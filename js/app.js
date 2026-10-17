@@ -30,7 +30,7 @@ document.querySelectorAll(".tabs button").forEach((btn) => {
 document.getElementById("exportMdBtn").onclick = exportMarkdown;
 document.getElementById("exportJsonBtn").onclick = exportJson;
 
-// === 左滑手势逻辑（防误触 + 跟手） ===
+// === 左滑手势逻辑（修复点击按钮不灵敏问题） ===
 let startX = 0;
 let startY = 0;
 let currentSwipeEl = null;
@@ -47,9 +47,12 @@ function resetSwipe() {
   }
 }
 
-// 记录按下的位置
 function handleStart(e) {
-  if (e.target.closest(".swipe-btn")) return; // 点按钮时不算滑动
+  // 核心修复1：如果手指点到的是“置顶”或“删除”按钮，直接放弃滑动逻辑！
+  if (e.target.closest(".swipe-btn")) {
+    currentSwipeEl = null;
+    return;
+  }
 
   const content = e.target.closest(".swipe-content");
   if (!content) return;
@@ -63,7 +66,6 @@ function handleStart(e) {
   currentSwipeEl.style.transition = "none"; 
 }
 
-// 拖动过程
 function handleMove(e) {
   if (!currentSwipeEl) return;
   
@@ -73,7 +75,6 @@ function handleMove(e) {
   const deltaX = clientX - startX;
   const deltaY = clientY - startY;
 
-  // 如果是上下滑动，立刻放弃左滑
   if (!isSwiping && Math.abs(deltaY) > Math.abs(deltaX)) {
     currentSwipeEl.style.transition = "";
     currentSwipeEl.style.transform = "";
@@ -81,8 +82,8 @@ function handleMove(e) {
     return;
   }
 
-  // 识别为左滑操作
-  if (Math.abs(deltaX) > 10) {
+  // 核心修复2：把触发的阈值从 10 提高到 15，防手抖
+  if (Math.abs(deltaX) > 15) {
     isSwiping = true;
     if (e.cancelable && e.type.includes("touch")) e.preventDefault(); 
   }
@@ -96,16 +97,12 @@ function handleMove(e) {
   }
 }
 
-// 松手判定
 function handleEnd(e) {
   if (!currentSwipeEl) return;
   
   currentSwipeEl.style.transition = "transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
 
   if (isSwiping) {
-    // 告诉浏览器刚刚是在滑动，不要触发点击事件
-    setTimeout(() => { isSwiping = false; }, 50); 
-    
     const clientX = e.type.includes("mouse") ? e.clientX : (e.changedTouches ? e.changedTouches[0].clientX : 0);
     const deltaX = clientX - startX;
 
@@ -120,19 +117,10 @@ function handleEnd(e) {
   } else {
     currentSwipeEl.style.transform = currentSwipeEl.classList.contains("active") ? `translateX(-${SWIPE_WIDTH}px)` : "";
   }
+  
+  // 延迟释放状态，防止立刻触发的 click 被吃掉
+  setTimeout(() => { isSwiping = false; }, 50);
 }
-
-// 拦截点击，防止滑动时触发 openModal
-document.addEventListener("click", (e) => {
-  if (isSwiping) {
-    e.preventDefault();
-    e.stopPropagation();
-    return;
-  }
-  if (!e.target.closest(".swipe-content") && !e.target.closest(".swipe-btn")) {
-    resetSwipe();
-  }
-}, true); // 使用捕获阶段拦截
 
 document.addEventListener("touchstart", handleStart, { passive: true });
 document.addEventListener("touchmove", handleMove, { passive: false });
@@ -141,6 +129,13 @@ document.addEventListener("touchend", handleEnd, { passive: true });
 document.addEventListener("mousedown", handleStart);
 document.addEventListener("mousemove", handleMove);
 document.addEventListener("mouseup", handleEnd);
+
+// 核心修复3：删掉原来那个带 true 捕获阶段的拦截器，改成最简单的
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".swipe-content") && !e.target.closest(".swipe-btn")) {
+    resetSwipe();
+  }
+});
 
 // === 草稿自动保存 ===
 const saveDraft = debounce(() => {
