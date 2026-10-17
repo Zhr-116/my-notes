@@ -163,18 +163,154 @@ button.primary:active {
   padding: 9px 12px;
 }
 
-.card {
-  background: var(--surface);
-  border-radius: var(--radius-card);
-  padding: 14px 16px;
-  margin-bottom: 14px;
-  box-shadow: var(--shadow-card);
-  border-left: 4px solid transparent;
-  transition: border-color 0.15s ease;
+/* === 全新列表样式（去卡片化） === */
+.list-container {
+  background: transparent;
 }
 
-.card.milestone {
-  border-left-color: var(--accent);
+.list-item {
+  position: relative;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border); /* 极细分隔线 */
+  overflow: hidden; /* 隐藏左滑露出的按钮 */
+  user-select: none;
+}
+
+/* 左滑内容区 */
+.swipe-content {
+  padding: 16px 4px;
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  z-index: 2;
+  background: var(--bg); /* 必须有底色，才能盖住背后的操作按钮 */
+}
+.swipe-content.active {
+  transform: translateX(-120px); /* 左滑露出 120px 的宽度 */
+}
+
+.item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.item-date {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.item-badges {
+  display: flex;
+  gap: 6px;
+  font-size: 12px;
+}
+.badge-milestone { color: var(--accent-text); }
+.badge-detail { color: var(--detail-text); }
+
+.item-content {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  word-break: break-all;
+}
+
+/* 左滑背后的操作按钮 */
+.swipe-actions {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  z-index: 1;
+}
+.swipe-btn {
+  width: 60px;
+  border: none;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.swipe-btn.pin { background: #8b5cf6; }
+.swipe-btn.pin.active { background: #c4b5fd; }
+.swipe-btn.delete { background: #ef4444; }
+
+/* === 详情弹窗 === */
+.modal-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end; /* 底部弹出 */
+  backdrop-filter: blur(2px);
+}
+.modal-content {
+  background: var(--surface);
+  width: 100%;
+  max-height: 85vh;
+  border-radius: 20px 20px 0 0;
+  padding: 20px;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.modal-date { font-size: 14px; color: var(--text-secondary); font-weight: 600; }
+.close-btn {
+  background: var(--surface-muted);
+  border: none;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.modal-body-text {
+  font-size: 18px;
+  line-height: 1.6;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+.modal-edit-area { margin-top: 20px; }
+.modal-edit-area textarea {
+  width: 100%;
+  min-height: 120px;
+  border: none;
+  background: var(--surface-muted);
+  border-radius: 12px;
+  padding: 12px;
+  font: inherit;
+  outline: none;
+  resize: vertical;
+}
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: var(--surface-muted);
+  font-size: 15px;
+  cursor: pointer;
+}
+.modal-actions button.primary {
+  background: var(--text-primary);
+  color: white;
 }
 
 .date {
@@ -484,6 +620,46 @@ footer button:hover {
   color: var(--text-secondary);
   font-weight: 600;
   padding: 14px 4px 6px;
+}
+
+.modal-mask[hidden] {
+  display: none !important;
+}
+
+/* 详情阅读态样式 */
+.detail-view-mode {
+  margin-top: 20px;
+}
+.detail-text-block {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  background: var(--surface-muted);
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.detail-text-block:empty {
+  display: none;
+}
+.edit-detail-btn {
+  background: transparent;
+  border: 1px dashed var(--border);
+  color: var(--text-secondary);
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.edit-detail-btn:hover {
+  background: var(--surface-muted);
+  color: var(--text-primary);
+}
+/* 解决文本域和底部间距 */
+.modal-edit-area textarea {
+  margin-bottom: 12px;
 }
 
 @keyframes fadeIn {

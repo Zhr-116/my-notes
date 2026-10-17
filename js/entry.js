@@ -29,9 +29,10 @@ function addEntry() {
 
 function deleteEntry(id) {
   if (!confirm("删除这条记录？")) return;
+  
   entries = entries.filter((e) => e.id !== id);
-  expandedIds.delete(id);
-  editingIds.delete(id);
+  
+  // 删掉以前残留的 expandedIds 和 editingIds 的清理
   saveEntries();
   render();
 }

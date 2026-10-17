@@ -4,14 +4,14 @@ const DRAFT_KEY = "mini-notes-draft-v1";
 let entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 let currentView = "record";
 
-let expandedIds = new Set();
-let editingIds = new Set();
 let expandedMonths = new Set();
 let expandedYears = new Set();
 let monthInitialized = false;
 let yearInitialized = false;
 let searchQuery = "";
 let activeTag = "";
+
+let currentModalId = null;
 
 const contentInput = document.getElementById("contentInput");
 const dateInput = document.getElementById("dateInput");

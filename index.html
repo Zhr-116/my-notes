@@ -38,6 +38,34 @@
       <div id="timeline"></div>
     </section>
 
+        <!-- 详情弹窗 -->
+    <div id="detailModal" class="modal-mask" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <span id="modalDate" class="modal-date"></span>
+          <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        
+        <div id="modalContent" class="modal-body-text"></div>
+        <div id="modalTags" class="tags"></div>
+        
+        <!-- 阅读态 -->
+        <div id="detailViewMode" class="detail-view-mode">
+          <div id="detailTextView" class="detail-text-block"></div>
+          <button id="editDetailBtn" class="edit-detail-btn" onclick="startEditDetail()">📝 编辑详情</button>
+        </div>
+
+        <!-- 编辑态（默认隐藏） -->
+        <div id="detailEditMode" class="modal-edit-area" hidden>
+          <textarea id="modalDetailInput" placeholder="记录一些心得、背景或细节..."></textarea>
+          <div class="modal-actions">
+            <button class="primary" onclick="saveModalDetail()">保存</button>
+            <button onclick="cancelEditDetail()">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <button id="exportMdBtn">导出 Markdown</button>
       <button id="exportJsonBtn">导出 JSON</button>
