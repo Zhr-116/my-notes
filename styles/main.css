@@ -203,8 +203,33 @@ button.primary:active {
   gap: 6px;
   font-size: 12px;
 }
-.badge-milestone { color: var(--accent-text); }
-.badge-detail { color: var(--detail-text); }
+.item-badges {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+  align-items: center;
+}
+
+/* 点击切换大事的文字按钮 */
+.badge-toggle {
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: color 0.15s ease;
+  user-select: none;
+}
+.badge-toggle:hover {
+  color: var(--text-secondary);
+}
+.badge-toggle.is-milestone {
+  color: var(--accent); /* 金色 */
+  font-weight: 600;
+}
+
+/* 详情标记 */
+.badge-detail {
+  color: var(--detail-text); /* 靛蓝色 */
+}
+
 
 .item-content {
   font-size: 15px;
@@ -235,6 +260,25 @@ button.primary:active {
 .swipe-btn.pin { background: #8b5cf6; }
 .swipe-btn.pin.active { background: #c4b5fd; }
 .swipe-btn.delete { background: #ef4444; }
+
+.swipe-content.active {
+  transform: translateX(-120px); /* 恢复成 120px */
+}
+
+/* 增加星星按钮的样式 */
+.star-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s ease;
+}
+.star-btn.is-milestone {
+  color: var(--accent); /* 金色实心 */
+}
 
 /* === 详情弹窗 === */
 .modal-mask {

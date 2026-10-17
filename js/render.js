@@ -82,12 +82,19 @@ function renderTimeline() {
 function renderItem(e) {
   const hasDetail = !!(e.detail && e.detail.trim());
   
-  let badges = "";
-  if (e.isMilestone) badges += `<span class="badge-milestone">★ 大事</span>`;
-  if (hasDetail) badges += `<span class="badge-detail">📝 有详情</span>`;
+  // 如果没有标为大事，显示灰色的“☆ 标记大事”，点了就变大事
+  // 如果已经是大事，显示金色的“★ 大事”
+  const milestoneBadge = `
+    <span class="badge-toggle ${e.isMilestone ? 'is-milestone' : ''}" 
+          onclick="event.stopPropagation(); toggleMilestone('${e.id}')">
+      ${e.isMilestone ? '★ 大事' : '☆ 标记大事'}
+    </span>
+  `;
+
+  const detailBadge = hasDetail ? `<span class="badge-detail">📝 详情</span>` : '';
 
   return `
-    <div class="list-item" data-id="${e.id}">
+    <div class="list-item ${e.isMilestone ? 'is-milestone-item' : ''}" data-id="${e.id}">
       <!-- 底层：滑动出现的按钮 -->
       <div class="swipe-actions">
         <button class="swipe-btn pin ${e.isPinned ? 'active' : ''}" onclick="togglePin('${e.id}'); resetSwipe();">
@@ -100,7 +107,10 @@ function renderItem(e) {
       <div class="swipe-content" onclick="openModal('${e.id}')">
         <div class="item-header">
           <div class="item-date">${escapeHtml(e.date)}</div>
-          <div class="item-badges">${badges}</div>
+          <div class="item-badges">
+            ${milestoneBadge}
+            ${detailBadge}
+          </div>
         </div>
         <div class="item-content">${escapeHtml(e.content)}</div>
       </div>
