@@ -58,3 +58,78 @@ function getAllTags() {
   });
   return Object.keys(counter).sort((a, b) => counter[b] - counter[a]);
 }
+
+// 压缩图片并转为 Base64
+function compressImage(file, maxWidth = 800) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        // 压缩质量 0.7
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.onerror = reject;
+    };
+    reader.onerror = reject;
+  });
+}
+
+// 极简 IndexedDB 封装（用于存储图片 Base64）
+const imageDB = {
+  db: null,
+  init() {
+    return new Promise((resolve) => {
+      const request = indexedDB.open("NotesImageDB", 1);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("images")) {
+          db.createObjectStore("images", { keyPath: "id" });
+        }
+      };
+      request.onsuccess = (e) => {
+        this.db = e.target.result;
+        resolve();
+      };
+    });
+  },
+  save(id, base64) {
+    return new Promise((resolve) => {
+      const tx = this.db.transaction("images", "readwrite");
+      tx.objectStore("images").put({ id, base64 });
+      tx.oncomplete = resolve;
+    });
+  },
+  get(id) {
+    return new Promise((resolve) => {
+      const tx = this.db.transaction("images", "readonly");
+      const req = tx.objectStore("images").get(id);
+      req.onsuccess = () => resolve(req.result ? req.result.base64 : null);
+    });
+  },
+  delete(id) {
+    return new Promise((resolve) => {
+      const tx = this.db.transaction("images", "readwrite");
+      tx.objectStore("images").delete(id);
+      tx.oncomplete = resolve;
+    });
+  }
+};
+
+function formatCardDate(dateStr) {
+  if (!dateStr) return "";
+  return dateStr.replace(/-/g, ".");
+}

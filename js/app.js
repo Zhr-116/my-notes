@@ -170,3 +170,74 @@ try {
 dateInput.value = draftDate || todayStr();
 
 render();
+
+// 初始化 IndexedDB
+imageDB.init().then(() => console.log("图片数据库已就绪"));
+
+// 图片选择与预览（限制最多 5 张）
+document.getElementById("imageInput").addEventListener("change", async (e) => {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+
+  // 判断总数量
+  const currentTotal = currentEditImages.length + currentEditFiles.length;
+  const remainCount = 5 - currentTotal;
+
+  if (remainCount <= 0) {
+    alert("最多只能添加 5 张图片哦！");
+    e.target.value = "";
+    return;
+  }
+
+  if (files.length > remainCount) {
+    alert(`你还能添加 ${remainCount} 张图片，多出的已自动忽略。`);
+  }
+
+  // 截取允许添加的数量
+  const filesToAdd = files.slice(0, remainCount);
+
+  for (const file of filesToAdd) {
+    currentEditFiles.push(file);
+  }
+  
+  // 重新渲染编辑区
+  renderEditImages();
+  
+  e.target.value = ""; // 清空 input
+});
+
+// 生成并下载卡片
+document.getElementById("downloadCardBtn")?.addEventListener("click", async () => {
+  const cardArea = document.getElementById("cardPreviewArea");
+  const btn = document.getElementById("downloadCardBtn");
+  
+  btn.innerText = "生成中...";
+  btn.disabled = true;
+
+  try {
+    // 稍微延迟 100ms，确保 CSS 渲染跟上
+    await new Promise(r => setTimeout(r, 100));
+
+    const dataUrl = await htmlToImage.toPng(cardArea, {
+      quality: 1,
+      pixelRatio: 2,
+      // 删掉 backgroundColor: "#fcfcfc"，
+      // 改为使用卡片自身的背景，如果透明就用白色兜底
+      backgroundColor: document.getElementById("cardPreviewArea").classList.contains("theme-film") ? "#2a2a2a" : "#ffffff",
+      skipFonts: true
+    });
+
+    const link = document.createElement("a");
+    link.download = `记录卡片-${todayStr()}.png`;
+    link.href = dataUrl;
+    link.click();
+    
+    showToast("已保存到相册/下载");
+  } catch (error) {
+    console.error("生成失败", error);
+    alert("生成卡片失败，请重试");
+  } finally {
+    btn.innerText = "保存图片到相册";
+    btn.disabled = false;
+  }
+});

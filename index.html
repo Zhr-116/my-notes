@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1f2937" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -38,7 +39,71 @@
       <div id="timeline"></div>
     </section>
 
-        <!-- 详情弹窗 -->
+    <!-- 卡片生成器（居中显示） -->
+    <div id="cardGeneratorModal" class="card-modal-overlay" hidden>
+      <div class="card-modal-container">
+        <div class="modal-header">
+          <span class="modal-date">生成分享卡片</span>
+          <button class="close-btn" onclick="closeCardGenerator()">×</button>
+        </div>
+
+        <!-- 预览区 -->
+        <div id="cardPreviewArea" class="card-preview-area">
+          <div class="card-top">
+            <span id="cardDateDisplay" class="card-date">2025.10.18</span>
+            <span id="cardTagDisplay" class="card-tag">★ 大事</span>
+          </div>
+          <div class="card-body">
+            <div id="cardContentDisplay" class="card-content">记录的内容</div>
+            <div id="cardDetailDisplay" class="card-detail">感悟与细节...</div>
+          </div>
+          <!-- 图片容器 -->
+          <div id="cardImageWrapper" class="card-image-wrapper" hidden>
+          </div>
+          <div class="card-footer">
+            <span>小事与大事 · 个人轨迹</span>
+          </div>
+        </div>
+
+        <!-- 控制区 -->
+        <div class="card-controls">
+            <div class="control-row">
+              <div class="control-group" style="flex: 1;">
+                <label>卡片主题</label>
+                <select id="cardThemeSelect" class="card-select">
+                  <option value="minimal">极简明信片</option>
+                  <option value="film">复古胶片</option>
+                  <option value="ticket">极简票根</option>
+                </select>
+              </div>
+              <div class="control-group" style="flex: 1;">
+                <label>文字排版</label>
+                <select id="cardTextSelect" class="card-select">
+                  <option value="normal">现代无衬线</option>
+                  <option value="literary">文艺衬线体</option>
+                  <option value="kaiti">温柔楷体</option>
+                </select>
+              </div>
+            </div>
+
+          <div class="control-group">
+            <label>微调感悟：</label>
+            <textarea id="cardDetailInput" placeholder="写点什么在卡片上..."></textarea>
+          </div>
+          
+          <div class="control-group" id="cardImageSelector" hidden>
+            <label>选择配图：</label>
+            <div id="cardImageOptions" class="image-options-grid"></div>
+          </div>
+
+          <button id="downloadCardBtn" class="primary" style="width: 100%; margin-top: 10px;">
+            保存图片到相册
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 详情弹窗 -->
     <div id="detailModal" class="modal-mask" hidden>
       <div class="modal-content">
         <div class="modal-header">
@@ -52,12 +117,25 @@
         <!-- 阅读态 -->
         <div id="detailViewMode" class="detail-view-mode">
           <div id="detailTextView" class="detail-text-block"></div>
+          <div id="detailImagesView" class="detail-images-grid"></div> <!-- 新增：图片展示区 -->
+          <!-- 新增这个按钮 -->
+          <button class="edit-detail-btn" style="margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
+            🖼️ 生成分享卡片
+          </button>
           <button id="editDetailBtn" class="edit-detail-btn" onclick="startEditDetail()">📝 编辑详情</button>
         </div>
 
         <!-- 编辑态（默认隐藏） -->
         <div id="detailEditMode" class="modal-edit-area" hidden>
           <textarea id="modalDetailInput" placeholder="记录一些心得、背景或细节..."></textarea>
+          
+          <!-- 新增：图片上传区 -->
+          <div class="image-upload-area">
+            <label for="imageInput" class="upload-btn">📷 添加图片</label>
+            <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
+            <div id="editImagesPreview" class="detail-images-grid"></div>
+          </div>
+
           <div class="modal-actions">
             <button class="primary" onclick="saveModalDetail()">保存</button>
             <button onclick="cancelEditDetail()">取消</button>
@@ -70,6 +148,11 @@
       <button id="exportMdBtn">导出 Markdown</button>
       <button id="exportJsonBtn">导出 JSON</button>
     </footer>
+  </div>
+
+  <!-- 新增：全屏图片预览 -->
+  <div id="imagePreviewModal" class="image-preview-modal" hidden onclick="closeImagePreview()">
+    <img id="imagePreviewImg" src="" alt="预览图">
   </div>
 
   <script src="js/state.js"></script>
