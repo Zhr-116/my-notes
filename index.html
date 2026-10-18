@@ -124,6 +124,12 @@
         <div id="detailViewMode" class="detail-view-mode">
           <div id="detailTextView" class="detail-text-block"></div>
           <div id="detailImagesView" class="detail-images-grid"></div> <!-- 新增：图片展示区 -->
+
+          <!-- 新增：音频播放区 -->
+          <div id="audioPlayerContainer" style="display: none; margin-bottom: 12px;">
+            <audio id="audioPlayer" controls style="width: 100%; height: 40px;"></audio>
+          </div>
+
           <!-- 新增这个按钮 -->
           <button class="edit-detail-btn" style="margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
             🖼️ 生成分享卡片
@@ -132,14 +138,28 @@
         </div>
 
         <!-- 编辑态（默认隐藏） -->
-        <div id="detailEditMode" class="modal-edit-area" hidden>
+                <div id="detailEditMode" class="modal-edit-area" hidden>
           <textarea id="modalDetailInput" placeholder="记录一些心得、背景或细节..."></textarea>
           
-          <!-- 新增：图片上传区 -->
-          <div class="image-upload-area">
+          <div class="image-upload-area" style="display: flex; gap: 10px; align-items: center;">
+            <!-- 原有的图片上传 -->
             <label for="imageInput" class="upload-btn">📷 添加图片</label>
             <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
-            <div id="editImagesPreview" class="detail-images-grid"></div>
+            
+            <!-- 新增：录音按钮 -->
+            <button id="recordBtn" class="upload-btn" type="button" style="border: none; display: flex; align-items: center; gap: 4px;">
+              🎤 录音
+            </button>
+            <!-- 录音状态提示 -->
+            <span id="recordStatus" style="font-size: 13px; color: #ef4444; display: none;">● 录音中...</span>
+          </div>
+          
+          <div id="editImagesPreview" class="detail-images-grid"></div>
+          
+          <!-- 新增：编辑态的音频预览 -->
+          <div id="editAudioPreview" style="display: none; margin-bottom: 12px;">
+            <audio id="editAudioPlayer" controls style="width: 100%; height: 40px;"></audio>
+            <button type="button" class="action-sub danger" style="font-size: 12px; padding: 4px;" onclick="removeAudio()">删除语音</button>
           </div>
 
           <div class="modal-actions">

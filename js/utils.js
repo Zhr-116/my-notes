@@ -88,7 +88,7 @@ function compressImage(file, maxWidth = 800) {
   });
 }
 
-// 极简 IndexedDB 封装（用于存储图片 Base64）
+// ================= 图片 IndexedDB =================
 const imageDB = {
   db: null,
   init() {
@@ -124,6 +124,47 @@ const imageDB = {
     return new Promise((resolve) => {
       const tx = this.db.transaction("images", "readwrite");
       tx.objectStore("images").delete(id);
+      tx.oncomplete = resolve;
+    });
+  }
+};
+
+// ================= 音频 IndexedDB =================
+const audioDB = {
+  db: null,
+  init() {
+    return new Promise((resolve) => {
+      const request = indexedDB.open("NotesAudioDB", 1);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains("audios")) {
+          db.createObjectStore("audios", { keyPath: "id" });
+        }
+      };
+      request.onsuccess = (e) => {
+        this.db = e.target.result;
+        resolve();
+      };
+    });
+  },
+  save(id, blob) {
+    return new Promise((resolve) => {
+      const tx = this.db.transaction("audios", "readwrite");
+      tx.objectStore("audios").put({ id, blob });
+      tx.oncomplete = resolve;
+    });
+  },
+  get(id) {
+    return new Promise((resolve) => {
+      const tx = this.db.transaction("audios", "readonly");
+      const req = tx.objectStore("audios").get(id);
+      req.onsuccess = () => resolve(req.result ? req.result.blob : null);
+    });
+  },
+  delete(id) {
+    return new Promise((resolve) => {
+      const tx = this.db.transaction("audios", "readwrite");
+      tx.objectStore("audios").delete(id);
       tx.oncomplete = resolve;
     });
   }
