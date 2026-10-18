@@ -16,6 +16,7 @@
       <div class="tabs">
         <button data-view="record" class="active">记录</button>
         <button data-view="timeline">时间轴</button>
+        <button data-view="review">回顾</button>
       </div>
     </header>
 
@@ -33,6 +34,11 @@
         <div class="tag-bar" id="tagBar"></div>
       </div>
       <div id="list"></div>
+    </section>
+
+    <!-- 新增：回顾页视图 -->
+    <section id="reviewView" hidden>
+      <div id="reviewContent"></div>
     </section>
 
     <section id="timelineView" hidden>
@@ -147,6 +153,8 @@
     <footer>
       <button id="exportMdBtn">导出 Markdown</button>
       <button id="exportJsonBtn">导出 JSON</button>
+      <button id="importBtn">导入备份</button> <!-- 新增导入按钮 -->
+      <input type="file" id="importFile" accept=".json" style="display: none;" />
     </footer>
   </div>
 
@@ -161,6 +169,7 @@
   <script src="js/detail.js"></script>
   <script src="js/milestone.js"></script>
   <script src="js/timeline.js"></script>
+  <script src="js/review.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

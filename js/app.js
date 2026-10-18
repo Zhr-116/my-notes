@@ -241,3 +241,68 @@ document.getElementById("downloadCardBtn")?.addEventListener("click", async () =
     btn.disabled = false;
   }
 });
+
+// === 导入备份逻辑 ===
+const importBtn = document.getElementById("importBtn");
+const importFile = document.getElementById("importFile");
+
+importBtn.addEventListener("click", () => {
+  importFile.click();
+});
+
+importFile.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const importedData = JSON.parse(event.target.result);
+      if (!Array.isArray(importedData)) {
+        alert("格式错误：文件内容不是有效的记录数组。");
+        return;
+      }
+
+      let addedCount = 0;
+      let replacedCount = 0;
+      let skippedCount = 0;
+
+      importedData.forEach(importedEntry => {
+        // 寻找是否有重复（根据 ID 或者 日期+内容 判断）
+        const existingIndex = entries.findIndex(ex => 
+          ex.id === importedEntry.id || 
+          (ex.date === importedEntry.date && ex.content === importedEntry.content)
+        );
+
+        if (existingIndex === -1) {
+          // 没有重复，直接添加
+          entries.push(importedEntry);
+          addedCount++;
+        } else {
+          // 出现重复项：询问用户
+          const choice = confirm(
+            `发现重复记录：\n【日期】${importedEntry.date}\n【内容】${importedEntry.content}\n\n点击“确定”使用【导入的新数据】覆盖。\n点击“取消”保留【本地旧数据】。`
+          );
+          
+          if (choice) {
+            entries[existingIndex] = importedEntry; // 覆盖
+            replacedCount++;
+          } else {
+            skippedCount++; // 保留旧数据
+          }
+        }
+      });
+
+      // 保存并刷新
+      saveEntries();
+      render();
+      showToast(`导入完成：新增 ${addedCount} 条，替换 ${replacedCount} 条，保留 ${skippedCount} 条`);
+      
+    } catch (err) {
+      console.error(err);
+      alert("读取文件失败，请确保是软件导出的 JSON 备份文件。");
+    }
+    importFile.value = ""; // 清空 Input 允许下次再选
+  };
+  reader.readAsText(file);
+});

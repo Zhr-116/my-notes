@@ -1105,6 +1105,102 @@ footer button:hover {
   resize: none; 
 }
 
+/* ================= 回顾页样式 ================= */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: var(--surface);
+  border-radius: var(--radius-input);
+  padding: 16px 10px;
+  text-align: center;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+.stat-num {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: "Georgia", serif;
+  margin-bottom: 4px;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+/* 热力图 */
+.heatmap-section {
+  margin-bottom: 30px;
+}
+.heatmap-wrapper {
+  background: var(--surface);
+  padding: 16px;
+  border-radius: var(--radius-input);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border);
+}
+.heatmap-grid {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.heat-cell {
+  aspect-ratio: 1;
+  border-radius: 2px;
+  background: var(--surface-muted);
+  transition: transform 0.1s;
+  position: relative;
+}
+.heat-cell:hover {
+  transform: scale(1.2);
+  z-index: 2;
+}
+
+/* 绿色深浅 */
+.heat-cell.level-1 { background: #d1fae5; }
+.heat-cell.level-2 { background: #34d399; }
+.heat-cell.level-3 { background: #059669; }
+
+/* 今天的格子：加一个明显的深色描边 */
+.heat-cell.today {
+  outline: 2px solid var(--text-primary);
+  outline-offset: 1px;
+  z-index: 1;
+}
+
+/* 底部图例 */
+.heatmap-legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+.legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+.legend-box.level-0 { background: var(--surface-muted); }
+.legend-box.level-1 { background: #d1fae5; }
+.legend-box.level-2 { background: #34d399; }
+.legend-box.level-3 { background: #059669; }
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translate(-50%, 6px); }
   to { opacity: 1; transform: translate(-50%, 0); }
