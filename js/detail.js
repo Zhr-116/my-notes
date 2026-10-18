@@ -138,7 +138,6 @@ async function saveModalDetail() {
   
   item.detail = document.getElementById("modalDetailInput").value;
   
-  // 图片保存逻辑（不变）
   if (currentEditFiles.length > 0) {
     showToast("正在保存图片...");
     for (const file of currentEditFiles) {
@@ -148,115 +147,17 @@ async function saveModalDetail() {
       currentEditImages.push(imgId);
     }
   }
-  item.images = currentEditImages;
   
-  // 音频保存逻辑
-  if (newAudioBlob) {
-    showToast("正在保存语音...");
-    const newAudioId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
-    await audioDB.save(newAudioId, newAudioBlob);
-    
-    // 如果之前有旧音频，删掉它
-    if (item.audioId && item.audioId !== newAudioId) {
-      await audioDB.delete(item.audioId);
-    }
-    item.audioId = newAudioId;
-  } else if (!currentAudioId && item.audioId) {
-    // 如果用户点了删除语音
-    await audioDB.delete(item.audioId);
-    item.audioId = null;
-  }
-
+  item.images = currentEditImages;
   saveEntries();
-  await loadAudioView(currentModalId); // 刷新阅读态音频
+  
+  document.getElementById("detailTextView").innerText = item.detail;
+  await renderViewImages(item.images);
+  
   cancelEditDetail();
   showToast("保存成功");
   render(); 
 }
-
-// 录音按钮逻辑
-document.getElementById("recordBtn")?.addEventListener("click", async () => {
-  const recordBtn = document.getElementById("recordBtn");
-  const recordStatus = document.getElementById("recordStatus");
-
-  if (!isRecording) {
-    // 开始录音
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorder = new MediaRecorder(stream);
-      audioChunks = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunks.push(e.data);
-      };
-
-      mediaRecorder.onstop = () => {
-        newAudioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
-        const audioUrl = URL.createObjectURL(newAudioBlob);
-        const editPlayer = document.getElementById("editAudioPlayer");
-        editPlayer.src = audioUrl;
-        document.getElementById("editAudioPreview").style.display = "block";
-        stream.getTracks().forEach(track => track.stop()); // 释放麦克风
-      };
-
-      mediaRecorder.start();
-      isRecording = true;
-      recordBtn.innerHTML = "⏹️ 停止";
-      recordBtn.style.color = "#ef4444";
-      recordStatus.style.display = "inline";
-    } catch (err) {
-      alert("无法访问麦克风，请检查浏览器权限设置！");
-    }
-  } else {
-    // 停止录音
-    if (mediaRecorder && mediaRecorder.state !== "inactive") {
-      mediaRecorder.stop();
-    }
-    isRecording = false;
-    recordBtn.innerHTML = "🎤 重录";
-    recordBtn.style.color = "";
-    recordStatus.style.display = "none";
-  }
-});
-
-// 删除语音
-function removeAudio() {
-  newAudioBlob = null;
-  currentAudioId = null;
-  document.getElementById("editAudioPreview").style.display = "none";
-  document.getElementById("editAudioPlayer").src = "";
-  document.getElementById("recordBtn").innerHTML = "🎤 录音";
-}
-
-// 修改 startEditDetail 初始化音频状态
-const originalStartEditDetail = startEditDetail; // 备份原函数
-startEditDetail = function() {
-  originalStartEditDetail();
-  const item = entries.find((e) => e.id === currentModalId);
-  currentAudioId = item.audioId || null;
-  newAudioBlob = null;
-  
-  document.getElementById("recordBtn").innerHTML = "🎤 录音";
-  document.getElementById("recordStatus").style.display = "none";
-  
-  if (currentAudioId) {
-    audioDB.get(currentAudioId).then(blob => {
-      if (blob) {
-        document.getElementById("editAudioPlayer").src = URL.createObjectURL(blob);
-        document.getElementById("editAudioPreview").style.display = "block";
-      }
-    });
-  } else {
-    document.getElementById("editAudioPreview").style.display = "none";
-  }
-};
-
-// 修改 openModal 调用 loadAudioView
-const originalOpenModal = openModal;
-openModal = async function(id) {
-  await originalOpenModal(id);
-  await loadAudioView(id);
-};
 
 // === 分享卡片逻辑 ===
 async function openCardGenerator() {

@@ -306,7 +306,3 @@ importFile.addEventListener("change", (e) => {
   };
   reader.readAsText(file);
 });
-
-// 初始化 IndexedDB
-imageDB.init().then(() => console.log("图片数据库已就绪"));
-audioDB.init().then(() => console.log("音频数据库已就绪")); // 新增这句
