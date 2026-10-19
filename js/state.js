@@ -24,3 +24,9 @@ const tagBar = document.getElementById("tagBar");
 function saveEntries() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
+
+// === 书籍数据 ===
+let books = JSON.parse(localStorage.getItem("mini-books") || "[]");
+function saveBooks() {
+  localStorage.setItem("mini-books", JSON.stringify(books));
+}

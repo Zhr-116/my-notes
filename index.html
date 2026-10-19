@@ -17,6 +17,7 @@
         <button data-view="record" class="active">记录</button>
         <button data-view="timeline">时间轴</button>
         <button data-view="review">回顾</button>
+        <button data-view="book">书架</button>
       </div>
     </header>
 
@@ -44,6 +45,103 @@
     <section id="timelineView" hidden>
       <div id="timeline"></div>
     </section>
+
+    <!-- 书架视图 -->
+    <section id="bookView" hidden>
+      <div class="book-toolbar">
+        <input type="search" id="bookSearchInput" placeholder="搜索书名或作者..." />
+        <select id="bookSortSelect" class="book-sort-select">
+          <option value="time">最新加入</option>
+          <option value="title">按书名</option>
+          <option value="author">按作者</option>
+        </select>
+      </div>
+
+      <div id="bookList" class="book-grid"></div>
+      
+      <!-- 新增：长按多选底部操作栏 -->
+      <div id="bookSelectionBar" class="selection-bar" hidden>
+        <span id="selectedCountText">已选择 0 本书</span>
+        <button id="batchDeleteBtn" class="danger-btn" onclick="batchDeleteBooks()">删除</button>
+        <button class="cancel-btn" onclick="exitSelectionMode()">取消</button>
+      </div>
+
+      <button id="addBookBtn" class="fab-btn" onclick="openBookModal()">+</button>
+    </section>
+
+    <!-- 沉浸式书页视图 -->
+    <section id="bookReadView" class="book-read-page" hidden>
+      <div id="bookPageContent" class="book-page-content">
+        
+        <!-- 顶部工具栏 -->
+        <div class="book-read-header">
+          <button class="back-btn" onclick="closeBookRead()">← 返回书架</button>
+          <!-- 右侧按钮动态区 -->
+          <div id="brHeaderActions">
+            <button id="brEditBtn" class="primary" style="padding: 6px 12px; font-size: 13px;" onclick="startEditBookDetail()">编辑</button>
+          </div>
+        </div>
+
+        <!-- 书籍信息区 -->
+        <div class="book-read-info">
+          <div id="brCover" class="br-cover"></div>
+          <div class="br-meta">
+            <h1 id="brTitle">书名</h1>
+            <p id="brAuthor">作者</p>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+              <span id="brStatusBadge" class="status-badge"></span>
+              <!-- 新增：标记读完按钮 -->
+              <button id="brMarkReadBtn" class="page-btn-edit" style="font-size: 11px; padding: 2px 8px; border-color: #d1c7b8; color: #8c8273;" onclick="markBookAsRead()">标记为已读完</button>
+            </div>
+            <div id="brQuote" class="br-quote">金句</div>
+          </div>
+        </div>
+
+        <div class="book-divider">✧ ✧ ✧</div>
+
+        <!-- 内容区：阅读态 -->
+        <div id="brTextView" class="paper-read-area"></div>
+
+        <!-- 内容区：编辑态（默认隐藏，且去掉了底部按钮） -->
+        <div id="brEditArea" hidden>
+          <textarea id="brDetailInput" class="paper-textarea" placeholder="在此写下你的阅读心得..."></textarea>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 新增：添加书籍弹窗 -->
+    <div id="bookModal" class="modal-mask" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-date">添加新书</span>
+          <button class="close-btn" onclick="closeBookModal()">×</button>
+        </div>
+                <div class="modal-edit-area">
+          <input type="text" id="bookTitleInput" placeholder="书名" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          <input type="text" id="bookAuthorInput" placeholder="作者（可选）" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          <select id="bookStatusInput" class="book-sort-select" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);">
+            <option value="want">📌 想读</option>
+            <option value="reading" selected>📖 在读</option>
+            <option value="read">✅ 已读</option>
+          </select>
+
+          <!-- 新增：封面上传区 -->
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <label for="bookCoverInput" class="upload-btn" style="margin: 0;">📷 上传封面</label>
+            <input type="file" id="bookCoverInput" accept="image/*" style="display: none;">
+            <img id="bookCoverPreview" style="width: 40px; height: 56px; object-fit: cover; border-radius: 4px; display: none; border: 1px solid var(--border);">
+          </div>
+
+          <textarea id="bookQuoteInput" placeholder="最打动你的一句话 / 核心感悟（可选）" style="width: 100%; height: 80px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; padding: 12px; outline: none; resize: none; font-family: inherit;"></textarea>
+          
+          <div class="modal-actions">
+            <button class="primary" onclick="saveBook()">上架</button>
+            <button onclick="closeBookModal()">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- 卡片生成器（居中显示） -->
     <div id="cardGeneratorModal" class="card-modal-overlay" hidden>
@@ -158,6 +256,44 @@
     </footer>
   </div>
 
+  <!-- 读书卡片生成器 -->
+  <div id="bookCardModal" class="card-modal-overlay" hidden>
+    <div class="card-modal-container">
+      <div class="modal-header">
+        <span class="modal-date">生成读书卡片</span>
+        <button class="close-btn" onclick="closeBookCardModal()">×</button>
+      </div>
+
+      <!-- 预览区（截图区域） -->
+      <div id="bookCardPreview" class="book-card-preview">
+        <div class="bcard-top">
+          <span>READING NOTES</span>
+          <span>✧ 阅</span>
+        </div>
+        
+        <div class="bcard-info">
+          <div id="bcardCover" class="bcard-cover"></div>
+          <div class="bcard-meta">
+            <h2 id="bcardTitle">书名</h2>
+            <p id="bcardAuthor">作者</p>
+          </div>
+        </div>
+
+        <div id="bcardQuote" class="bcard-quote">“金句”</div>
+        
+        <div id="bcardReview" class="bcard-review">读后感摘要...</div>
+
+        <div class="bcard-footer">
+          <span>小事与大事 · 私人书房</span>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button id="downloadBookCardBtn" class="primary" style="width: 100%;">保存图片到相册</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 新增：全屏图片预览 -->
   <div id="imagePreviewModal" class="image-preview-modal" hidden onclick="closeImagePreview()">
     <img id="imagePreviewImg" src="" alt="预览图">
@@ -170,6 +306,7 @@
   <script src="js/milestone.js"></script>
   <script src="js/timeline.js"></script>
   <script src="js/review.js"></script>
+  <script src="js/books.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

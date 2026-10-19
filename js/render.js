@@ -2,6 +2,7 @@ function render() {
   document.getElementById("recordView").hidden = currentView !== "record";
   document.getElementById("timelineView").hidden = currentView !== "timeline";
   document.getElementById("reviewView").hidden = currentView !== "review"; // 新增
+  document.getElementById("bookView").hidden = currentView !== "book";
 
   document.querySelectorAll(".tabs button").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.view === currentView);
@@ -14,6 +15,10 @@ function render() {
     renderTimeline();
   } else if (currentView === "review") {
     renderReview(); // 调用新文件里的函数
+  } else if (currentView === "review") {
+    renderReview();
+  } else if (currentView === "book") {
+    renderBookView();
   }
 }
 
