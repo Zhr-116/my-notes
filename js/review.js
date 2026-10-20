@@ -46,6 +46,27 @@ function renderReview() {
 
   container.innerHTML = html;
   drawHeatmap();
+
+  // 在原本的统计和热力图下面，加上 11 和魔狗的对峙彩蛋
+  html += `
+    <div class="easter-egg-container">
+      <!-- 左侧：11 和她的台词 -->
+      <div class="character-left">
+        <div class="speech-bubble">
+          “ Friends don't lie. ”
+        </div>
+        <img src="./assets/eleven.svg" alt="11" class="eleven-img">
+      </div>
+      
+      <!-- 右侧：虎视眈眈的魔狗 -->
+      <div class="character-right">
+        <img src="./assets/demogorgon.svg" alt="Demogorgon" class="demo-img">
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+  drawHeatmap();
 }
 
 // 计算连续打卡天数

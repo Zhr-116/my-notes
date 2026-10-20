@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>小事与大事</title>
+  <title>拾迹</title>
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1f2937" />
@@ -12,12 +12,13 @@
 <body>
   <div class="app">
     <header>
-      <h1>小事与大事</h1>
+      <h1>拾迹</h1>
       <div class="tabs">
         <button data-view="record" class="active">记录</button>
         <button data-view="timeline">时间轴</button>
         <button data-view="review">回顾</button>
         <button data-view="book">书架</button>
+        <button data-view="plan">计划</button>
       </div>
     </header>
 
@@ -110,6 +111,30 @@
       </div>
     </section>
 
+    <!-- 计划页视图 -->
+    <section id="planView" hidden>
+      <div id="countdownContainer"></div>
+      <div id="taskContainer" class="task-section"></div>
+    </section>
+
+    <!-- 添加倒计时弹窗 -->
+    <div id="countdownModal" class="modal-mask" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-date">设定目标倒计时</span>
+          <button class="close-btn" onclick="closeCountdownModal()">×</button>
+        </div>
+        <div class="modal-edit-area">
+          <input type="text" id="cdTitleInput" placeholder="目标名称（如：考研、生日、放假）" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          <input type="date" id="cdDateInput" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          <div class="modal-actions">
+            <button class="primary" onclick="saveCountdown()">保存</button>
+            <button onclick="closeCountdownModal()">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 新增：添加书籍弹窗 -->
     <div id="bookModal" class="modal-mask" hidden>
       <div class="modal-content">
@@ -121,19 +146,25 @@
           <input type="text" id="bookTitleInput" placeholder="书名" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
           <input type="text" id="bookAuthorInput" placeholder="作者（可选）" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
           <select id="bookStatusInput" class="book-sort-select" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);">
-            <option value="want">📌 想读</option>
-            <option value="reading" selected>📖 在读</option>
-            <option value="read">✅ 已读</option>
+            <option value="want">想读</option>
+            <option value="reading" selected>在读</option>
+            <option value="read">已读</option>
           </select>
 
           <!-- 新增：封面上传区 -->
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-            <label for="bookCoverInput" class="upload-btn" style="margin: 0;">📷 上传封面</label>
+            <label for="bookCoverInput" class="upload-btn" style="margin: 0; display: inline-flex; align-items: center; gap: 6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
+              上传封面
+            </label>
             <input type="file" id="bookCoverInput" accept="image/*" style="display: none;">
             <img id="bookCoverPreview" style="width: 40px; height: 56px; object-fit: cover; border-radius: 4px; display: none; border: 1px solid var(--border);">
           </div>
 
-          <textarea id="bookQuoteInput" placeholder="最打动你的一句话 / 核心感悟（可选）" style="width: 100%; height: 80px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; padding: 12px; outline: none; resize: none; font-family: inherit;"></textarea>
+          <textarea id="bookQuoteInput" maxlength="50" placeholder="最打动你的一句话 / 核心感悟（限50字）" ...></textarea>
           
           <div class="modal-actions">
             <button class="primary" onclick="saveBook()">上架</button>
@@ -165,7 +196,7 @@
           <div id="cardImageWrapper" class="card-image-wrapper" hidden>
           </div>
           <div class="card-footer">
-            <span>小事与大事 · 个人轨迹</span>
+            <span>拾迹 · 个人轨迹</span>
           </div>
         </div>
 
@@ -223,10 +254,21 @@
           <div id="detailTextView" class="detail-text-block"></div>
           <div id="detailImagesView" class="detail-images-grid"></div> <!-- 新增：图片展示区 -->
           <!-- 新增这个按钮 -->
-          <button class="edit-detail-btn" style="margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
-            🖼️ 生成分享卡片
+          <button class="edit-detail-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12.65 7.65a2 2 0 012.629-1.046l5.51 2.374a2 2 0 011.046 2.628l-3.957 9.184a2 2 0 01-2.628 1.046l-5.51-2.374a2 2 0 01-1.046-2.628z"/>
+              <path d="M18 7.777V4a2 2 0 00-2-2h-6a2 2 0 00-2 2v10a2 2 0 001.137 1.805"/>
+              <path d="m8 4.389-4.364.809a2 2 0 00-1.602 2.33l1.822 9.833a2 2 0 002.331 1.602l2.542-.47"/>
+            </svg>
+            生成分享卡片
           </button>
-          <button id="editDetailBtn" class="edit-detail-btn" onclick="startEditDetail()">📝 编辑详情</button>
+          <button id="editDetailBtn" class="edit-detail-btn" onclick="startEditDetail()" style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>
+              <path d="m15 5 4 4"/>
+            </svg>
+            编辑详情
+          </button>
         </div>
 
         <!-- 编辑态（默认隐藏） -->
@@ -235,7 +277,13 @@
           
           <!-- 新增：图片上传区 -->
           <div class="image-upload-area">
-            <label for="imageInput" class="upload-btn">📷 添加图片</label>
+            <label for="imageInput" class="upload-btn" style="display: inline-flex; align-items: center; gap: 6px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/>
+                <circle cx="12" cy="13" r="3"/>
+              </svg>
+              添加图片
+            </label>
             <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
             <div id="editImagesPreview" class="detail-images-grid"></div>
           </div>
@@ -256,43 +304,44 @@
     </footer>
   </div>
 
-  <!-- 读书卡片生成器 -->
-  <div id="bookCardModal" class="card-modal-overlay" hidden>
-    <div class="card-modal-container">
-      <div class="modal-header">
-        <span class="modal-date">生成读书卡片</span>
-        <button class="close-btn" onclick="closeBookCardModal()">×</button>
-      </div>
-
-      <!-- 预览区（截图区域） -->
-      <div id="bookCardPreview" class="book-card-preview">
-        <div class="bcard-top">
-          <span>READING NOTES</span>
-          <span>✧ 阅</span>
+      <!-- 整书分享卡片生成器 -->
+    <div id="bookCardModal" class="card-modal-overlay" hidden>
+      <div class="card-modal-container">
+        <div class="modal-header">
+          <span class="modal-date">生成读书卡片</span>
+          <button class="close-btn" onclick="closeBookCardModal()">×</button>
         </div>
         
-        <div class="bcard-info">
-          <div id="bcardCover" class="bcard-cover"></div>
-          <div class="bcard-meta">
-            <h2 id="bcardTitle">书名</h2>
-            <p id="bcardAuthor">作者</p>
+        <!-- 预览区 -->
+        <div id="bookCardPreview" class="book-card-preview">
+          <div class="bcard-top">
+            <span>READING NOTES</span>
+            <span>✧ 阅</span>
+          </div>
+          <div class="bcard-info">
+            <div id="bcardCover" class="bcard-cover"></div>
+            <div class="bcard-meta">
+              <h2 id="bcardTitle">书名</h2>
+              <p id="bcardAuthor">作者</p>
+            </div>
+          </div>
+          <div id="bcardQuote" class="bcard-quote">“金句”</div>
+          <div id="bcardReview" class="bcard-review">读后感摘要...</div>
+          <div class="bcard-footer">
+            <span>拾迹 · 私人书房</span>
           </div>
         </div>
 
-        <div id="bcardQuote" class="bcard-quote">“金句”</div>
-        
-        <div id="bcardReview" class="bcard-review">读后感摘要...</div>
+        <!-- 新增：自由编辑区 -->
+        <div class="card-edit-inputs">
+          <textarea id="bcardReviewInput" placeholder="挑选部分书评填入卡片（太长会不好看）..." style="height: 80px;"></textarea>
+        </div>
 
-        <div class="bcard-footer">
-          <span>小事与大事 · 私人书房</span>
+        <div class="modal-actions" style="margin-top: 15px;">
+          <button id="downloadBookCardBtn" class="primary" style="width: 100%;">保存图片到相册</button>
         </div>
       </div>
-
-      <div class="modal-actions" style="margin-top: 20px;">
-        <button id="downloadBookCardBtn" class="primary" style="width: 100%;">保存图片到相册</button>
-      </div>
     </div>
-  </div>
 
   <!-- 新增：全屏图片预览 -->
   <div id="imagePreviewModal" class="image-preview-modal" hidden onclick="closeImagePreview()">
@@ -307,6 +356,7 @@
   <script src="js/timeline.js"></script>
   <script src="js/review.js"></script>
   <script src="js/books.js"></script>
+  <script src="js/plan.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

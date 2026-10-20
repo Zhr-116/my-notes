@@ -90,12 +90,18 @@ async function openModal(id) {
   tagsEl.innerHTML = (item.tags || []).map(t => `<span class="tag">#${escapeHtml(t)}</span>`).join("");
   
   const textView = document.getElementById("detailTextView");
+  const editBtn = document.getElementById("editDetailBtn");
+  
+  // 定义铅笔和加号的 SVG
+  const pencilSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>`;
+  const plusSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
+
   if (item.detail && item.detail.trim()) {
     textView.innerText = item.detail;
-    document.getElementById("editDetailBtn").innerText = "📝 编辑详情";
+    editBtn.innerHTML = pencilSvg + " 编辑详情";
   } else {
     textView.innerText = "";
-    document.getElementById("editDetailBtn").innerText = "➕ 添加详情";
+    editBtn.innerHTML = plusSvg + " 添加详情";
   }
 
   await renderViewImages(item.images);

@@ -3,6 +3,7 @@ function render() {
   document.getElementById("timelineView").hidden = currentView !== "timeline";
   document.getElementById("reviewView").hidden = currentView !== "review"; // 新增
   document.getElementById("bookView").hidden = currentView !== "book";
+  document.getElementById("planView").hidden = currentView !== "plan"; // 新增
 
   document.querySelectorAll(".tabs button").forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.view === currentView);
@@ -19,6 +20,8 @@ function render() {
     renderReview();
   } else if (currentView === "book") {
     renderBookView();
+  } else if (currentView === "plan") {
+    renderPlanView(); // 关键：必须有这句，否则里面永远是空的
   }
 }
 
@@ -94,12 +97,20 @@ function renderItem(e) {
   // 如果已经是大事，显示金色的“★ 大事”
   const milestoneBadge = `
     <span class="badge-toggle ${e.isMilestone ? 'is-milestone' : ''}" 
-          onclick="event.stopPropagation(); toggleMilestone('${e.id}')">
-      ${e.isMilestone ? '★ 大事' : '☆ 标记大事'}
+          onclick="event.stopPropagation(); toggleMilestone('${e.id}')"
+          style="display: inline-flex; align-items: center; gap: 4px;">
+      
+      <!-- 这里是 SVG 星星 -->
+      <svg class="star-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
+      </svg>
+
+      ${e.isMilestone ? '大事' : '标记大事'}
     </span>
   `;
 
-  const detailBadge = hasDetail ? `<span class="badge-detail">📝 详情</span>` : '';
+    const pencilSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>`;
+    const detailBadge = hasDetail ? `<span class="badge-detail" style="display:inline-flex; align-items:center;">${pencilSvg} 详情</span>` : '';
 
   return `
     <div class="list-item ${e.isMilestone ? 'is-milestone-item' : ''}" data-id="${e.id}">

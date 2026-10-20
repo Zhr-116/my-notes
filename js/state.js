@@ -30,3 +30,7 @@ let books = JSON.parse(localStorage.getItem("mini-books") || "[]");
 function saveBooks() {
   localStorage.setItem("mini-books", JSON.stringify(books));
 }
+
+// === 计划模块数据 ===
+let countdowns = JSON.parse(localStorage.getItem("mini-countdowns") || "[]");
+function saveCountdowns() { localStorage.setItem("mini-countdowns", JSON.stringify(countdowns)); }

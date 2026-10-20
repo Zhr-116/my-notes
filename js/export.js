@@ -16,7 +16,7 @@ function exportMarkdown() {
     groups[month].push(e);
   });
 
-  let md = "# 我的小事与大事记录\n\n";
+  let md = "# 拾迹--个人时光记\n\n";
   md += `> 导出于：${new Date().toLocaleString()}\n\n---\n\n`;
 
   Object.keys(groups).forEach(month => {
@@ -50,7 +50,7 @@ function exportMarkdown() {
   });
 
   const blob = new Blob([md], { type: "text/markdown;charset=utf-8" });
-  downloadFile(blob, `小事与大事_${todayStr()}.md`);
+  downloadFile(blob, `拾迹_${todayStr()}.md`);
 }
 
 // === 导出 JSON ===
@@ -62,7 +62,7 @@ function exportJson() {
   // 格式化 JSON，加上缩进方便人类阅读
   const dataStr = JSON.stringify(entries, null, 2);
   const blob = new Blob([dataStr], { type: "application/json;charset=utf-8" });
-  downloadFile(blob, `小事与大事备份_${todayStr()}.json`);
+  downloadFile(blob, `拾迹备份_${todayStr()}.json`);
 }
 
 // 统一的下载辅助函数
