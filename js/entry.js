@@ -18,6 +18,7 @@ function addEntry() {
     createdAt: new Date().toISOString(),
   });
 
+  addStars(5);
   saveEntries();
   localStorage.removeItem(DRAFT_KEY);
   contentInput.value = "";

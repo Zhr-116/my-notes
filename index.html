@@ -12,13 +12,25 @@
 <body>
   <div class="app">
     <header>
-      <h1>拾迹</h1>
-      <div class="tabs">
-        <button data-view="record" class="active">记录</button>
-        <button data-view="timeline">时间轴</button>
-        <button data-view="review">回顾</button>
-        <button data-view="book">书架</button>
-        <button data-view="plan">计划</button>
+      <!-- 左侧：主页显示拾迹，子页面显示返回按钮 -->
+      <div id="headerLeft">
+        <h1 id="appTitle">拾迹</h1>
+        <!-- 返回按钮，默认隐藏 -->
+        <button id="subBackBtn" class="back-btn-icon" onclick="switchView('more')" hidden>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10.793 19.793a.707.707 0 0 0 1.207-.5V16a1 1 0 0 1 1-1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-6a1 1 0 0 1-1-1V4.707a.707.707 0 0 0-1.207-.5l-6.94 6.94a1.207 1.207 0 0 0 0 1.707z"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 右侧：主页显示导航，子页面显示标题 -->
+      <div id="headerRight">
+        <div class="tabs" id="mainTabs">
+          <button data-view="record" class="active">记录</button>
+          <button data-view="timeline">时间轴</button>
+          <button data-view="more">更多</button>
+        </div>
+        <span id="subPageTitle" class="sub-page-title" hidden>页面名</span>
       </div>
     </header>
 
@@ -116,6 +128,61 @@
       <div id="countdownContainer"></div>
       <div id="taskContainer" class="task-section"></div>
     </section>
+
+    <!-- 更多功能页 -->
+    <section id="moreView" hidden>
+      <div class="more-grid">
+        <div class="more-card" onclick="switchView('review')">
+          <span class="more-icon">📊</span>
+          <span>回顾看板</span>
+        </div>
+        <div class="more-card" onclick="switchView('book')">
+          <span class="more-icon">📚</span>
+          <span>私人书架</span>
+        </div>
+        <div class="more-card" onclick="switchView('plan')">
+          <span class="more-icon">🎯</span>
+          <span>计划倒计时</span>
+        </div>
+        <div class="more-card" onclick="switchView('shop')">
+          <span class="more-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.983 21.186a1 1 0 0 1-1.966 0 10 10 0 0 0-8.203-8.203 1 1 0 0 1 0-1.966 10 10 0 0 0 8.203-8.203 1 1 0 0 1 1.966 0 10 10 0 0 0 8.203 8.203 1 1 0 0 1 0 1.966 10 10 0 0 0-8.203 8.203"/></svg>
+          </span>
+          <span>拾光商店</span>
+        </div>
+      </div>
+      
+      <!-- 快捷设置：自定义首页 -->
+      <div style="margin-top: 40px; padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
+        <label style="font-size: 14px; font-weight: 600; color: var(--text-primary);">默认启动首页</label>
+        <select id="defaultViewSelect" class="card-select" style="margin-top: 10px;" onchange="saveDefaultView(this.value)">
+          <option value="record">记录</option>
+          <option value="timeline">时间轴</option>
+          <option value="review">回顾看板</option>
+          <option value="book">私人书架</option>
+          <option value="plan">计划倒计时</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- 拾光商店页 -->
+    <section id="shopView" hidden>
+      <div id="shopContent"></div>
+    </section>
+    <!-- 开盲盒全屏遮罩 -->
+    <div id="boxOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
+      
+      <!-- 抖动的大盲盒 -->
+      <div id="openingBoxContainer" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+        <!-- 这里的内容由 JS 动态注入图片 -->
+      </div>
+      
+      <!-- 结果展示区 -->
+      <div id="boxResult" style="display: none; width: 320px; background: #fff; border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+        <!-- 这里的内容由 JS 动态注入 -->
+      </div>
+      
+    </div>
 
     <!-- 添加倒计时弹窗 -->
     <div id="countdownModal" class="modal-mask" hidden>
@@ -357,6 +424,7 @@
   <script src="js/review.js"></script>
   <script src="js/books.js"></script>
   <script src="js/plan.js"></script>
+  <script src="js/shop.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

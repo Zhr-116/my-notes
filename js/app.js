@@ -306,3 +306,16 @@ importFile.addEventListener("change", (e) => {
   };
   reader.readAsText(file);
 });
+
+// 读取默认首页
+const savedDefaultView = localStorage.getItem("mini-default-view");
+if (savedDefaultView) {
+  currentView = savedDefaultView;
+  // 顺便把下拉框选中
+  const select = document.getElementById("defaultViewSelect");
+  if(select) select.value = savedDefaultView;
+}
+
+// 最后再执行初始化渲染
+dateInput.value = todayStr();
+render();

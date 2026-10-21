@@ -1,28 +1,67 @@
 function render() {
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'plan': '计划', 'shop': '拾光商店' };
+  const isSubPage = Object.keys(pageTitles).includes(currentView);
+
+  const mainTabs = document.getElementById("mainTabs");
+  const subPageTitle = document.getElementById("subPageTitle");
+  const appTitle = document.getElementById("appTitle");
+  const subBackBtn = document.getElementById("subBackBtn");
+
+  if (isSubPage) {
+    // 子页面：隐藏导航、隐藏拾迹，显示返回和标题
+    mainTabs.hidden = true;
+    subPageTitle.hidden = false;
+    subPageTitle.innerText = pageTitles[currentView];
+    
+    appTitle.hidden = true;
+    subBackBtn.hidden = false;
+  } else {
+    // 主页面：显示导航、显示拾迹，隐藏返回和标题
+    mainTabs.hidden = false;
+    subPageTitle.hidden = true;
+    
+    appTitle.hidden = false;
+    subBackBtn.hidden = true;
+  }
+
+  // 隐藏所有页面
   document.getElementById("recordView").hidden = currentView !== "record";
   document.getElementById("timelineView").hidden = currentView !== "timeline";
-  document.getElementById("reviewView").hidden = currentView !== "review"; // 新增
+  document.getElementById("reviewView").hidden = currentView !== "review";
   document.getElementById("bookView").hidden = currentView !== "book";
-  document.getElementById("planView").hidden = currentView !== "plan"; // 新增
+  document.getElementById("planView").hidden = currentView !== "plan";
+  document.getElementById("moreView").hidden = currentView !== "more"; // 新增
+  document.getElementById("shopView").hidden = currentView !== "shop"; // 稍后加
 
   document.querySelectorAll(".tabs button").forEach((btn) => {
-    btn.classList.toggle("active", btn.dataset.view === currentView);
+    // 当在非前两个页面时，“更多”按钮高亮
+    const isMorePage = ["review", "book", "plan", "shop", "more"].includes(currentView);
+    if (btn.dataset.view === "more") {
+      btn.classList.toggle("active", isMorePage);
+    } else {
+      btn.classList.toggle("active", btn.dataset.view === currentView);
+    }
   });
 
-  if (currentView === "record") {
-    renderTagBar();
-    renderList();
-  } else if (currentView === "timeline") {
-    renderTimeline();
-  } else if (currentView === "review") {
-    renderReview(); // 调用新文件里的函数
-  } else if (currentView === "review") {
-    renderReview();
-  } else if (currentView === "book") {
-    renderBookView();
-  } else if (currentView === "plan") {
-    renderPlanView(); // 关键：必须有这句，否则里面永远是空的
-  }
+  // 渲染逻辑
+  if (currentView === "record") { renderTagBar(); renderList(); } 
+  else if (currentView === "timeline") { renderTimeline(); } 
+  else if (currentView === "review") { renderReview(); } 
+  else if (currentView === "book") { renderBookView(); } 
+  else if (currentView === "plan") { renderPlanView(); } 
+  else if (currentView === "shop") { renderShop(); } // 稍后写
+}
+
+// 全局跳转函数
+function switchView(viewName) {
+  currentView = viewName;
+  render();
+}
+
+// 保存默认首页
+function saveDefaultView(viewName) {
+  localStorage.setItem("mini-default-view", viewName);
+  showToast("默认首页已设置");
 }
 
 function renderTagBar() {
@@ -175,7 +214,14 @@ function renderList() {
 
   if (!filtered.length) {
     const emptyMsg = isSearching || activeTag ? "没有找到匹配的记录。" : "还没有记录，写一条吧。";
-    listEl.innerHTML = `<div class="empty">${emptyMsg}</div>`;
+    
+    // 加回纸飞机彩蛋
+    listEl.innerHTML = `
+      <div class="empty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top: 60px;">
+        <img src="./assets/plane.svg" alt="纸飞机" class="plane-img">
+        <span style="text-align:center; margin-top: 16px;">${emptyMsg}</span>
+      </div>
+    `;
     return;
   }
 

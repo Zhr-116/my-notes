@@ -328,8 +328,10 @@ async function saveBook() {
   // 如果添加时直接选了“已读”，立刻触发
   if (status === "read") {
     createReadEntry(newBook);
+    addStars(5);
     showToast("已上架，并作为小事同步到记录页！");
   } else {
+    addStars(5);
     showToast("上架成功");
   }
 }

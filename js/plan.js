@@ -139,6 +139,11 @@ function toggleTask(index) {
   tasks[index].completed = !tasks[index].completed;
   saveTodayTasks(tasks);
   renderTasks();
+  // 检查是否全部完成
+  if (tasks.length > 0 && tasks.every(t => t.completed)) {
+    // 直接加 10 星迹，如果在今天已经拿满，addStars 会自动拦截并提示
+    addStars(10);
+  }
 }
 function deleteTask(index) {
   const tasks = getTodayTasks();
