@@ -21,7 +21,7 @@ function escapeHtml(str) {
 function showToast(msg) {
   const t = document.createElement("div");
   t.className = "toast";
-  t.textContent = msg;
+  t.innerHTML = msg; 
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 1400);
 }

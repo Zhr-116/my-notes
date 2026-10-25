@@ -415,6 +415,19 @@
     <img id="imagePreviewImg" src="" alt="预览图">
   </div>
 
+  <!-- 拾迹专属剧情对话框 -->
+  <div id="storyOverlay" class="story-overlay" style="display: none;">
+    <!-- 立绘：你的小女孩 -->
+    <img src="./assets/girl-color.png" alt="拾迹" class="story-character">
+    
+    <!-- 羊皮纸对话框 -->
+    <div class="story-dialog-box" onclick="handleStoryClick()">
+      <div class="story-speaker">拾迹</div>
+      <div class="story-text" id="storyText"></div>
+      <div class="story-continue" id="storyContinue">▼</div>
+    </div>
+  </div>
+
   <script src="js/state.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/entry.js"></script>
@@ -425,6 +438,7 @@
   <script src="js/books.js"></script>
   <script src="js/plan.js"></script>
   <script src="js/shop.js"></script>
+  <script src="js/story.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

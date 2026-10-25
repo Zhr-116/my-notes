@@ -381,7 +381,7 @@ footer { margin-top: 28px; display: flex; gap: 8px; justify-content: center; fle
 footer button { border: none; background: var(--surface-muted); border-radius: 8px; padding: 8px 12px; cursor: pointer; color: var(--text-primary); transition: background 0.15s ease; }
 footer button:hover { background: var(--border); }
 
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: white; padding: 8px 16px; border-radius: 999px; font-size: 13px; z-index: 3000; animation: fadeIn 0.2s ease; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text-primary); color: white; padding: 8px 16px; border-radius: 999px; font-size: 13px; display: flex; z-index: 3000; animation: fadeIn 0.2s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
 /* === 回顾页 === */
@@ -935,3 +935,161 @@ footer button:hover { background: var(--border); }
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 3;
 }
+
+/* ================= 剧情系统：遮罩与卡片 ================= */
+
+.story-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26, 21, 18, 0.6); /* 暖色调的深色遮罩 */
+  backdrop-filter: blur(8px); /* 毛玻璃背景 */
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.story-overlay.show {
+  opacity: 1;
+}
+
+/* ================= 全彩立绘 ================= */
+.story-character {
+  position: absolute;
+  right: 5%; /* 靠右边 */
+  bottom: 20px; /* 沉底，下半身藏在卡片后面 */
+  height: 280px; /* 全彩图稍微大一点 */
+  object-fit: contain;
+  z-index: 5; /* 层级比卡片低，保证在卡片后面 */
+  
+  /* 唯一修饰：自然的黑色落地阴影，增加体积感 */
+  filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.4));
+  animation: none; /* 取消浮动，稳稳站着 */
+}
+
+/* ================= 羊皮纸对话框 ================= */
+.story-dialog-box {
+  width: 90%;
+  max-width: 600px;
+  background: #fcf9f2; 
+  border: 1px solid #d1c7b8;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 10; 
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 4px rgba(255, 255, 255, 0.6); 
+  
+  /* 【核心修改】去掉 translateY，改成 scale 缩放 */
+  transform: scale(0.95);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+}
+
+/* 打开时：恢复正常大小和完全不透明 */
+.story-overlay.show .story-dialog-box {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* 左上角的“拾迹”印泥标签 */
+.story-speaker {
+  position: absolute;
+  top: -16px;
+  left: 24px;
+  background: #a0522d; /* 印泥红 */
+  color: #fff;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  
+  /* 【核心修改】去掉悬浮阴影，换成极短的黑色微影，增加实体感 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); 
+  /* 加一圈淡淡的金色边框，和羊皮纸呼应 */
+  border: 1px solid #c2825e; 
+}
+
+/* 对话框里的文本 */
+.story-text {
+  font-family: "Kaiti", "STKaiti", "Georgia", serif; /* 优雅楷体 */
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+  min-height: 80px; /* 占位，防止文字没打完时卡片高度乱跳 */
+  white-space: pre-wrap;
+}
+
+/* 右下角提示继续的跳动箭头 */
+.story-continue {
+  text-align: right;
+  font-size: 18px;
+  color: #8c8273;
+  margin-top: 10px;
+  animation: bounce 1s infinite alternate;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.story-continue.show {
+  opacity: 1;
+}
+
+@keyframes bounce {
+  from { transform: translateY(0); }
+  to { transform: translateY(5px); }
+}
+
+/* ================= 手机端适配 ================= */
+@media (max-width: 600px) {
+  .story-character {
+    right: 2%; 
+    bottom: 20px; 
+    height: 220px; /* 手机端缩小，防止太挤 */
+  }
+  .story-dialog-box {
+    width: 92%;
+    margin-bottom: 24px;
+    padding: 20px;
+  }
+}
+
+/* 全彩立绘：直接站在右侧，没有底座，没有发光 */
+.story-character {
+  position: absolute;
+  right: 5%; /* 靠右边 */
+  bottom: 80px; /* 沉底，下半身藏在卡片后面 */
+  height: 280px; /* 全彩图可以稍微大一点，比较有气势 */
+  object-fit: contain;
+  z-index: 5; /* 在卡片后面 */
+  
+  /* 唯一的修饰：给人物一个自然的黑色落地阴影，增加物理体积感 */
+  filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.4));
+  
+  /* 取消所有的浮动动画，安安静静站着 */
+  animation: none; 
+  transition: opacity 0.2s ease; 
+}
+
+/* 当遮罩层失去 .show 类（也就是点击关闭）时，女孩瞬间透明 */
+.story-overlay:not(.show) .story-character {
+  opacity: 0;
+}
+
+/* 手机端适配 */
+@media (max-width: 600px) {
+  .story-character {
+    right: 2%; 
+    bottom: 80px; 
+    height: 220px; /* 手机端缩小一点，防止太挤 */
+  }
+}
+
+

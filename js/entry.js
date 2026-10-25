@@ -20,12 +20,18 @@ function addEntry() {
 
   addStars(5);
   saveEntries();
+  checkStoryTrigger("save_entry", { content: content });
   localStorage.removeItem(DRAFT_KEY);
   contentInput.value = "";
   tagsInput.value = "";
   dateInput.value = todayStr();
   render();
   contentInput.focus();
+
+  // 唤醒剧情引擎
+  if (typeof checkStoryTrigger === 'function') {
+    setTimeout(checkStoryTrigger, 500); // 延迟半秒，等列表刷新完再弹剧情
+  }
 }
 
 function deleteEntry(id) {
@@ -35,6 +41,7 @@ function deleteEntry(id) {
   
   // 删掉以前残留的 expandedIds 和 editingIds 的清理
   saveEntries();
+  checkStoryTrigger("delete_entry");
   render();
 }
 

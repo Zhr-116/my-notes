@@ -220,6 +220,7 @@ async function updateBookStatus(bookId, newStatus) {
   saveBooks(); renderBookStatus(book); renderBookView(); 
   
   if (newStatus === "read") {
+    checkStoryTrigger("read_book");
     createReadEntry(book);
     showToast("已读，并同步到记录页！");
   } else { showToast("状态已更新"); }

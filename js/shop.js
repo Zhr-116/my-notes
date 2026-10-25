@@ -174,6 +174,7 @@ function openMysteryBox(poolKey) {
       `;
     } else {
       unlockedBadges.push(drawnItem.id);
+      checkStoryTrigger("draw_box");
       localStorage.setItem("mini-badges", JSON.stringify(unlockedBadges));
       
       resultEl.innerHTML = `

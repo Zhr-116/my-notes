@@ -143,6 +143,7 @@ function toggleTask(index) {
   if (tasks.length > 0 && tasks.every(t => t.completed)) {
     // 直接加 10 星迹，如果在今天已经拿满，addStars 会自动拦截并提示
     addStars(10);
+    checkStoryTrigger("all_tasks_done");
   }
 }
 function deleteTask(index) {
