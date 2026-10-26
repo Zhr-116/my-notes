@@ -1,8 +1,7 @@
-let currentEditImages = []; // 保存原有的图片 ID
-let currentEditFiles = [];  // 保存新选的文件
-let currentCardImageBase64 = null; // 卡片选中的配图
+let currentEditImages = []; 
+let currentEditFiles = [];  
+let currentCardImageBase64 = null; 
 
-// 打开全屏预览
 function showImagePreview(base64) {
   document.getElementById("imagePreviewImg").src = base64;
   document.getElementById("imagePreviewModal").hidden = false;
@@ -13,7 +12,6 @@ function closeImagePreview() {
   document.getElementById("imagePreviewImg").src = "";
 }
 
-// 渲染阅读态图片
 async function renderViewImages(imageIds) {
   const container = document.getElementById("detailImagesView");
   container.innerHTML = "";
@@ -34,12 +32,10 @@ async function renderViewImages(imageIds) {
   }
 }
 
-// 渲染编辑态图片（带删除按钮）
 async function renderEditImages() {
   const container = document.getElementById("editImagesPreview");
   container.innerHTML = "";
 
-  // 1. 渲染已经保存的旧图
   for (const id of currentEditImages) {
     const base64 = await imageDB.get(id);
     if (base64) {
@@ -53,7 +49,6 @@ async function renderEditImages() {
     }
   }
 
-  // 2. 渲染新选的图
   currentEditFiles.forEach((file, index) => {
     const wrapper = document.createElement("div");
     wrapper.className = "edit-img-wrapper";
@@ -66,13 +61,11 @@ async function renderEditImages() {
   });
 }
 
-// 删除旧图
 function removeEditImage(id) {
   currentEditImages = currentEditImages.filter(imgId => imgId !== id);
   renderEditImages();
 }
 
-// 删除新图
 function removeEditFile(index) {
   currentEditFiles.splice(index, 1);
   renderEditImages();
@@ -92,8 +85,8 @@ async function openModal(id) {
   const textView = document.getElementById("detailTextView");
   const editBtn = document.getElementById("editDetailBtn");
   
-  // 定义铅笔和加号的 SVG
-  const pencilSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>`;
+  // 【修改点】动态获取铅笔图标；加号我们用个简单的文字或代码
+  const pencilSvg = getIcon('pencil');
   const plusSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 4px;"><path d="M5 12h14"/><path d="M12 5v14"/></svg>`;
 
   if (item.detail && item.detail.trim()) {
@@ -170,25 +163,22 @@ async function openCardGenerator() {
   const item = entries.find((e) => e.id === currentModalId);
   if (!item) return;
 
-  // 1. 填充文字
   document.getElementById("cardDateDisplay").innerText = formatCardDate(item.date);
   document.getElementById("cardTagDisplay").innerText = item.isMilestone ? "★ 大事" : "· 小事";
   document.getElementById("cardContentDisplay").innerText = item.content;
   document.getElementById("cardDetailDisplay").innerText = item.detail || "";
   document.getElementById("cardDetailInput").value = item.detail || "";
   
-  // 2. 重置下拉框的默认值
   document.getElementById("cardThemeSelect").value = "minimal";
   document.getElementById("cardTextSelect").value = "normal";
 
-  // 3. 处理图片
   const imageWrapper = document.getElementById("cardImageWrapper");
   const imageSelector = document.getElementById("cardImageSelector");
   const imageOptions = document.getElementById("cardImageOptions");
   
   currentCardImageBase64 = null;
   imageWrapper.hidden = true;
-  imageWrapper.innerHTML = ""; // 彻底清空，不留幽灵 img 标签
+  imageWrapper.innerHTML = ""; 
   imageOptions.innerHTML = "";
 
   if (item.images && item.images.length > 0) {
@@ -203,8 +193,6 @@ async function openCardGenerator() {
           document.querySelectorAll(".image-option").forEach(el => el.classList.remove("selected"));
           img.classList.add("selected");
           currentCardImageBase64 = base64;
-          
-          // 【关键修复】：只有选中时，才动态把图片插入到容器里
           imageWrapper.innerHTML = `<img src="${base64}" alt="配图">`;
           imageWrapper.hidden = false;
         };
@@ -215,10 +203,7 @@ async function openCardGenerator() {
     imageSelector.hidden = true;
   }
 
-  // 4. 应用初始样式
   applyCardStyles();
-
-  // 5. 显示弹窗
   document.getElementById("cardGeneratorModal").hidden = false;
 }
 
@@ -226,7 +211,6 @@ function closeCardGenerator() {
   document.getElementById("cardGeneratorModal").hidden = true;
 }
 
-// 核心：独立应用主题和文字排版
 function applyCardStyles() {
   const theme = document.getElementById("cardThemeSelect").value;
   const textStyle = document.getElementById("cardTextSelect").value;
@@ -235,12 +219,10 @@ function applyCardStyles() {
   const previewArea = document.getElementById("cardPreviewArea");
   const detailEl = document.getElementById("cardDetailDisplay");
 
-  // 1. 应用卡片主题
   previewArea.className = "card-preview-area";
   if (theme === "film") previewArea.classList.add("theme-film");
   if (theme === "ticket") previewArea.classList.add("theme-ticket");
 
-  // 2. 应用文字排版
   detailEl.className = "card-detail";
   if (!rawText.trim()) {
     detailEl.innerText = "";
@@ -258,7 +240,6 @@ function applyCardStyles() {
   }
 }
 
-// 绑定两个下拉框和输入框的事件
 document.getElementById("cardDetailInput")?.addEventListener("input", applyCardStyles);
 document.getElementById("cardThemeSelect")?.addEventListener("change", applyCardStyles);
 document.getElementById("cardTextSelect")?.addEventListener("change", applyCardStyles);

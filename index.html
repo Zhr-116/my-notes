@@ -150,6 +150,10 @@
           </span>
           <span>拾光商店</span>
         </div>
+                <div class="more-card" onclick="openCapsuleModal()">
+          <span class="more-icon">✉️</span>
+          <span>时间胶囊</span>
+        </div>
       </div>
       
       <!-- 快捷设置：自定义首页 -->
@@ -321,7 +325,7 @@
           <div id="detailTextView" class="detail-text-block"></div>
           <div id="detailImagesView" class="detail-images-grid"></div> <!-- 新增：图片展示区 -->
           <!-- 新增这个按钮 -->
-          <button class="edit-detail-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
+          <button id="generateCardBtn" class="edit-detail-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12.65 7.65a2 2 0 012.629-1.046l5.51 2.374a2 2 0 011.046 2.628l-3.957 9.184a2 2 0 01-2.628 1.046l-5.51-2.374a2 2 0 01-1.046-2.628z"/>
               <path d="M18 7.777V4a2 2 0 00-2-2h-6a2 2 0 00-2 2v10a2 2 0 001.137 1.805"/>
@@ -344,7 +348,7 @@
           
           <!-- 新增：图片上传区 -->
           <div class="image-upload-area">
-            <label for="imageInput" class="upload-btn" style="display: inline-flex; align-items: center; gap: 6px;">
+            <label id="cameraBtnLabel" for="imageInput" class="upload-btn" style="display: inline-flex; align-items: center; gap: 6px;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/>
                 <circle cx="12" cy="13" r="3"/>
@@ -428,6 +432,133 @@
     </div>
   </div>
 
+  <!-- 写信弹窗 -->
+  <div id="capsuleModal" class="modal-mask" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">封存时间胶囊</span>
+        <button class="close-btn" onclick="closeCapsuleModal()">×</button>
+      </div>
+      <div class="modal-edit-area">
+        <textarea id="capsuleInput" placeholder="写给未来的自己..." style="width: 100%; height: 150px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); outline: none; resize: none; margin-bottom: 15px; font-family: 'Kaiti', serif; font-size: 16px; line-height: 1.8;"></textarea>
+        
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">选择解锁日期（在当天打开 App 才会触发）：</label>
+        <input type="date" id="capsuleDateInput" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+        
+        <div class="modal-actions">
+          <button class="primary" onclick="saveCapsule()">封存</button>
+          <button onclick="closeCapsuleModal()">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 拆信全屏动画遮罩 -->
+  <div id="envelopeOverlay" class="envelope-overlay" style="display: none;">
+    <p id="envelopeHint" style="color: #8c8273; font-size: 14px; letter-spacing: 2px; margin-bottom: 20px; transition: opacity 0.3s;">点击信封拆阅</p>
+    
+    <!-- 信封外壳（只管外壳视觉，不包含信纸） -->
+    <div class="envelope-wrapper" id="envelopeWrapper" onclick="openEnvelope()">
+      <div class="envelope-back"></div>
+      <div class="envelope-mask" id="envelopeMask"></div>
+      <div class="envelope-front"></div>
+      <div class="envelope-top" id="envelopeTop"></div>
+      <div class="wax-seal" id="waxSeal">拾</div>
+    </div>
+
+    <!-- 【核心改动】：信纸独立放在外层，方便独立做动画 -->
+    <div class="envelope-paper" id="envelopePaper">
+      <div class="paper-content" id="capsuleTextContent"></div>
+      <div class="paper-date" id="capsuleDateContent"></div>
+    </div>
+
+    <!-- 阅读完后出现的按钮 -->
+    <button id="flyAwayBtn" onclick="flyPaperAway()" class="primary" style="display: none;">
+      封存信件
+    </button>
+  </div>
+
+  <!-- 年度报告全屏遮罩 -->
+  <div id="annualReportOverlay" class="report-overlay" style="display: none;">
+    <!-- 幻灯片容器 -->
+    <div class="report-slides-container" id="reportSlidesContainer">
+      <!-- 第 1 页：总览 -->
+      <div class="report-slide active" id="slide-1">
+        <h2 class="rs-title">2025 年</h2>
+        <div class="rs-num" id="rs-total-entries">0</div>
+        <p class="rs-desc">片微光，被你拾起</p>
+      </div>
+
+      <!-- 第 2 页：大事记（加入视觉装饰） -->
+      <div class="report-slide" id="slide-2">
+        <h2 class="rs-title">时光轴上的锚点</h2>
+        <div class="rs-num" id="rs-total-milestones">0</div>
+        <p class="rs-desc">件大事，组成了你的高光时刻</p>
+        <div class="rs-graphic-line"></div>
+      </div>
+
+      <!-- 第 3 页：标签（大号高亮 + 微统计） -->
+      <div class="report-slide" id="slide-3">
+        <h2 class="rs-title">出现频率最高的词</h2>
+        <div class="rs-highlight" id="rs-top-tag">#生活</div>
+        <p class="rs-desc">它出现在了你 <span id="rs-top-tag-count" style="color:#fff;font-weight:bold;font-size:18px;">0</span> 条记录里</p>
+      </div>
+
+      <!-- 第 4 页：深夜哲学家 -->
+      <div class="report-slide" id="slide-4">
+        <h2 class="rs-title">在 22:00 - 04:00</h2>
+        <div class="rs-num" id="rs-night-entries">0</div>
+        <p class="rs-desc">个深夜，思绪化作了文字</p>
+      </div>
+      
+      <!-- 第 5 页：结语 -->
+      <div class="report-slide" id="slide-5">
+        <h2 class="rs-title">无论好坏</h2>
+        <p class="rs-desc" style="font-size: 20px; margin-top: 20px;">这一年，拾迹都替你收好了。</p>
+        <button class="primary" style="margin-top: 40px; background: #fff; color: #000; padding: 12px 30px;" onclick="closeAnnualReport()">结束回顾</button>
+      </div>
+    </div>
+    
+      <!-- 底部提示 -->
+    <div class="report-hint" id="reportHint">轻触屏幕继续 ▸</div>
+  </div>
+
+  <!-- 专注钟全屏遮罩 -->
+  <div id="focusOverlay" class="focus-overlay" style="display: none;">
+    <!-- 星光容器 -->
+    <div id="starField" class="star-field"></div>
+    
+    <!-- 中央倒计时 -->
+    <div class="focus-content">
+      <div class="focus-time" id="focusTime">25:00</div>
+      <div class="focus-label" id="focusLabel">专注中，星光正在汇聚...</div>
+    </div>
+
+    <!-- 小女孩陪伴 -->
+    <img src="./assets/girl-color.png" alt="陪伴" class="focus-girl">
+    
+    <!-- 底部按钮 -->
+    <button class="focus-quit-btn" onclick="quitFocus()">结束专注</button>
+  </div>
+
+  <!-- 专注时长选择弹窗 -->
+  <div id="focusDurationModal" class="modal-mask" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">选择专注时长</span>
+        <button class="close-btn" onclick="closeFocusModal()">×</button>
+      </div>
+      <div class="modal-edit-area">
+        <div class="duration-grid">
+          <button class="duration-btn" onclick="startFocus(15)">15 分钟</button>
+          <button class="duration-btn active" onclick="startFocus(25)">25 分钟</button>
+          <button class="duration-btn" onclick="startFocus(45)">45 分钟</button>
+          <button class="duration-btn" onclick="startFocus(60)">60 分钟</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/state.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/entry.js"></script>
@@ -439,6 +570,10 @@
   <script src="js/plan.js"></script>
   <script src="js/shop.js"></script>
   <script src="js/story.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/capsule.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/focus.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

@@ -99,13 +99,12 @@ function renderShop() {
     `;
   }).join("");
 
-  container.innerHTML = `
+    container.innerHTML = `
     <div class="shop-header">
       <div class="stars-display">${STAR_ICON} 星迹：<span>${userStars}</span></div>
     </div>
 
     <div class="shop-section">
-      <!-- 给标题加一个总进度 -->
       <h3 class="section-title">
         荣誉橱窗 
         <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">
@@ -122,7 +121,49 @@ function renderShop() {
         <div class="shelf-board"></div>
       </div>
     </div>
+
+    <!-- 新增：外观装扮区 -->
+    <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
+      <h3 class="section-title">外观装扮</h3>
+      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+        <div class="theme-preview" style="display: flex; gap: 8px; background: var(--surface-muted); padding: 10px; border-radius: 8px;">
+           <img src="./assets/theme-doodle/bell.svg" style="width: 24px; height: 24px;">
+           <img src="./assets/theme-doodle/pencil.svg" style="width: 24px; height: 24px;">
+           <img src="./assets/theme-doodle/card.svg" style="width: 24px; height: 24px;">
+        </div>
+        <div class="theme-info" style="flex: 1;">
+          <h4 style="margin: 0 0 4px 0; font-size: 15px;">手账涂鸦包</h4>
+          <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">包含 4 款全彩图标 + 复古牛皮纸底色</p>
+        </div>
+        
+        <!-- 核心切换逻辑 -->
+        ${currentTheme === 'doodle' 
+          ? `<button onclick="setTheme('default')" class="primary" style="background: var(--text-secondary); padding: 6px 12px; font-size: 13px; white-space: nowrap;">切回默认</button>`
+          : (ownedThemes.includes('doodle')
+              ? `<button onclick="setTheme('doodle')" class="primary" style="padding: 6px 12px; font-size: 13px; white-space: nowrap;">切换手账</button>`
+              : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 12px; font-size: 13px; white-space: nowrap;">✨ 500 购买</button>`)
+        }
+      </div>
+    </div>
   `;
+}
+
+// 在 shop.js 最下面加上购买逻辑
+function buyTheme(themeName, price) {
+  if (currentTheme === themeName) {
+    showToast("你已经在使用这个主题啦");
+    return;
+  }
+  if (userStars < price) {
+    showToast("星迹不足，快去记录吧！");
+    return;
+  }
+  
+  if (confirm(`确定花费 ${price} 星迹解锁并切换至该主题吗？`)) {
+    userStars -= price;
+    localStorage.setItem("mini-stars", userStars.toString());
+    setTheme(themeName); // 这个方法在 theme.js 里，会自动 render()
+  }
 }
 
 function openMysteryBox(poolKey) {

@@ -57,9 +57,23 @@ function renderTasks() {
   const container = document.getElementById("taskContainer");
   const tasks = getTodayTasks(); 
   
-  let html = `<h3 class="section-title">今日待办</h3>`;
+  let html = ``;
+
+  // 【新增】：全局专注钟入口按钮（放在列表上方）
+  html += `
+    <div class="focus-start-card" onclick="openFocusModal()">
+      <div class="focus-start-icon">⏳</div>
+      <div class="focus-start-text">
+        <h4>开启专注</h4>
+        <p>让星光汇聚</p>
+      </div>
+      <div class="focus-start-arrow">▸</div>
+    </div>
+  `;
+
+  html += `<h3 class="section-title" style="margin-top: 24px;">今日待办</h3>`;
   
-  // 【关键修改】：把输入框放到最上面
+  // 把输入框放到最上面
   html += `
     <div class="task-add-row" style="margin-bottom: 16px;">
       <input type="text" id="newTaskInput" placeholder="添加新任务..." onkeypress="handleTaskKeyPress(event)">
@@ -67,7 +81,7 @@ function renderTasks() {
     </div>
   `;
 
-  // 然后再渲染列表
+  // 渲染列表
   html += `<div class="task-list">`;
   if (tasks.length === 0) {
     html += `<div class="empty-task">今天还没有任务，添加一个吧。</div>`;

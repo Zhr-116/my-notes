@@ -8,33 +8,27 @@ function render() {
   const subBackBtn = document.getElementById("subBackBtn");
 
   if (isSubPage) {
-    // 子页面：隐藏导航、隐藏拾迹，显示返回和标题
     mainTabs.hidden = true;
     subPageTitle.hidden = false;
     subPageTitle.innerText = pageTitles[currentView];
-    
     appTitle.hidden = true;
     subBackBtn.hidden = false;
   } else {
-    // 主页面：显示导航、显示拾迹，隐藏返回和标题
     mainTabs.hidden = false;
     subPageTitle.hidden = true;
-    
     appTitle.hidden = false;
     subBackBtn.hidden = true;
   }
 
-  // 隐藏所有页面
   document.getElementById("recordView").hidden = currentView !== "record";
   document.getElementById("timelineView").hidden = currentView !== "timeline";
   document.getElementById("reviewView").hidden = currentView !== "review";
   document.getElementById("bookView").hidden = currentView !== "book";
   document.getElementById("planView").hidden = currentView !== "plan";
-  document.getElementById("moreView").hidden = currentView !== "more"; // 新增
-  document.getElementById("shopView").hidden = currentView !== "shop"; // 稍后加
+  document.getElementById("moreView").hidden = currentView !== "more";
+  document.getElementById("shopView").hidden = currentView !== "shop";
 
   document.querySelectorAll(".tabs button").forEach((btn) => {
-    // 当在非前两个页面时，“更多”按钮高亮
     const isMorePage = ["review", "book", "plan", "shop", "more"].includes(currentView);
     if (btn.dataset.view === "more") {
       btn.classList.toggle("active", isMorePage);
@@ -43,22 +37,26 @@ function render() {
     }
   });
 
-  // 渲染逻辑
+  // 动态替换相机图标（在 index.html 里的那个 label）
+  const camLabel = document.getElementById("cameraBtnLabel");
+  if (camLabel) camLabel.innerHTML = getIcon('camera') + ' 添加图片';
+
+  const genCardBtn = document.getElementById("generateCardBtn");
+  if (genCardBtn) genCardBtn.innerHTML = getIcon('card') + ' 生成分享卡片';
+
   if (currentView === "record") { renderTagBar(); renderList(); } 
   else if (currentView === "timeline") { renderTimeline(); } 
   else if (currentView === "review") { renderReview(); } 
   else if (currentView === "book") { renderBookView(); } 
   else if (currentView === "plan") { renderPlanView(); } 
-  else if (currentView === "shop") { renderShop(); } // 稍后写
+  else if (currentView === "shop") { renderShop(); } 
 }
 
-// 全局跳转函数
 function switchView(viewName) {
   currentView = viewName;
   render();
 }
 
-// 保存默认首页
 function saveDefaultView(viewName) {
   localStorage.setItem("mini-default-view", viewName);
   showToast("默认首页已设置");
@@ -94,7 +92,6 @@ function renderTimeline() {
     if (!groups[year]) groups[year] = [];
     groups[year].push(e);
   });
-  // 这里保证年份是倒序的（最新的在最上面）
   const years = Object.keys(groups).sort().reverse();
 
   let html = "";
@@ -132,28 +129,21 @@ function renderTimeline() {
 function renderItem(e) {
   const hasDetail = !!(e.detail && e.detail.trim());
   
-  // 如果没有标为大事，显示灰色的“☆ 标记大事”，点了就变大事
-  // 如果已经是大事，显示金色的“★ 大事”
+  // 动态获取铃铛/星星图标
   const milestoneBadge = `
     <span class="badge-toggle ${e.isMilestone ? 'is-milestone' : ''}" 
           onclick="event.stopPropagation(); toggleMilestone('${e.id}')"
-          style="display: inline-flex; align-items: center; gap: 4px;">
-      
-      <!-- 这里是 SVG 星星 -->
-      <svg class="star-svg" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
-      </svg>
-
+          style="display: inline-flex; align-items: center; gap: 6px;">
+      ${getIcon('bell')}
       ${e.isMilestone ? '大事' : '标记大事'}
     </span>
   `;
 
-    const pencilSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 2px;"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>`;
-    const detailBadge = hasDetail ? `<span class="badge-detail" style="display:inline-flex; align-items:center;">${pencilSvg} 详情</span>` : '';
+  // 动态获取铅笔图标
+  const detailBadge = hasDetail ? `<span class="badge-detail" style="display:inline-flex; align-items:center; gap:4px;">${getIcon('pencil')} 详情</span>` : '';
 
   return `
     <div class="list-item ${e.isMilestone ? 'is-milestone-item' : ''}" data-id="${e.id}">
-      <!-- 底层：滑动出现的按钮 -->
       <div class="swipe-actions">
         <button class="swipe-btn pin ${e.isPinned ? 'active' : ''}" onclick="togglePin('${e.id}'); resetSwipe();">
           ${e.isPinned ? '取消置顶' : '置顶'}
@@ -161,7 +151,6 @@ function renderItem(e) {
         <button class="swipe-btn delete" onclick="deleteEntry('${e.id}')">删除</button>
       </div>
       
-      <!-- 表层：内容区 -->
       <div class="swipe-content" onclick="openModal('${e.id}')">
         <div class="item-header">
           <div class="item-date">${escapeHtml(e.date)}</div>
@@ -214,8 +203,6 @@ function renderList() {
 
   if (!filtered.length) {
     const emptyMsg = isSearching || activeTag ? "没有找到匹配的记录。" : "还没有记录，写一条吧。";
-    
-    // 加回纸飞机彩蛋
     listEl.innerHTML = `
       <div class="empty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top: 60px;">
         <img src="./assets/plane.svg" alt="纸飞机" class="plane-img">

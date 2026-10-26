@@ -316,6 +316,18 @@ if (savedDefaultView) {
   if(select) select.value = savedDefaultView;
 }
 
+// 初始化时检查主题
+const savedTheme = localStorage.getItem("mini-theme") || "default";
+if (savedTheme !== "default") {
+  document.documentElement.setAttribute("data-theme", savedTheme);
+}
+
+// 检查时间胶囊是否到期
+if (typeof checkCapsuleTrigger === 'function') {
+  checkCapsuleTrigger();
+}
+
 // 最后再执行初始化渲染
 dateInput.value = todayStr();
 render();
+

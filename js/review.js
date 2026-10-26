@@ -65,6 +65,17 @@ function renderReview() {
     </div>
   `;
 
+  // 在 container.innerHTML = ... 的末尾，加上这个入口
+  html += `
+    <div class="annual-report-entry" onclick="openAnnualReport()" style="margin-top: 30px; margin-bottom: 40px; background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border-radius: 16px; padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
+      <div>
+        <h3 style="color: #fff; margin: 0 0 6px 0; font-size: 18px;">🎬 开启年度报告</h3>
+        <p style="color: #9ca3af; margin: 0; font-size: 13px;">看看这一年，你留下了什么痕迹。</p>
+      </div>
+      <span style="color: #fff; font-size: 20px;">▸</span>
+    </div>
+  `;
+
   container.innerHTML = html;
   drawHeatmap();
 }
