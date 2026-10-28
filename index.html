@@ -25,6 +25,10 @@
 
       <!-- 右侧：主页显示导航，子页面显示标题 -->
       <div id="headerRight">
+        <!-- 极简签到按钮（默认是个日历图标） -->
+        <button id="headerCheckinBtn" class="header-checkin-btn" onclick="openCheckinPage()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+        </button>
         <div class="tabs" id="mainTabs">
           <button data-view="record" class="active">记录</button>
           <button data-view="timeline">时间轴</button>
@@ -482,44 +486,61 @@
   <div id="annualReportOverlay" class="report-overlay" style="display: none;">
     <!-- 幻灯片容器 -->
     <div class="report-slides-container" id="reportSlidesContainer">
-      <!-- 第 1 页：总览 -->
+      <!-- 第 1 页：小女孩开场 -->
       <div class="report-slide active" id="slide-1">
-        <h2 class="rs-title">2025 年</h2>
-        <div class="rs-num" id="rs-total-entries">0</div>
-        <p class="rs-desc">片微光，被你拾起</p>
+        <img src="./assets/girl-color.png" class="report-girl-intro">
+        <p class="rs-desc" style="margin-top: 20px; font-size: 18px; line-height: 1.8;">
+          又见面了。<br>我们一起走过了三百多天，来看看轨迹吧。
+        </p>
       </div>
 
-      <!-- 第 2 页：大事记（加入视觉装饰） -->
+      <!-- 第 2 页：总览 -->
       <div class="report-slide" id="slide-2">
-        <h2 class="rs-title">时光轴上的锚点</h2>
+        <h2 class="rs-title">这一年</h2>
+        <div class="rs-num" id="rs-total-entries">0</div>
+        <p class="rs-desc">片碎片，被你拾起</p>
+      </div>
+
+      <!-- 第 3 页：大事记 -->
+      <div class="report-slide" id="slide-3">
+        <h2 class="rs-title">高光时刻</h2>
         <div class="rs-num" id="rs-total-milestones">0</div>
-        <p class="rs-desc">件大事，组成了你的高光时刻</p>
+        <p class="rs-desc">件大事，被你用力记住</p>
         <div class="rs-graphic-line"></div>
       </div>
 
-      <!-- 第 3 页：标签（大号高亮 + 微统计） -->
-      <div class="report-slide" id="slide-3">
-        <h2 class="rs-title">出现频率最高的词</h2>
-        <div class="rs-highlight" id="rs-top-tag">#生活</div>
-        <p class="rs-desc">它出现在了你 <span id="rs-top-tag-count" style="color:#fff;font-weight:bold;font-size:18px;">0</span> 条记录里</p>
+      <!-- 第 4 页：最特别的一天（需要长按） -->
+      <div class="report-slide" id="slide-4">
+        <h2 class="rs-title">最特别的一天</h2>
+        <div class="rs-date" id="rs-special-date">某月某日</div>
+        <p class="rs-desc" style="font-size: 18px; color: #fff; margin-top: 16px; font-family: 'Kaiti', serif; line-height: 1.8;">“ <span id="rs-special-content">...</span> ”</p>
+        <p class="rs-desc" style="margin-top: 20px; font-size: 14px;">这是你写得最多的一条。</p>
       </div>
 
-      <!-- 第 4 页：深夜哲学家 -->
-      <div class="report-slide" id="slide-4">
-        <h2 class="rs-title">在 22:00 - 04:00</h2>
-        <div class="rs-num" id="rs-night-entries">0</div>
-        <p class="rs-desc">个深夜，思绪化作了文字</p>
+      <!-- 第 5 页：高频标签 -->
+      <div class="report-slide" id="slide-5">
+        <h2 class="rs-title">频繁出现的词</h2>
+        <div class="rs-highlight" id="rs-top-tag">#生活</div>
+        <p class="rs-desc">原来你总是围绕着它记录</p>
       </div>
       
-      <!-- 第 5 页：结语 -->
-      <div class="report-slide" id="slide-5">
-        <h2 class="rs-title">无论好坏</h2>
-        <p class="rs-desc" style="font-size: 20px; margin-top: 20px;">这一年，拾迹都替你收好了。</p>
-        <button class="primary" style="margin-top: 40px; background: #fff; color: #000; padding: 12px 30px;" onclick="closeAnnualReport()">结束回顾</button>
+      <!-- 第 6 页：深夜记录 -->
+      <div class="report-slide" id="slide-6">
+        <h2 class="rs-title">在深夜</h2>
+        <div class="rs-num" id="rs-night-entries">0</div>
+        <p class="rs-desc">次，你在凌晨留下了痕迹</p>
+      </div>
+      
+      <!-- 第 7 页：小女孩结尾 -->
+      <div class="report-slide" id="slide-7">
+        <img src="./assets/girl-color.png" class="report-girl-outro">
+        <h2 class="rs-title" style="margin-top: 20px;">时间就是这样</h2>
+        <p class="rs-desc" style="font-size: 16px;">别怕，我都给你存着呢。<br>明年见。</p>
+        <button class="primary" style="margin-top: 30px; background: #fff; color: #000; padding: 10px 24px; border-radius: 20px;" onclick="closeAnnualReport()">退出回顾</button>
       </div>
     </div>
     
-      <!-- 底部提示 -->
+    <!-- 底部提示 -->
     <div class="report-hint" id="reportHint">轻触屏幕继续 ▸</div>
   </div>
 
@@ -559,6 +580,60 @@
     </div>
   </div>
 
+  <!-- 全屏签到独立页面 -->
+  <div id="checkinOverlay" class="checkin-overlay" style="display: none;">
+    <!-- 横向日历 -->
+    <div class="horizontal-calendar" id="horizontalCalendar"></div>
+
+    <!-- 卡牌区域 -->
+    <div class="checkin-card-wrapper">
+      <div class="checkin-card" id="checkinCard">
+        <div class="card-face card-back">
+          <img src="./assets/card-back.jpg" alt="卡背" class="card-back-img">
+        </div>
+        <div class="card-face card-front">
+          <div class="checkin-date" id="checkinDateText"></div>
+          <div class="checkin-mood-large" id="checkinMoodText"></div>
+          <div class="checkin-quote" id="checkinQuoteText"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作按钮区（固定在底部） -->
+    <div class="checkin-actions">
+      <button id="btnFlipCard" class="primary" onclick="openMoodModal()">签到并翻开</button>
+      <button id="btnCloseCheckin" class="primary" onclick="closeCheckinPage()">收下这份记忆</button>
+    </div>
+    
+    <!-- 心情选择弹窗 -->
+    <div id="moodModal" class="modal-mask" hidden>
+      <div class="modal-content" style="max-width: 400px; margin: 0 auto; border-radius: 20px 20px 0 0;">
+        <div class="modal-header">
+          <span class="modal-date">今天心情如何？</span>
+          <button class="close-btn" onclick="closeMoodModal()">×</button>
+        </div>
+        <div class="mood-grid">
+          <!-- 用 SVG 替代 Emoji -->
+          <button class="mood-btn" data-mood="sun" onclick="submitCheckin('sun', '充满阳光')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          </button>
+          <button class="mood-btn" data-mood="cloud" onclick="submitCheckin('cloud', '平静充实')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+          </button>
+          <button class="mood-btn" data-mood="rain" onclick="submitCheckin('rain', '有些低落')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 14v6"/><path d="M8 14v6"/><path d="M12 16v6"/></svg>
+          </button>
+          <button class="mood-btn" data-mood="zap" onclick="submitCheckin('zap', '焦虑烦躁')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>
+          </button>
+          <button class="mood-btn" data-mood="smile" onclick="submitCheckin('smile', '充满期待')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="js/state.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/entry.js"></script>
@@ -574,6 +649,7 @@
   <script src="js/capsule.js"></script>
   <script src="js/report.js"></script>
   <script src="js/focus.js"></script>
+  <script src="js/checkin.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

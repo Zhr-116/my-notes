@@ -1,115 +1,18 @@
-let currentSlideIndex = 0;
-const totalSlides = 5;
-
-function openAnnualReport() {
-  // 1. 计算数据
-  const totalEntries = entries.length;
-  const totalMilestones = entries.filter(e => e.isMilestone).length;
+(function() {
+  let rptCurrentSlideIndex = 0;
+  const rptTotalSlides = 7;
   
-  // 计算深夜记录数（22点到凌晨4点）
-  let nightEntries = 0;
-  entries.forEach(e => {
-    if (e.createdAt) {
-      const hour = new Date(e.createdAt).getHours();
-      if (hour >= 22 || hour <= 4) nightEntries++;
-    }
-  });
-
-  // 计算最常出现的标签
-  const tagCounts = {};
-  entries.forEach(e => {
-    (e.tags || []).forEach(t => {
-      tagCounts[t] = (tagCounts[t] || 0) + 1;
-    });
-  });
-  let topTag = "无";
-  let topTagCount = 0;
-  for (let t in tagCounts) {
-    if (tagCounts[t] > topTagCount) {
-      topTag = t;
-      topTagCount = tagCounts[t];
-    }
-  }
-
-  // 2. 填充到 HTML 里
-  document.getElementById("rs-total-entries").innerText = totalEntries;
-  document.getElementById("rs-total-milestones").innerText = totalMilestones;
-  document.getElementById("rs-night-entries").innerText = nightEntries;
+  let rptPressTimer = null;
+  let rptIsPressing = false;
+  let rptLongPressTriggered = false; // 【新增】标记是否刚刚长按翻页了，防止 click 穿透
+  const rptPressDuration = 800;
   
-  // 【就是这里】：填充第 3 页的标签和次数
-  if (topTag !== "无") {
-    document.getElementById("rs-top-tag").innerText = `#${topTag}`;
-    document.getElementById("rs-top-tag-count").innerText = topTagCount;
-  } else {
-    document.getElementById("rs-top-tag").innerText = "空白";
-    document.getElementById("rs-top-tag-count").innerText = "0";
-  }
+  const rptLongPressPages = [3, 6]; 
 
-  // 3. 重置到第一页并显示
-  currentSlideIndex = 0;
-  updateSlideView();
-  
-  const overlay = document.getElementById("annualReportOverlay");
-  overlay.style.display = "flex";
-  overlay.offsetHeight; 
-  overlay.classList.add("show");
-}
-
-function closeAnnualReport() {
-  const overlay = document.getElementById("annualReportOverlay");
-  overlay.classList.remove("show");
-  setTimeout(() => {
-    overlay.style.display = "none";
-  }, 600);
-}
-
-// 点击切页（在 overlay 上绑定点击事件）
-function nextSlide() {
-  if (currentSlideIndex < totalSlides - 1) {
-    currentSlideIndex++;
-    updateSlideView();
-  }
-}
-
-// 数字滚动函数
-function animateNumber(elementId, targetValue) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-  let start = 0;
-  const duration = 1000; // 1秒滚完
-  const startTime = performance.now();
-
-  function update(currentTime) {
-    const elapsed = currentTime - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    // 缓动：先快后慢
-    const easeOut = 1 - Math.pow(1 - progress, 3);
-    el.innerText = Math.floor(easeOut * targetValue);
-
-    if (progress < 1) requestAnimationFrame(update);
-    else el.innerText = targetValue;
-  }
-  requestAnimationFrame(update);
-}
-
-// 在切页时触发数字滚动
-function updateSlideView() {
-  const slides = document.querySelectorAll(".report-slide");
-  slides.forEach((slide, index) => {
-    if (index === currentSlideIndex) {
-      slide.classList.add("active");
-    } else {
-      slide.classList.remove("active");
-    }
-  });
-
-  // 根据当前页，触发数字滚动
-  if (currentSlideIndex === 0) {
-    animateNumber("rs-total-entries", entries.length);
-  } else if (currentSlideIndex === 1) {
-    animateNumber("rs-total-milestones", entries.filter(e => e.isMilestone).length);
-  } else if (currentSlideIndex === 3) {
-    // 统计深夜记录数
+  window.openAnnualReport = function() {
+    const totalEntries = entries.length;
+    const totalMilestones = entries.filter(e => e.isMilestone).length;
+    
     let nightEntries = 0;
     entries.forEach(e => {
       if (e.createdAt) {
@@ -117,16 +20,149 @@ function updateSlideView() {
         if (hour >= 22 || hour <= 4) nightEntries++;
       }
     });
-    animateNumber("rs-night-entries", nightEntries);
+
+    let longestEntry = { content: "没有留下太长的文字。" };
+    entries.forEach(e => {
+      if (e.content && e.content.length > (longestEntry.content ? longestEntry.content.length : 0)) {
+        longestEntry = e;
+      }
+    });
+
+    const tagCounts = {};
+    entries.forEach(e => {
+      (e.tags || []).forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1; });
+    });
+    let topTag = "无";
+    for (let t in tagCounts) {
+      if (!topTag || tagCounts[t] > tagCounts[topTag]) topTag = t;
+    }
+
+    document.getElementById("rs-total-entries").innerText = totalEntries;
+    document.getElementById("rs-total-milestones").innerText = totalMilestones;
+    document.getElementById("rs-night-entries").innerText = nightEntries;
+    document.getElementById("rs-special-date").innerText = longestEntry.date || "某一天";
+    
+    let shortContent = longestEntry.content || "";
+    if (shortContent.length > 30) shortContent = shortContent.substring(0, 30) + "...";
+    document.getElementById("rs-special-content").innerText = shortContent;
+
+    if (topTag !== "无") {
+      document.getElementById("rs-top-tag").innerText = `#${topTag}`;
+    }
+
+    rptCurrentSlideIndex = 0;
+    rptLongPressTriggered = false;
+    updateRptSlideView();
+    
+    const overlay = document.getElementById("annualReportOverlay");
+    overlay.style.display = "flex";
+    overlay.offsetHeight; 
+    overlay.classList.add("show");
+  };
+
+  window.closeAnnualReport = function() {
+    const overlay = document.getElementById("annualReportOverlay");
+    overlay.classList.remove("show");
+    setTimeout(() => { overlay.style.display = "none"; }, 600);
+  };
+
+  function updateRptSlideView() {
+    const slides = document.querySelectorAll(".report-slide");
+    slides.forEach((slide, index) => {
+      if (index === rptCurrentSlideIndex) slide.classList.add("active");
+      else slide.classList.remove("active");
+    });
+
+    const hint = document.getElementById("reportHint");
+    const indicator = document.getElementById("pressIndicator");
+
+    if (rptCurrentSlideIndex === rptTotalSlides - 1) {
+      hint.style.opacity = "0";
+      if (indicator) indicator.style.display = "none";
+    } else if (rptLongPressPages.includes(rptCurrentSlideIndex)) {
+      hint.innerText = "长按屏幕继续";
+      hint.style.opacity = "1";
+      if (indicator) indicator.style.display = "block";
+    } else {
+      hint.innerText = "轻触屏幕继续 ▸";
+      hint.style.opacity = "1";
+      if (indicator) indicator.style.display = "none";
+    }
   }
 
-  const hint = document.getElementById("reportHint");
-  hint.style.opacity = currentSlideIndex === totalSlides - 1 ? "0" : "1";
-}
+  function nextRptSlide() {
+    if (rptCurrentSlideIndex < rptTotalSlides - 1) {
+      rptCurrentSlideIndex++;
+      updateRptSlideView();
+    }
+  }
 
-// 绑定点击事件
-document.getElementById("annualReportOverlay")?.addEventListener("click", (e) => {
-  // 如果点的是“结束回顾”按钮，就不触发翻页了
-  if (e.target.tagName === "BUTTON") return;
-  nextSlide();
-});
+  function endRptPress() {
+    rptIsPressing = false;
+    const indicator = document.getElementById("pressIndicator");
+    if (indicator) indicator.classList.remove("active");
+    if (rptPressTimer) clearTimeout(rptPressTimer);
+  }
+
+  // 绑定交互事件
+  const overlay = document.getElementById("annualReportOverlay");
+
+  if (overlay) {
+    overlay.addEventListener("mousedown", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+
+      if (rptLongPressPages.includes(rptCurrentSlideIndex)) {
+        rptIsPressing = true;
+        rptLongPressTriggered = false; // 重置标记
+        const indicator = document.getElementById("pressIndicator");
+        if (indicator) indicator.classList.add("active");
+        
+        rptPressTimer = setTimeout(() => {
+          if (rptIsPressing) {
+            rptLongPressTriggered = true; // 【关键】长按成功，标记为 true
+            nextRptSlide();
+            endRptPress();
+          }
+        }, rptPressDuration);
+      }
+    });
+
+    overlay.addEventListener("mouseup", endRptPress);
+    overlay.addEventListener("mouseleave", endRptPress);
+
+    overlay.addEventListener("touchstart", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      if (rptLongPressPages.includes(rptCurrentSlideIndex)) {
+        rptIsPressing = true;
+        rptLongPressTriggered = false;
+        const indicator = document.getElementById("pressIndicator");
+        if (indicator) indicator.classList.add("active");
+        
+        rptPressTimer = setTimeout(() => {
+          if (rptIsPressing) {
+            rptLongPressTriggered = true; // 【关键】长按成功，标记为 true
+            nextRptSlide();
+            endRptPress();
+          }
+        }, rptPressDuration);
+      }
+    }, { passive: true });
+
+    overlay.addEventListener("touchend", endRptPress);
+
+    // 普通点击翻页
+    overlay.addEventListener("click", (e) => {
+      if (e.target.tagName === "BUTTON") return;
+      
+      // 【修复】：如果刚刚是因为长按翻的页，就忽略这次跟随着的 click
+      if (rptLongPressTriggered) {
+        rptLongPressTriggered = false; 
+        return;
+      }
+
+      if (!rptLongPressPages.includes(rptCurrentSlideIndex)) {
+        nextRptSlide();
+      }
+    });
+  }
+})();

@@ -6,6 +6,7 @@ function render() {
   const subPageTitle = document.getElementById("subPageTitle");
   const appTitle = document.getElementById("appTitle");
   const subBackBtn = document.getElementById("subBackBtn");
+  const headerCheckinBtn = document.getElementById("headerCheckinBtn"); // 新增
 
   if (isSubPage) {
     mainTabs.hidden = true;
@@ -13,11 +14,13 @@ function render() {
     subPageTitle.innerText = pageTitles[currentView];
     appTitle.hidden = true;
     subBackBtn.hidden = false;
+    headerCheckinBtn.hidden = true; 
   } else {
     mainTabs.hidden = false;
     subPageTitle.hidden = true;
     appTitle.hidden = false;
     subBackBtn.hidden = true;
+    headerCheckinBtn.hidden = false;
   }
 
   document.getElementById("recordView").hidden = currentView !== "record";

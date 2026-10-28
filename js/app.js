@@ -331,3 +331,4 @@ if (typeof checkCapsuleTrigger === 'function') {
 dateInput.value = todayStr();
 render();
 
+initCheckin(); 
