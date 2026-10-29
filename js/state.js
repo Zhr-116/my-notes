@@ -34,6 +34,9 @@ function saveBooks() {
 // === 计划模块数据 ===
 let countdowns = JSON.parse(localStorage.getItem("mini-countdowns") || "[]");
 function saveCountdowns() { localStorage.setItem("mini-countdowns", JSON.stringify(countdowns)); }
+// === 计划模块：周期习惯数据 ===
+let habits = JSON.parse(localStorage.getItem("mini-habits") || "[]");
+function saveHabits() { localStorage.setItem("mini-habits", JSON.stringify(habits)); }
 
 // === 拾光商店数据 ===
 let userStars = parseInt(localStorage.getItem("mini-stars") || "0"); 
@@ -73,3 +76,6 @@ function addStars(amount) {
   
   showToast(`${STAR_ICON} 获得 ${actualAmount} 星迹！`);
 }
+
+// 记录当前查看的标签聚合页名称
+let currentTagDetail = "";

@@ -16,7 +16,7 @@
       <div id="headerLeft">
         <h1 id="appTitle">拾迹</h1>
         <!-- 返回按钮，默认隐藏 -->
-        <button id="subBackBtn" class="back-btn-icon" onclick="switchView('more')" hidden>
+        <button id="subBackBtn" class="back-btn-icon" onclick="switchView('record')" hidden>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10.793 19.793a.707.707 0 0 0 1.207-.5V16a1 1 0 0 1 1-1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-6a1 1 0 0 1-1-1V4.707a.707.707 0 0 0-1.207-.5l-6.94 6.94a1.207 1.207 0 0 0 0 1.707z"/>
           </svg>
@@ -52,6 +52,11 @@
         <div class="tag-bar" id="tagBar"></div>
       </div>
       <div id="list"></div>
+    </section>
+
+    <!-- 新增：标签聚合页视图 -->
+    <section id="tagDetailView" hidden>
+      <div id="tagDetailContent" style="padding-bottom: 60px;"></div>
     </section>
 
     <!-- 新增：回顾页视图 -->
@@ -205,6 +210,27 @@
           <div class="modal-actions">
             <button class="primary" onclick="saveCountdown()">保存</button>
             <button onclick="closeCountdownModal()">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+        <!-- 新增：添加习惯弹窗 -->
+    <div id="habitModal" class="modal-mask" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-date">设定周期习惯</span>
+          <button class="close-btn" onclick="closeHabitModal()">×</button>
+        </div>
+        <div class="modal-edit-area">
+          <input type="text" id="habitTitleInput" placeholder="习惯名称（如：背20个单词）" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          
+          <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">持续天数（达到目标后天数自动结算）：</label>
+          <input type="number" id="habitDaysInput" value="21" min="1" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          
+          <div class="modal-actions">
+            <button class="primary" onclick="saveHabit()">开始习惯</button>
+            <button onclick="closeHabitModal()">取消</button>
           </div>
         </div>
       </div>
@@ -639,7 +665,6 @@
   <script src="js/entry.js"></script>
   <script src="js/detail.js"></script>
   <script src="js/milestone.js"></script>
-  <script src="js/timeline.js"></script>
   <script src="js/review.js"></script>
   <script src="js/books.js"></script>
   <script src="js/plan.js"></script>

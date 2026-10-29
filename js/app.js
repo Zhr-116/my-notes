@@ -16,8 +16,10 @@ tagBar.addEventListener("click", (e) => {
   const chip = e.target.closest(".tag-chip");
   if (!chip) return;
   const tag = chip.dataset.tag;
-  activeTag = activeTag === tag ? "" : tag;
-  render();
+  
+  // 设置当前查看的标签，并切到标签聚合页
+  currentTagDetail = tag;
+  switchView("tagDetail");
 });
 
 document.querySelectorAll(".tabs button").forEach((btn) => {

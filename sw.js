@@ -8,7 +8,6 @@ const ASSETS = [
   './js/entry.js',
   './js/detail.js',
   './js/milestone.js',
-  './js/timeline.js',
   './js/render.js',
   './js/export.js',
   './js/app.js'

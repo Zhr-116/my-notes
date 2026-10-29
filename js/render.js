@@ -1,5 +1,5 @@
 function render() {
-  const pageTitles = { 'review': '回顾', 'book': '书架', 'plan': '计划', 'shop': '拾光商店' };
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'plan': '计划', 'shop': '拾光商店', 'tagDetail': '标签档案' };
   const isSubPage = Object.keys(pageTitles).includes(currentView);
 
   const mainTabs = document.getElementById("mainTabs");
@@ -30,6 +30,7 @@ function render() {
   document.getElementById("planView").hidden = currentView !== "plan";
   document.getElementById("moreView").hidden = currentView !== "more";
   document.getElementById("shopView").hidden = currentView !== "shop";
+  document.getElementById("tagDetailView").hidden = currentView !== "tagDetail"; 
 
   document.querySelectorAll(".tabs button").forEach((btn) => {
     const isMorePage = ["review", "book", "plan", "shop", "more"].includes(currentView);
@@ -53,6 +54,7 @@ function render() {
   else if (currentView === "book") { renderBookView(); } 
   else if (currentView === "plan") { renderPlanView(); } 
   else if (currentView === "shop") { renderShop(); } 
+  else if (currentView === "tagDetail") { renderTagDetailView(); } 
 }
 
 function switchView(viewName) {
@@ -249,4 +251,102 @@ function renderList() {
 
   html += `</div>`;
   listEl.innerHTML = html;
+}
+
+function renderTagDetailView() {
+  const container = document.getElementById("tagDetailContent");
+  if (!container) return;
+
+  // 1. 过滤出当前标签的所有记录
+  const tagEntries = entries.filter(e => (e.tags || []).includes(currentTagDetail));
+
+  if (!tagEntries.length) {
+    container.innerHTML = `<div class="empty" style="margin-top: 50px;">这个标签下还没有记录。</div>`;
+    return;
+  }
+
+  // 2. 统计数据
+  const total = tagEntries.length;
+  const sortedAsc = tagEntries.slice().sort((a,b) => a.date.localeCompare(b.date));
+  const firstDate = sortedAsc[0].date;
+
+  // 3. 构建近 60 天的微型热力图
+  const today = new Date();
+  let heatmapHtml = `<div class="heatmap-grid" style="grid-template-columns: repeat(15, 1fr); gap: 4px; margin-bottom: 20px;">`;
+  const countMap = {};
+  tagEntries.forEach(e => { countMap[e.date] = (countMap[e.date] || 0) + 1; });
+
+  for (let i = 59; i >= 0; i--) {
+    let d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    
+    const count = countMap[dateStr] || 0;
+    let level = 0;
+    if (count > 0) level = 1;
+    if (count > 1) level = 2;
+    if (count > 2) level = 3;
+
+    heatmapHtml += `<div class="heat-cell level-${level}" title="${dateStr}: ${count}条"></div>`;
+  }
+  heatmapHtml += `</div>`;
+
+  // 4. 按月分组，生成折叠列表
+  const sortedDesc = tagEntries.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || "").localeCompare(a.createdAt || ""));
+  const groups = {};
+  sortedDesc.forEach(e => {
+    const month = e.date.slice(0, 7);
+    if (!groups[month]) groups[month] = [];
+    groups[month].push(e);
+  });
+  const months = Object.keys(groups).sort().reverse();
+
+  let listHtml = "";
+  months.forEach((month) => {
+    const items = groups[month];
+    // 复用全局的 expandedMonths，但加个前缀防止和主页冲突
+    const isExpanded = expandedMonths.has("tag-" + month);
+    
+    listHtml += `
+      <div class="month-header" onclick="toggleTagMonth('${month}')">
+        <span>${formatMonth(month)}</span>
+        <span class="month-count">${items.length} 条 ${isExpanded ? "▾" : "▸"}</span>
+      </div>
+    `;
+    
+    if (isExpanded) {
+      // 直接复用 renderItem，完美保留左滑、置顶等所有功能！
+      listHtml += `<div class="list-container">${items.map(renderItem).join("")}</div>`;
+    }
+  });
+
+  // 5. 拼装完整 HTML
+  container.innerHTML = `
+    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
+      <div class="stat-card">
+        <div class="stat-num">${total}</div>
+        <div class="stat-label">共记录</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" style="font-size: 20px; padding-top: 8px;">${firstDate}</div>
+        <div class="stat-label">最早相遇</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top: 30px;">近 60 天足迹</div>
+    ${heatmapHtml}
+
+    <div class="section-title" style="margin-top: 30px;">档案记录</div>
+    <div class="list-container">
+      ${listHtml}
+    </div>
+  `;
+}
+
+// 标签页专属的折叠控制
+function toggleTagMonth(month) {
+  const key = "tag-" + month;
+  if (expandedMonths.has(key)) expandedMonths.delete(key);
+  else expandedMonths.add(key);
+  renderTagDetailView();
 }
