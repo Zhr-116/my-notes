@@ -20,11 +20,11 @@ function startFocus(minutes) {
   overlay.offsetHeight;
   overlay.classList.add("show");
 
-  // 计算结束时间
+  // 计算结束的绝对时间戳
   focusEndTime = Date.now() + minutes * 60 * 1000;
 
+  if (focusInterval) cancelAnimationFrame(focusInterval);
   updateFocusTime();
-  focusInterval = setInterval(updateFocusTime, 1000);
   starSpawner = setInterval(createStar, 300);
 }
 
@@ -33,7 +33,7 @@ function updateFocusTime() {
   const remaining = focusEndTime - now;
 
   if (remaining <= 0) {
-    clearInterval(focusInterval);
+    cancelAnimationFrame(focusInterval);
     clearInterval(starSpawner);
     finishFocus(totalFocusMinutes, false); // 正常完成
     return;
@@ -41,8 +41,12 @@ function updateFocusTime() {
 
   const minutes = Math.floor(remaining / 60000);
   const seconds = Math.floor((remaining % 60000) / 1000);
-  document.getElementById("focusTime").innerText = 
-    `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  const timeEl = document.getElementById("focusTime");
+  if (timeEl) {
+    timeEl.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  
+  focusInterval = requestAnimationFrame(updateFocusTime);
 }
 
 function createStar() {
@@ -59,10 +63,9 @@ function createStar() {
 // 按钮触发的结束
 function quitFocus() {
   if (confirm("确定要提前结束专注吗？未满一分钟将没有星迹奖励哦。")) {
-    clearInterval(focusInterval);
+    cancelAnimationFrame(focusInterval);
     clearInterval(starSpawner);
     
-    // 计算实际专注了多少分钟
     const remaining = focusEndTime - Date.now();
     const focusedMs = (totalFocusMinutes * 60 * 1000) - remaining;
     const focusedMinutes = Math.floor(focusedMs / 60000);
@@ -83,7 +86,6 @@ function finishFocus(minutes, isEarlyQuit) {
     return;
   }
 
-  // 1. 生成记录
   const newEntry = {
     id: Date.now().toString(36),
     content: `🌱 专注了 ${minutes} 分钟`,
@@ -95,11 +97,9 @@ function finishFocus(minutes, isEarlyQuit) {
   saveEntries();
   render();
 
-  // 2. 按比例发放星迹（1分钟 = 1星迹）
   const earnedStars = minutes;
   addStars(earnedStars);
   
-  // 3. 剧情反馈
   setTimeout(() => {
     if (isEarlyQuit) {
       playStory(`虽然提前结束了，但你也专注了 ${minutes} 分钟，获得了 ${earnedStars} 星迹。下次再接再厉！`);

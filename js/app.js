@@ -327,3 +327,81 @@ dateInput.value = todayStr();
 render();
 
 initCheckin(); 
+
+// === 移动端键盘弹出时，隐藏底部导航栏 ===
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', () => {
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    
+    // 如果视口高度明显小于屏幕高度（通常差值 > 100px），说明键盘弹出了
+    if (window.visualViewport.height < window.innerHeight - 100) {
+      nav.style.display = 'none'; // 键盘弹起，隐藏导航
+    } else {
+      nav.style.display = 'flex'; // 键盘收起，恢复导航
+    }
+  });
+}
+
+// === 个人资料编辑逻辑 ===
+let tempAvatarId = null;
+
+async function openProfileModal() {
+  document.getElementById("profileModal").hidden = false;
+  document.getElementById("profileNameInput").value = userProfile.nickname;
+  document.getElementById("profileSignInput").value = userProfile.signature;
+  
+  const preview = document.getElementById("profileAvatarPreview");
+  tempAvatarId = userProfile.avatarId || null;
+  
+  if (tempAvatarId) {
+    if (!imageDB.db) await imageDB.init(); 
+    const base64 = await imageDB.get(tempAvatarId);
+    preview.src = base64 || "./assets/girl-color.png";
+  } else {
+    preview.src = "./assets/girl-color.png";
+  }
+}
+
+function closeProfileModal() {
+  document.getElementById("profileModal").hidden = true;
+}
+
+// 处理头像上传
+document.getElementById("profileAvatarInput")?.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  if (!imageDB.db) await imageDB.init(); 
+  
+  const base64 = await compressImage(file, 200); 
+  const newAvatarId = "avatar_" + Date.now().toString();
+  await imageDB.save(newAvatarId, base64);
+  
+  tempAvatarId = newAvatarId;
+  document.getElementById("profileAvatarPreview").src = base64;
+  e.target.value = ""; 
+});
+
+function saveProfileData() {
+  const nickname = document.getElementById("profileNameInput").value.trim() || "拾迹";
+  const signature = document.getElementById("profileSignInput").value.trim() || "收集时间的痕迹";
+  
+  userProfile.nickname = nickname;
+  userProfile.signature = signature;
+  
+  if (tempAvatarId) {
+    userProfile.avatarId = tempAvatarId;
+  }
+  
+  saveProfile();
+  closeProfileModal();
+  
+  // 先同步更新 DOM 上的文字，保证立刻看到效果
+  document.getElementById("myNickname").innerText = userProfile.nickname;
+  document.getElementById("mySignature").innerText = userProfile.signature;
+  
+  // 再异步渲染一下头像（如果你有 renderMineView 函数就调用它，这步不影响文字）
+  renderMineView(); 
+  showToast("资料已更新");
+}

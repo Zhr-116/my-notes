@@ -1,3 +1,4 @@
+let timelineSortOrder = "desc"; // "desc" 为最新优先，"asc" 为最早优先
 const STORAGE_KEY = "mini-notes-v1";
 const DRAFT_KEY = "mini-notes-draft-v1";
 
@@ -33,6 +34,8 @@ function saveBooks() {
 
 // === 计划模块数据 ===
 let countdowns = JSON.parse(localStorage.getItem("mini-countdowns") || "[]");
+// 记录首页展示的主倒计时 ID
+let mainCountdownId = localStorage.getItem("mini-main-countdown-id") || null; 
 function saveCountdowns() { localStorage.setItem("mini-countdowns", JSON.stringify(countdowns)); }
 // === 计划模块：周期习惯数据 ===
 let habits = JSON.parse(localStorage.getItem("mini-habits") || "[]");
@@ -79,3 +82,9 @@ function addStars(amount) {
 
 // 记录当前查看的标签聚合页名称
 let currentTagDetail = "";
+
+// === 个人资料数据 ===
+let userProfile = JSON.parse(localStorage.getItem("mini-user-profile") || '{"nickname":"拾迹", "signature":"收集时间的痕迹", "avatarId":""}');
+function saveProfile() {
+  localStorage.setItem("mini-user-profile", JSON.stringify(userProfile));
+}

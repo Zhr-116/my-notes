@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1f2937" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+  <!-- 换成这行 -->
+  <script src="js/html-to-image.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -25,8 +26,15 @@
 
       <!-- 右侧：主页显示导航，子页面显示标题 -->
       <div id="headerRight">
+        <!-- 新增：专注闹钟按钮（仅在计划页显示） -->
+        <button id="headerFocusBtn" class="header-checkin-btn" onclick="openFocusModal()" hidden>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/></svg>
+        </button>
         <button id="headerCheckinBtn" class="header-checkin-btn" onclick="openCheckinPage()">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+        </button>
+        <button id="headerSettingsBtn" class="header-checkin-btn" onclick="switchView('settings')" hidden>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
         <span id="subPageTitle" class="sub-page-title" hidden>页面名</span>
       </div>
@@ -149,16 +157,23 @@
 
     <!-- 我的页面 -->
     <section id="mineView" hidden>
-      <div style="text-align: center; padding: 30px 0 20px 0;">
-        <img src="./assets/girl-color.png" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); margin-bottom: 10px;">
-        <h2 style="margin: 0; font-size: 20px; color: var(--text-primary);">拾迹</h2>
-        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-tertiary);">收集时间的痕迹</p>
-      </div>
-
-      <div style="margin-top: 30px;">
-        <div class="more-card" onclick="switchView('settings')" style="flex-direction: row; justify-content: flex-start; gap: 16px; padding: 16px 20px;">
-          <span class="more-icon" style="font-size: 20px;">⚙️</span>
-          <span style="font-size: 15px; font-weight: 500;">应用设置</span>
+      <div style="display: flex; align-items: center; gap: 16px; padding: 10px 10px 20px 10px;">
+        
+        <!-- 左侧：头像容器 -->
+        <div style="position: relative; flex-shrink: 0;">
+          <img id="myAvatar" src="./assets/girl-color.png" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); background: var(--surface);">
+        </div>
+        
+        <!-- 右侧：昵称与个签 -->
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+            <h2 id="myNickname" style="margin: 0; font-size: 18px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">拾迹</h2>
+            <!-- 触发编辑的铅笔按钮 -->
+            <div onclick="openProfileModal()" style="cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: all 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-tertiary)'">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+            </div>
+          </div>
+          <p id="mySignature" style="margin: 0; font-size: 12px; color: var(--text-tertiary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">收集时间的痕迹</p>
         </div>
       </div>
     </section>
@@ -224,19 +239,24 @@
       <div id="boxResult" style="display: none; width: 320px; background: #fff; border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);"></div>
     </div>
 
-    <!-- 添加倒计时弹窗 -->
-    <div id="countdownModal" class="modal-mask" hidden>
+    <!-- 新增：倒计时管理弹窗 -->
+    <div id="countdownManageModal" class="modal-mask" hidden>
       <div class="modal-content">
         <div class="modal-header">
-          <span class="modal-date">设定目标倒计时</span>
-          <button class="close-btn" onclick="closeCountdownModal()">×</button>
+          <span class="modal-date">目标倒计时管理</span>
+          <button class="close-btn" onclick="closeCountdownManageModal()">×</button>
         </div>
-        <div class="modal-edit-area">
+        
+        <!-- 列表区 -->
+        <div id="countdownManageList" style="margin-bottom: 20px;"></div>
+        
+        <!-- 添加区 -->
+        <div style="border-top: 1px dashed var(--border); padding-top: 12px;">
+          <h4 style="font-size: 14px; margin: 0 0 10px 0; color: var(--text-secondary);">添加新倒计时 (最多 5 个)</h4>
           <input type="text" id="cdTitleInput" placeholder="目标名称（如：考研、生日、放假）" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
           <input type="date" id="cdDateInput" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
-          <div class="modal-actions">
-            <button class="primary" onclick="saveCountdown()">保存</button>
-            <button onclick="closeCountdownModal()">取消</button>
+          <div class="modal-actions" style="margin-top: 0;">
+            <button class="primary" onclick="saveCountdown()">添加</button>
           </div>
         </div>
       </div>
@@ -464,11 +484,13 @@
 
   <!-- 拾迹专属剧情对话框 -->
   <div id="storyOverlay" class="story-overlay" style="display: none;">
-    <img src="./assets/girl-color.png" alt="拾迹" class="story-character">
-    <div class="story-dialog-box" onclick="handleStoryClick()">
-      <div class="story-speaker">拾迹</div>
-      <div class="story-text" id="storyText"></div>
-      <div class="story-continue" id="storyContinue">▼</div>
+    <div class="story-content-wrapper">
+      <img src="./assets/girl-color.png" alt="拾迹" class="story-character">
+      <div class="story-dialog-box" onclick="handleStoryClick()">
+        <div class="story-speaker">拾迹</div>
+        <div class="story-text" id="storyText"></div>
+        <div class="story-continue" id="storyContinue">▼</div>
+      </div>
     </div>
   </div>
 
@@ -585,6 +607,36 @@
           <button class="duration-btn active" onclick="startFocus(25)">25 分钟</button>
           <button class="duration-btn" onclick="startFocus(45)">45 分钟</button>
           <button class="duration-btn" onclick="startFocus(60)">60 分钟</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 编辑资料弹窗 -->
+  <div id="profileModal" class="modal-mask" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">编辑个人资料</span>
+        <button class="close-btn" onclick="closeProfileModal()">×</button>
+      </div>
+      <div class="modal-edit-area">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <label for="profileAvatarInput" style="cursor: pointer; position: relative; display: inline-block;">
+            <img id="profileAvatarPreview" src="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px dashed var(--border);">
+            <div style="font-size: 12px; color: var(--accent); margin-top: 8px; font-weight: 600;">点击更换头像</div>
+          </label>
+          <input type="file" id="profileAvatarInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">昵称</label>
+        <input type="text" id="profileNameInput" placeholder="给自己起个名字" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+        
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">个性签名</label>
+        <input type="text" id="profileSignInput" placeholder="写一句喜欢的话" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+        
+        <div class="modal-actions">
+          <button class="primary" onclick="saveProfileData()">保存</button>
+          <button onclick="closeProfileModal()">取消</button>
         </div>
       </div>
     </div>

@@ -2,11 +2,13 @@ function render() {
   // 字典：需要显示顶部返回按钮和标题的子页面
   const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置' };
   const isSubPage = Object.keys(pageTitles).includes(currentView);
-
+  
   const subPageTitle = document.getElementById("subPageTitle");
   const appTitle = document.getElementById("appTitle");
   const subBackBtn = document.getElementById("subBackBtn");
   const headerCheckinBtn = document.getElementById("headerCheckinBtn");
+  const headerSettingsBtn = document.getElementById("headerSettingsBtn");
+  const headerFocusBtn = document.getElementById("headerFocusBtn"); // 【修复1】补上漏掉的声明
 
   // 处理顶部栏状态
   if (isSubPage) {
@@ -14,23 +16,53 @@ function render() {
     subPageTitle.innerText = pageTitles[currentView];
     appTitle.hidden = true;
     subBackBtn.hidden = false;
+    
+    // 子页面隐藏所有右侧图标
     headerCheckinBtn.hidden = true; 
+    if (headerSettingsBtn) headerSettingsBtn.hidden = true; 
+    if (headerFocusBtn) headerFocusBtn.hidden = true;
   } else {
     subPageTitle.hidden = true;
     appTitle.hidden = false;
     subBackBtn.hidden = true;
-    headerCheckinBtn.hidden = false;
+    
+    // 主页面动态显示逻辑
+    if (currentView === "mine") {
+      headerCheckinBtn.hidden = true;
+      if (headerSettingsBtn) headerSettingsBtn.hidden = false;
+      if (headerFocusBtn) headerFocusBtn.hidden = true;
+    } else if (currentView === "plan") {
+      // 计划页显示签到和专注闹钟
+      headerCheckinBtn.hidden = false;
+      if (headerSettingsBtn) headerSettingsBtn.hidden = true;
+      if (headerFocusBtn) headerFocusBtn.hidden = false;
+    } else {
+      // 其他页面（记录、时间轴、更多）只显示签到
+      headerCheckinBtn.hidden = false;
+      if (headerSettingsBtn) headerSettingsBtn.hidden = true;
+      if (headerFocusBtn) headerFocusBtn.hidden = true;
+    }
   }
 
-  // 【核心修复】动态返回按钮逻辑
+  // 动态控制底部导航栏的显隐
+  const bottomNav = document.querySelector(".bottom-nav");
+  if (bottomNav) {
+    if (isSubPage) {
+      bottomNav.style.display = "none";
+    } else {
+      bottomNav.style.display = "flex"; 
+    }
+  }
+
+  // 动态返回按钮逻辑
   if (subBackBtn) {
     subBackBtn.onclick = () => {
       if (currentView === "tagDetail") {
-        switchView("record"); // 标签档案回记录
+        switchView("record", true); 
       } else if (currentView === "settings") {
-        switchView("mine");   // 设置回我的
+        switchView("mine", true);   
       } else {
-        switchView("more");   // 回顾、书架、商店回更多
+        switchView("more", true);   
       }
     };
   }
@@ -47,14 +79,14 @@ function render() {
   document.getElementById("tagDetailView").hidden = currentView !== "tagDetail";
   document.getElementById("settingsView").hidden = currentView !== "settings"; 
 
-  // 【核心修复】底部导航栏高亮
+  // 底部导航栏高亮
   document.querySelectorAll(".nav-item").forEach((item) => {
     const view = item.dataset.view;
     const isMoreSub = ["review", "book", "shop"].includes(currentView);
     const isMineSub = ["settings"].includes(currentView);
     
     if (view === "more" && isMoreSub) {
-      item.classList.add("active"); // 在子页面时，父级Tab保持高亮
+      item.classList.add("active"); 
     } else if (view === "mine" && isMineSub) {
       item.classList.add("active");
     } else if (view === "record" && currentView === "tagDetail") {
@@ -83,11 +115,38 @@ function render() {
     const select = document.getElementById("defaultViewSelect");
     if (select) select.value = localStorage.getItem("mini-default-view") || "record";
   }
+  else if (currentView === "mine") { renderMineView(); } // 【修复2】补上“我的”页面的渲染调用
 }
 
-function switchView(viewName) {
+function switchView(viewName, isBack = false) {
+  const oldView = currentView;
+  if (oldView === viewName) return;
+  
   currentView = viewName;
   render();
+
+  const mainViews = ["record", "timeline", "plan", "more", "mine"];
+  const isOldMain = mainViews.includes(oldView);
+  const isNewMain = mainViews.includes(viewName);
+
+  let animClass = "";
+
+  if (isBack) {
+    animClass = "anim-slide-left"; 
+  } else if (isOldMain && isNewMain) {
+    animClass = "anim-fade-soft"; 
+  } else {
+    animClass = "anim-slide-right"; 
+  }
+
+  const targetId = viewName === "tagDetail" ? "tagDetailView" : viewName + "View";
+  const activeSection = document.getElementById(targetId);
+  
+  if (activeSection) {
+    activeSection.classList.remove("anim-fade-soft", "anim-slide-right", "anim-slide-left");
+    void activeSection.offsetWidth; 
+    activeSection.classList.add(animClass);
+  }
 }
 
 function saveDefaultView(viewName) {
@@ -110,14 +169,19 @@ function renderTagBar() {
 }
 
 function renderTimeline() {
-  const milestones = entries
-    .filter((e) => e.isMilestone)
-    .sort((a, b) => a.date.localeCompare(b.date));
+  const milestones = entries.filter((e) => e.isMilestone);
 
   if (!milestones.length) {
     timelineEl.innerHTML = '<div class="empty">还没有标记大事。去记录页点“标记大事”吧。</div>';
     return;
   }
+
+  // 定义两个排序图标
+  const iconDesc = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 4v16"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a2.5 2.5 0 0 1 5 0V20"/><path d="M20 18h-5"/></svg>`;
+  const iconAsc = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M20 8h-5"/><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"/><path d="M15 14h5l-5 6h5"/></svg>`;
+  
+  // 根据当前排序状态选择图标
+  const currentIcon = timelineSortOrder === "desc" ? iconDesc : iconAsc;
 
   const groups = {};
   milestones.forEach((e) => {
@@ -125,18 +189,37 @@ function renderTimeline() {
     if (!groups[year]) groups[year] = [];
     groups[year].push(e);
   });
+  
+  // 年份永远固定倒序
   const years = Object.keys(groups).sort().reverse();
 
   let html = "";
+
   years.forEach((year) => {
     const items = groups[year];
+    
+    // 年份内部事件排序
+    items.sort((a, b) => {
+      return timelineSortOrder === "desc" 
+        ? b.date.localeCompare(a.date) 
+        : a.date.localeCompare(b.date);
+    });
+
     const isExpanded = expandedYears.has(year);
+    
     html += `
       <div class="year-header" onclick="toggleYear('${year}')">
-        <span>${year} 年</span>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>${year} 年</span>
+          <!-- 排序图标：阻止冒泡，防止触发折叠 -->
+          <span onclick="event.stopPropagation(); toggleTimelineSort()" style="color: var(--text-tertiary); cursor: pointer; display: flex; align-items: center; transition: color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-tertiary)'">
+            ${currentIcon}
+          </span>
+        </div>
         <span class="month-count">${items.length} 件 ${isExpanded ? "▾" : "▸"}</span>
       </div>
     `;
+    
     if (isExpanded) {
       items.forEach((e, idx) => {
         const isLast = idx === items.length - 1;
@@ -156,7 +239,20 @@ function renderTimeline() {
       });
     }
   });
+  
   timelineEl.innerHTML = html;
+}
+
+// 切换排序逻辑保持不变
+function toggleTimelineSort() {
+  timelineSortOrder = timelineSortOrder === "desc" ? "asc" : "desc";
+  renderTimeline();
+}
+
+// 新增：切换排序逻辑
+function toggleTimelineSort() {
+  timelineSortOrder = timelineSortOrder === "desc" ? "asc" : "desc";
+  renderTimeline();
 }
 
 function renderItem(e) {
@@ -367,4 +463,22 @@ function toggleTagMonth(month) {
   if (expandedMonths.has(key)) expandedMonths.delete(key);
   else expandedMonths.add(key);
   renderTagDetailView();
+}
+
+// 渲染“我的”页面
+async function renderMineView() {
+  document.getElementById("myNickname").innerText = userProfile.nickname;
+  document.getElementById("mySignature").innerText = userProfile.signature;
+  
+  const avatarEl = document.getElementById("myAvatar");
+  if (userProfile.avatarId) {
+    if (!imageDB.db) await imageDB.init(); // 核心修复：确保数据库已初始化
+    const base64 = await imageDB.get(userProfile.avatarId);
+    if (base64) {
+      avatarEl.src = base64;
+      return;
+    }
+  }
+  // 如果没头像或者没取到，用默认小女孩
+  avatarEl.src = "./assets/girl-color.png";
 }

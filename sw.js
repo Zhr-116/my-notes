@@ -10,7 +10,8 @@ const ASSETS = [
   './js/milestone.js',
   './js/render.js',
   './js/export.js',
-  './js/app.js'
+  './js/app.js',
+  './js/html-to-image.min.js'
 ];
 
 // 安装时，立刻缓存所有核心文件

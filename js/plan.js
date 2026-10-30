@@ -11,47 +11,6 @@ function renderPlanView() {
   renderTasks();
 }
 
-// 渲染倒计时看板 (保持不变)
-function renderCountdown() {
-  const container = document.getElementById("countdownContainer");
-  
-  if (countdowns.length === 0) {
-    container.innerHTML = `
-      <div class="countdown-card empty-countdown" onclick="openCountdownModal()">
-        <p>+ 设定你的第一个倒计时</p>
-      </div>
-    `;
-    return;
-  }
-
-  countdowns.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-  container.innerHTML = countdowns.map(cd => {
-    const targetDate = new Date(cd.date + "T00:00:00");
-    const today = new Date(todayStr() + "T00:00:00");
-    const diffTime = targetDate - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    let dayText = diffDays;
-    let isPast = false;
-    if (diffDays === 0) dayText = "今天";
-    if (diffDays < 0) {
-      dayText = Math.abs(diffDays);
-      isPast = true;
-    }
-
-    return `
-      <div class="countdown-card" onclick="deleteCountdown('${cd.id}')">
-        <div class="cd-title">${escapeHtml(cd.title)}</div>
-        <div class="cd-days">
-          ${typeof dayText === 'number' ? `<span>${dayText}</span> 天` : dayText}
-        </div>
-        <div class="cd-label">${isPast ? '已过去' : '倒计时'}</div>
-      </div>
-    `;
-  }).join("");
-}
-
 // 渲染今日待办与习惯
 function renderTasks() {
   const container = document.getElementById("taskContainer");
@@ -59,18 +18,6 @@ function renderTasks() {
   const today = todayStr();
   
   let html = ``;
-
-  // 全局专注钟入口按钮
-  html += `
-    <div class="focus-start-card" onclick="openFocusModal()">
-      <div class="focus-start-icon">⏳</div>
-      <div class="focus-start-text">
-        <h4>开启专注</h4>
-        <p>让星光汇聚</p>
-      </div>
-      <div class="focus-start-arrow">▸</div>
-    </div>
-  `;
 
   html += `<h3 class="section-title" style="margin-top: 24px;">今日待办</h3>`;
   
@@ -308,18 +255,105 @@ function checkAllDailyCleared() {
   }
 }
 
-// --- 倒计时交互 ---
-function openCountdownModal() {
-  document.getElementById("countdownModal").hidden = false;
+// 渲染倒计时看板（只展示一个主倒计时）
+function renderCountdown() {
+  const container = document.getElementById("countdownContainer");
+  
+  if (countdowns.length === 0) {
+    container.innerHTML = `
+      <div class="countdown-card empty-countdown" onclick="openCountdownManageModal()">
+        <p>+ 设定你的第一个倒计时</p>
+      </div>
+    `;
+    return;
+  }
+
+  // 寻找当前要展示的主倒计时
+  let activeCd = countdowns.find(c => c.id === mainCountdownId);
+  if (!activeCd) {
+    // 如果没设置或设置的被删了，默认找最近的那个
+    countdowns.sort((a, b) => new Date(a.date) - new Date(b.date));
+    activeCd = countdowns[0];
+    mainCountdownId = activeCd.id; // 顺便保存一下
+  }
+
+  const targetDate = new Date(activeCd.date + "T00:00:00");
+  const today = new Date(todayStr() + "T00:00:00");
+  const diffTime = targetDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  let dayText = diffDays;
+  let isPast = false;
+  if (diffDays === 0) dayText = "今天";
+  if (diffDays < 0) {
+    dayText = Math.abs(diffDays);
+    isPast = true;
+  }
+
+    container.innerHTML = `
+    <div class="countdown-card" onclick="openCountdownManageModal()">
+      <div class="cd-title">${escapeHtml(activeCd.title)}</div>
+      <div class="cd-days">
+        ${typeof dayText === 'number' ? `<span>${dayText}</span> 天` : dayText}
+      </div>
+      <div class="cd-label">${isPast ? '已过去' : '倒计时'}</div>
+    </div>
+  `;
 }
 
-function closeCountdownModal() {
-  document.getElementById("countdownModal").hidden = true;
+// --- 倒计时管理弹窗逻辑 ---
+
+function openCountdownManageModal() {
+  document.getElementById("countdownManageModal").hidden = false;
+  renderCountdownManageList();
+}
+
+function closeCountdownManageModal() {
+  document.getElementById("countdownManageModal").hidden = true;
   document.getElementById("cdTitleInput").value = "";
   document.getElementById("cdDateInput").value = "";
 }
 
+function renderCountdownManageList() {
+  const listEl = document.getElementById("countdownManageList");
+  
+  if (countdowns.length === 0) {
+    listEl.innerHTML = `<div style="text-align: center; color: var(--text-tertiary); font-size: 13px; padding: 10px 0;">还没有添加任何倒计时</div>`;
+    return;
+  }
+
+  // 按日期排序展示
+  countdowns.sort((a, b) => new Date(a.date) - new Date(b.date));
+  
+  listEl.innerHTML = countdowns.map(cd => {
+    const isCurrent = cd.id === mainCountdownId;
+    return `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border: 1px solid ${isCurrent ? 'var(--accent)' : 'var(--border)'}; border-radius: 8px; margin-bottom: 8px; background: ${isCurrent ? 'var(--accent-soft)' : 'var(--surface)'}; cursor: pointer;" onclick="setMainCountdown('${cd.id}')">
+        <div>
+          <div style="font-size: 14px; font-weight: 600; color: ${isCurrent ? 'var(--accent-text)' : 'var(--text-primary)'};">${escapeHtml(cd.title)}</div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">${cd.date} ${isCurrent ? '(当前展示)' : ''}</div>
+        </div>
+        <button onclick="event.stopPropagation(); deleteCountdown('${cd.id}')" style="background: transparent; border: none; color: #ef4444; font-size: 18px; cursor: pointer; padding: 0 8px;">×</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function setMainCountdown(id) {
+  mainCountdownId = id;
+  localStorage.setItem("mini-main-countdown-id", mainCountdownId);
+  closeCountdownManageModal();
+  renderPlanView();
+  showToast("已切换主倒计时");
+}
+
+// 添加倒计时
 function saveCountdown() {
+  if (countdowns.length >= 5) {
+    alert("最多只能设置 5 个倒计时哦！");
+    return;
+  }
+
   const title = document.getElementById("cdTitleInput").value.trim();
   const date = document.getElementById("cdDateInput").value;
   
@@ -328,16 +362,36 @@ function saveCountdown() {
     return;
   }
   
-  countdowns.push({ id: Date.now().toString(), title, date });
+  const newId = Date.now().toString();
+  countdowns.push({ id: newId, title, date });
   saveCountdowns();
-  closeCountdownModal();
-  renderPlanView();
+  
+  // 如果之前没有主倒计时，自动把它设为当前主倒计时
+  if (!mainCountdownId) {
+    mainCountdownId = newId;
+    localStorage.setItem("mini-main-countdown-id", mainCountdownId);
+  }
+
+  document.getElementById("cdTitleInput").value = "";
+  document.getElementById("cdDateInput").value = "";
+  
+  renderCountdownManageList(); // 只刷新弹窗里的列表
+  renderCountdown(); // 刷新背后卡片的展示
 }
 
+// 删除倒计时
 function deleteCountdown(id) {
   if (confirm("确定要删除这个倒计时吗？")) {
     countdowns = countdowns.filter(c => c.id !== id);
     saveCountdowns();
-    renderPlanView();
+    
+    // 如果删的是当前主倒计时，重置
+    if (mainCountdownId === id) {
+      mainCountdownId = countdowns.length > 0 ? countdowns[0].id : null;
+      localStorage.setItem("mini-main-countdown-id", mainCountdownId || "");
+    }
+    
+    renderCountdownManageList();
+    renderCountdown();
   }
 }
