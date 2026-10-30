@@ -12,6 +12,7 @@ function closeFocusModal() {
 
 // 开始专注
 function startFocus(minutes) {
+  applySavedFocusTheme(); // 读取上次的皮肤
   closeFocusModal();
   totalFocusMinutes = minutes;
   
@@ -108,3 +109,30 @@ function finishFocus(minutes, isEarlyQuit) {
     }
   }, 800);
 }
+
+// === 专注背景切换逻辑 ===
+function applySavedFocusTheme() {
+  const savedTheme = localStorage.getItem("mini-focus-theme") || "dark";
+  document.getElementById("focusOverlay").setAttribute("data-focus-theme", savedTheme);
+}
+
+function toggleFocusThemeMenu(e) {
+  if (e) e.stopPropagation(); 
+  const menu = document.getElementById("focusThemeMenu");
+  menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+
+function setFocusTheme(themeName) {
+  const overlay = document.getElementById("focusOverlay");
+  overlay.setAttribute("data-focus-theme", themeName);
+  localStorage.setItem("mini-focus-theme", themeName);
+  document.getElementById("focusThemeMenu").style.display = "none";
+}
+
+// 点击其他区域关闭菜单
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("focusThemeMenu");
+  if (menu && menu.style.display === "flex" && !e.target.closest("#focusThemeBtn")) {
+    menu.style.display = "none";
+  }
+});

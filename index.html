@@ -10,6 +10,7 @@
   <meta name="theme-color" content="#1f2937" />
   <!-- 换成这行 -->
   <script src="js/html-to-image.min.js"></script>
+  <script src="js/jszip.min.js"></script>
 </head>
 <body>
   <div class="app">
@@ -190,23 +191,30 @@
         <!-- 数据安全区 -->
         <h3 class="section-title">数据与备份</h3>
         <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px;">
+          
           <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <div>
               <div style="font-size: 15px; color: var(--text-primary); font-weight: 500;">完整打包备份 (ZIP)</div>
               <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">包含所有文字与图片，防丢失</div>
             </div>
-            <button class="primary" style="padding: 6px 12px; font-size: 13px;" onclick="alert('ZIP打包功能即将上线，我们下一步就做！')">打包</button>
+            <button class="primary" style="padding: 6px 12px; font-size: 13px;" onclick="backupZip()" id="zipBackupBtn">打包导出</button>
           </div>
+
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 15px; color: var(--text-primary);">导入 ZIP 备份</div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">恢复全站数据（覆盖当前）</div>
+            </div>
+            <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="document.getElementById('importZipFile').click()">导入</button>
+            <input type="file" id="importZipFile" accept=".zip" style="display: none;">
+          </div>
+
           <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
             <div style="font-size: 15px; color: var(--text-primary);">导出 Markdown</div>
             <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="exportMarkdown()">导出</button>
           </div>
-          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 15px; color: var(--text-primary);">导出 JSON 备份</div>
-            <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="exportJson()">导出</button>
-          </div>
           <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-size: 15px; color: var(--text-primary);">导入备份文件</div>
+            <div style="font-size: 15px; color: var(--text-primary);">导入旧版 JSON</div>
             <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="document.getElementById('importFile').click()">导入</button>
           </div>
         </div>
@@ -584,13 +592,26 @@
   </div>
 
   <!-- 专注钟全屏遮罩 -->
-  <div id="focusOverlay" class="focus-overlay" style="display: none;">
+  <div id="focusOverlay" class="focus-overlay" style="display: none;" data-focus-theme="dark">
+    
+    <!-- 右上角外观切换菜单按钮 -->
+    <button id="focusThemeBtn" onclick="toggleFocusThemeMenu(event)" style="position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px; background: transparent; border: none; color: #a1a1aa; cursor: pointer; z-index: 100; padding: 8px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    </button>
+
+    <!-- 外观切换下拉菜单 -->
+    <div id="focusThemeMenu" style="display: none; position: absolute; top: max(60px, calc(env(safe-area-inset-top) + 40px)); right: 20px; background: rgba(30, 27, 75, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 8px; z-index: 101; flex-direction: column; gap: 4px;">
+      <button class="focus-theme-option" onclick="setFocusTheme('dark')" style="background: transparent; border: none; color: #fff; padding: 8px 16px; text-align: left; border-radius: 8px; cursor: pointer; font-size: 14px;">🌌 星空陪伴</button>
+      <button class="focus-theme-option" onclick="setFocusTheme('minimal')" style="background: transparent; border: none; color: #fff; padding: 8px 16px; text-align: left; border-radius: 8px; cursor: pointer; font-size: 14px;">📜 极简白</button>
+      <button class="focus-theme-option" onclick="setFocusTheme('forest')" style="background: transparent; border: none; color: #fff; padding: 8px 16px; text-align: left; border-radius: 8px; cursor: pointer; font-size: 14px;">🌿 深林绿</button>
+    </div>
+
     <div id="starField" class="star-field"></div>
     <div class="focus-content">
       <div class="focus-time" id="focusTime">25:00</div>
       <div class="focus-label" id="focusLabel">专注中，星光正在汇聚...</div>
     </div>
-    <img src="./assets/girl-color.png" alt="陪伴" class="focus-girl">
+    <img src="./assets/girl-color.png" alt="陪伴" class="focus-girl" id="focusGirlImg">
     <button class="focus-quit-btn" onclick="quitFocus()">结束专注</button>
   </div>
 

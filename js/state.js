@@ -45,6 +45,10 @@ function saveHabits() { localStorage.setItem("mini-habits", JSON.stringify(habit
 let userStars = parseInt(localStorage.getItem("mini-stars") || "0"); 
 let unlockedBadges = JSON.parse(localStorage.getItem("mini-badges") || "[]"); 
 
+// === 拾迹卡牌数据 ===
+let unlockedCards = JSON.parse(localStorage.getItem("mini-cards") || "[]"); 
+function saveCards() { localStorage.setItem("mini-cards", JSON.stringify(unlockedCards)); }
+
 // 每日星迹上限设定（50星迹）
 const DAILY_STAR_LIMIT = 50;
 

@@ -22,7 +22,7 @@ html {
     "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; /* 修复点击蓝光 */ }
 
 body {
   margin: 0;
@@ -42,10 +42,14 @@ body {
   padding: 0 16px 80px 16px; /* 顶部由 header 自己控制内边距 */
   min-height: calc(100vh - 40px);
   position: relative;
+  overflow: hidden;
 }
 
 /* 手机端全屏铺满，去掉多余边距 */
 @media (max-width: 768px) {
+  body {
+    background: var(--bg); /* 手机端统一底色，彻底消灭底部闪黑/闪灰 */
+  }
   .app {
     margin: 0;
     border-radius: 0;
@@ -337,7 +341,7 @@ button.primary:active { transform: translateY(1px); }
 .book-card.is-read .book-cover-wrapper { filter: grayscale(40%) opacity(0.8); }
 
 /* 悬浮按钮 */
-.fab-btn { position: fixed; bottom: 85px; right: 30px; width: 56px; height: 56px; border-radius: 50%; background: var(--text-primary); color: white; font-size: 32px; font-weight: 300; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; transition: transform 0.2s; }
+.fab-btn { position: fixed; bottom: 30px; right: 30px; width: 56px; height: 56px; border-radius: 50%; background: var(--text-primary); color: white; font-size: 32px; font-weight: 300; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 100; transition: transform 0.2s; }
 .fab-btn:hover { transform: scale(1.05); }
 .fab-btn:active { transform: scale(0.95); }
 .book-grid .empty { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; min-height: 40vh; color: var(--text-tertiary); font-size: 14px; }
@@ -793,4 +797,169 @@ body {
   margin-bottom: 12px !important; 
   padding-top: 8px !important; /* 手动给一个 8px 的呼吸感，紧贴分界线 */
   padding-left: 4px !important;
+}
+
+/* ================= 专注钟主题换肤 ================= */
+
+/* 防止数字跳动 */
+.focus-time { 
+  font-variant-numeric: tabular-nums; 
+}
+
+/* 1. 星空陪伴（默认） */
+.focus-overlay[data-focus-theme="dark"] { background: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #111111 80%); }
+.focus-overlay[data-focus-theme="dark"] .focus-girl { display: block; }
+.focus-overlay[data-focus-theme="dark"] .star-field { display: block; }
+.focus-overlay[data-focus-theme="dark"] .focus-time { color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+.focus-overlay[data-focus-theme="dark"] .focus-label { color: #a1a1aa; }
+
+/* 2. 极简白（古典纸质） */
+.focus-overlay[data-focus-theme="minimal"] { background: #fcf9f2; }
+.focus-overlay[data-focus-theme="minimal"] .focus-girl { display: none; }
+.focus-overlay[data-focus-theme="minimal"] .star-field { display: none; }
+.focus-overlay[data-focus-theme="minimal"] .focus-time { 
+  color: #333; 
+  font-family: Georgia, "Songti SC", "SimSun", serif; /* 切换为优雅衬线体 */
+  text-shadow: none; 
+}
+.focus-overlay[data-focus-theme="minimal"] .focus-label { color: #8c8273; }
+.focus-overlay[data-focus-theme="minimal"] .focus-quit-btn { color: #8c8273; }
+.focus-overlay[data-focus-theme="minimal"] #focusThemeBtn { color: #8c8273; }
+.focus-overlay[data-focus-theme="minimal"] #focusThemeMenu { background: rgba(255,255,255,0.95); border-color: #e5e0d8; }
+.focus-overlay[data-focus-theme="minimal"] .focus-theme-option { color: #333; }
+
+/* 3. 深林绿（降噪呼吸） */
+.focus-overlay[data-focus-theme="forest"] { background: radial-gradient(circle at 50% 30%, #064e3b 0%, #022c22 80%); }
+.focus-overlay[data-focus-theme="forest"] .focus-girl { display: none; }
+.focus-overlay[data-focus-theme="forest"] .star-field { display: block; opacity: 0.3; }
+.focus-overlay[data-focus-theme="forest"] .focus-time { 
+  color: #d1fae5; 
+  font-family: "PingFang SC", "Avenir", sans-serif; /* 切换为圆润无衬线 */
+  font-weight: 300;
+}
+.focus-overlay[data-focus-theme="forest"] .focus-label { color: #34d399; }
+.focus-overlay[data-focus-theme="forest"] .focus-quit-btn { color: #059669; }
+
+/* ================= 拾迹卡牌样式 ================= */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.collect-card {
+  background: #fdfbf7;
+  border: 1px solid #e5e0d8;
+  border-radius: 8px;
+  padding: 8px;
+  aspect-ratio: 1 / 1.4; /* 卡牌比例 */
+  position: relative;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  transition: transform 0.2s ease;
+}
+.collect-card:hover { transform: translateY(-4px); }
+
+.card-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fcf9f2;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.card-img {
+  flex: 1; /* 占满除了底部文字外的所有空间 */
+  width: 85%;
+  object-fit: contain;
+  margin: 0 auto;
+  padding-top: 10px;
+}
+
+/* 锁定底部文字区，高度固定为两行 */
+.card-quote {
+  height: 44px; /* 固定高度：上下padding 8px + 两行文字高度 28px */
+  font-size: 11px;
+  line-height: 14px;
+  color: #8c8273;
+  text-align: center;
+  font-family: "Kaiti", serif;
+  padding: 8px;
+  background: rgba(255,255,255,0.9);
+  border-top: 1px dashed #e5e0d8;
+  
+  /* 多行文本溢出省略 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.card-rarity {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 9px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 10px;
+  z-index: 2;
+  font-family: monospace;
+}
+.rarity-n { background: #f3f4f6; color: #6b7280; }
+.rarity-r { background: #e0f2fe; color: #0284c7; }
+.rarity-ssr { background: #fef3c7; color: #d97706; box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+
+/* ================= 抽卡全屏3D翻转动画 ================= */
+.flip-card-container {
+  perspective: 1000px;
+  width: 200px;
+  height: 280px;
+}
+
+.flip-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transform-style: preserve-3d;
+}
+
+/* 【核心修复】这里就是之前漏掉的触发翻转逻辑 */
+.flip-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front, .flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* 正面（人物图），初始隐藏，旋转 180 度 */
+.flip-card-front {
+  transform: rotateY(180deg);
+  background: #fdfbf7; /* 正面卡牌底色 */
+  border: 4px solid #fff;
+}
+
+/* 背面（卡背图），初始显示 */
+.flip-card-back {
+  transform: rotateY(0deg);
+  background-color: #e5dccb;
+  border: 4px solid #fff;
+}
+
+@keyframes cardShake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  20% { transform: translate(-5px, 0) rotate(-3deg); }
+  40% { transform: translate(5px, 0) rotate(3deg); }
+  60% { transform: translate(-5px, 0) rotate(-3deg); }
+  80% { transform: translate(5px, 0) rotate(3deg); }
 }

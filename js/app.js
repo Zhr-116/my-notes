@@ -405,3 +405,140 @@ function saveProfileData() {
   renderMineView(); 
   showToast("资料已更新");
 }
+
+// ================= 完整数据 ZIP 打包备份 =================
+
+async function backupZip() {
+  const btn = document.getElementById("zipBackupBtn");
+  btn.innerText = "打包中...";
+  btn.disabled = true;
+
+  try {
+    const zip = new JSZip();
+
+    // 1. 收集 LocalStorage
+    const dataToBackup = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key.startsWith("mini-")) {
+        dataToBackup[key] = localStorage.getItem(key);
+      }
+    }
+    zip.file("data.json", JSON.stringify(dataToBackup, null, 2));
+
+    // 2. 收集图片并转换为真实图片格式
+    if (!imageDB.db) await imageDB.init();
+    
+    const imgFolder = zip.folder("images");
+    const tx = imageDB.db.transaction("images", "readonly");
+    const store = tx.objectStore("images");
+    const request = store.getAll();
+
+    await new Promise((resolve, reject) => {
+      request.onsuccess = async () => {
+        const images = request.result;
+        for (let img of images) {
+          // img.base64 格式为 "data:image/jpeg;base64,/9j/4AAQSk..."
+          const match = img.base64.match(/^data:(image\/\w+);base64,(.+)$/);
+          if (match) {
+            const mimeType = match[1]; 
+            const base64Data = match[2]; // 纯数据部分
+            
+            // 判断文件后缀
+            let ext = "jpg";
+            if (mimeType.includes("png")) ext = "png";
+            else if (mimeType.includes("svg")) ext = "svg";
+            else if (mimeType.includes("gif")) ext = "gif";
+            else if (mimeType.includes("webp")) ext = "webp";
+            
+            // 【核心修复】加上 {base64: true}，JSZip 会自动将其解码为二进制真实图片
+            imgFolder.file(`${img.id}.${ext}`, base64Data, {base64: true});
+          }
+        }
+        resolve();
+      };
+      request.onerror = reject;
+    });
+
+    // 3. 生成并下载
+    const content = await zip.generateAsync({ type: "blob" });
+    const url = URL.createObjectURL(content);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `拾迹完整备份_${todayStr()}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast("完整数据已打包下载！");
+  } catch (error) {
+    console.error(error);
+    alert("打包失败：" + error.message);
+  } finally {
+    btn.innerText = "打包导出";
+    btn.disabled = false;
+  }
+}
+
+// ================= 导入 ZIP 备份 =================
+document.getElementById("importZipFile")?.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  if (!confirm("⚠️ 警告：导入备份将【完全覆盖】你当前的所有记录、图片和设置。确定继续吗？")) {
+    e.target.value = "";
+    return;
+  }
+
+  showToast("正在解压恢复，请稍候...");
+
+  try {
+    const zip = await JSZip.loadAsync(file);
+
+    // 1. 恢复 LocalStorage
+    const dataFile = zip.file("data.json");
+    if (dataFile) {
+      const dataText = await dataFile.async("text");
+      const parsedData = JSON.parse(dataText);
+      
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key.startsWith("mini-")) localStorage.removeItem(key);
+      }
+      for (let key in parsedData) {
+        localStorage.setItem(key, parsedData[key]);
+      }
+    }
+
+    // 2. 恢复图片
+    if (!imageDB.db) await imageDB.init();
+    
+    // 过滤出所有图片文件（排除文件夹本身）
+    const imgFiles = Object.keys(zip.files).filter(name => name.startsWith("images/") && !zip.files[name].dir);
+    
+    for (let filename of imgFiles) {
+      const fileObj = zip.file(filename);
+      // 【核心修复】将图片文件读为 base64
+      const base64Data = await fileObj.async("base64");
+      
+      const ext = filename.split('.').pop().toLowerCase();
+      let mimeType = `image/${ext}`;
+      if (ext === "jpg") mimeType = "image/jpeg";
+
+      const imgId = filename.replace("images/", "").split(".")[0];
+      const fullBase64 = `data:${mimeType};base64,${base64Data}`;
+      
+      await imageDB.save(imgId, fullBase64);
+    }
+
+    showToast("恢复成功！即将刷新页面...");
+    setTimeout(() => {
+      window.location.reload();
+    }, 1500);
+
+  } catch (error) {
+    console.error(error);
+    alert("导入失败，文件可能损坏或格式不正确。");
+  } finally {
+    e.target.value = "";
+  }
+});

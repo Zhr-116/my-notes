@@ -11,7 +11,8 @@ const ASSETS = [
   './js/render.js',
   './js/export.js',
   './js/app.js',
-  './js/html-to-image.min.js'
+  './js/html-to-image.min.js',
+  './js/jszip.min.js'
 ];
 
 // 安装时，立刻缓存所有核心文件

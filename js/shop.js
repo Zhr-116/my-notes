@@ -1,5 +1,19 @@
 const STAR_ICON = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px;"><path d="M12.983 21.186a1 1 0 0 1-1.966 0 10 10 0 0 0-8.203-8.203 1 1 0 0 1 0-1.966 10 10 0 0 0 8.203-8.203 1 1 0 0 1 1.966 0 10 10 0 0 0 8.203 8.203 1 1 0 0 1 0 1.966 10 10 0 0 0-8.203 8.203"/></svg>`;
 
+const CARD_POOL = [
+  { id: "card_01", title: "为你鼓掌", rarity: "N", img: "./assets/cards/card_01.png", quote: "太棒啦！" },
+  { id: "card_02", title: "眼里有光", rarity: "N", img: "./assets/cards/card_02.png", quote: "今天也充满了期待。" },
+  { id: "card_03", title: "一点魔法", rarity: "R", img: "./assets/cards/card_03.png", quote: "一点点魔法，就能点亮心情。" },
+  { id: "card_04", title: "偷偷比心", rarity: "R", img: "./assets/cards/card_04.png", quote: "给你一点甜。" },
+  { id: "card_05", title: "探索未知", rarity: "R", img: "./assets/cards/card_05.png", quote: "一起看看这个世界吧。" },
+  { id: "card_06", title: "安静力量", rarity: "N", img: "./assets/cards/card_06.png", quote: "安静的时候，最接近自己。" },
+  { id: "card_07", title: "记录此刻", rarity: "N", img: "./assets/cards/card_07.png", quote: "帮你把这一刻收好。" },
+  { id: "card_08", title: "寻找答案", rarity: "N", img: "./assets/cards/card_08.png", quote: "这题好像有点难哦？" },
+  { id: "card_09", title: "满满心意", rarity: "R", img: "./assets/cards/card_09.png", quote: "收下我全部的心意。" },
+  { id: "card_10", title: "满载而归", rarity: "SSR", img: "./assets/cards/card_10.png", quote: "恭喜完成，这是属于你的荣光。" }
+];
+let isBadgeGridExpanded = false; // 记录徽章区是否展开
+let isCardGridExpanded = false; // 记录卡牌区是否展开
 const BOX_POOLS = {
   nature: {
     name: "自然物语", price: 100, 
@@ -56,50 +70,99 @@ function renderShop() {
   const container = document.getElementById("shopContent");
   if (!container) return;
 
+  // --- 1. 徽章部分（带折叠逻辑） ---
   let badgesHtml = "";
   const allItems = Object.values(BOX_POOLS).flatMap(p => p.items);
-  
-  // 计算总进度：总款式数 vs 已获得的款式数
   const totalItemsCount = allItems.length;
-  // 过滤一下，防止旧数据里有已经不存在的ID
-  const validUnlockedCount = unlockedBadges.filter(id => allItems.some(b => b.id === id)).length;
+  
+  // 提取有效已解锁徽章对象列表
+  const validUnlockedBadges = unlockedBadges
+    .map(id => allItems.find(b => b.id === id))
+    .filter(b => b !== undefined);
+  const validUnlockedCount = validUnlockedBadges.length;
 
-  if (unlockedBadges.length === 0) {
+  if (validUnlockedCount === 0) {
     badgesHtml = `<div class="empty" style="grid-column: 1/-1; padding: 20px 0; font-size: 13px; color: var(--text-tertiary);">继续记录，去解锁隐藏的惊喜吧！</div>`;
   } else {
-    badgesHtml = unlockedBadges.map(badgeId => {
-      const badge = allItems.find(b => b.id === badgeId);
-      if (!badge) return "";
-      
-      return `
-        <div class="badge-item">
-          <div class="luxury-badge" style="--c1: ${badge.color1}; --c2: ${badge.color2};">
-            ${badge.icon}
-          </div>
-          <span class="badge-name">${badge.title}</span>
+    // 默认只展示前 4 个（一排）
+    const badgesToDisplay = (!isBadgeGridExpanded && validUnlockedCount > 4)
+      ? validUnlockedBadges.slice(0, 4)
+      : validUnlockedBadges;
+
+    badgesHtml = badgesToDisplay.map(badge => `
+      <div class="badge-item">
+        <div class="luxury-badge" style="--c1: ${badge.color1}; --c2: ${badge.color2};">
+          ${badge.icon}
+        </div>
+        <span class="badge-name">${badge.title}</span>
+      </div>
+    `).join("");
+
+    // 如果超过 4 个，加折叠按钮
+    if (validUnlockedCount > 4) {
+      badgesHtml += `
+        <div style="grid-column: 1 / -1; text-align: center; margin-top: -6px; margin-bottom: -6px;">
+          <button onclick="toggleBadgeGrid()" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;">
+            ${isBadgeGridExpanded ? '收起橱窗 ▴' : `展开全部 ${validUnlockedCount} 款 ▾`}
+          </button>
         </div>
       `;
-    }).join("");
+    }
   }
 
-  // 计算单池进度，并渲染货架
+  // --- 2. 卡牌部分（带折叠逻辑，只展示一排3张） ---
+  let cardsHtml = "";
+  const totalCards = CARD_POOL.length;
+  const unlockedCardList = CARD_POOL.filter(c => unlockedCards.includes(c.id));
+  const validCardsCount = unlockedCardList.length;
+
+  if (validCardsCount === 0) {
+    cardsHtml = `<div class="empty" style="grid-column: 1/-1; padding: 20px 0; font-size: 13px; color: var(--text-tertiary);">继续记录，去收集拾迹的精灵卡牌吧！</div>`;
+  } else {
+    // 默认只展示前 3 张（一排）
+    const cardsToDisplay = (!isCardGridExpanded && validCardsCount > 3) 
+      ? unlockedCardList.slice(0, 3) 
+      : unlockedCardList;
+
+    cardsHtml = cardsToDisplay.map(card => `
+      <div class="collect-card" onclick="previewCard('${card.id}')">
+        <div class="card-inner">
+          <img src="${card.img}" alt="${card.title}" class="card-img">
+          <div class="card-quote">${card.quote}</div>
+        </div>
+        <div class="card-rarity rarity-${card.rarity.toLowerCase()}">${card.rarity}</div>
+      </div>
+    `).join("");
+
+    // 如果超过 3 张，加折叠按钮
+    if (validCardsCount > 3) {
+      cardsHtml += `
+        <div style="grid-column: 1 / -1; text-align: center; margin-top: -6px; margin-bottom: -6px;">
+          <button onclick="toggleCardGrid()" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;">
+            ${isCardGridExpanded ? '收起卡册 ▴' : `展开全部 ${validCardsCount} 张 ▾`}
+          </button>
+        </div>
+      `;
+    }
+  }
+
+  // --- 3. 盲盒货架部分 ---
   let shelvesHtml = Object.keys(BOX_POOLS).map(key => {
     const box = BOX_POOLS[key];
-    // 该盲盒的总款式
     const poolTotal = box.items.length;
-    // 该盲盒已获得的款式
     const poolUnlocked = box.items.filter(item => unlockedBadges.includes(item.id)).length;
     
     return `
       <div class="mystery-box" onclick="openMysteryBox('${key}')">
-        <div class="box-progress">${poolUnlocked}/${poolTotal}</div> <!-- 新增进度角标 -->
+        <div class="box-progress">${poolUnlocked}/${poolTotal}</div>
         <img src="${box.img}" alt="${box.name}" class="box-img">
         <div class="box-price">${STAR_ICON} ${box.price}</div>
       </div>
     `;
   }).join("");
 
-    container.innerHTML = `
+  // --- 4. 拼装完整 HTML ---
+  container.innerHTML = `
     <div class="shop-header">
       <div class="stars-display">${STAR_ICON} 星迹：<span>${userStars}</span></div>
     </div>
@@ -114,15 +177,40 @@ function renderShop() {
       <div class="badge-showcase">${badgesHtml}</div>
     </div>
 
+    <!-- 拾迹卡牌 -->
+    <div class="shop-section" style="margin-top: 40px;">
+      <h3 class="section-title">
+        拾迹精灵 
+        <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">
+          已收集 ${validCardsCount} / ${totalCards} 张
+        </span>
+      </h3>
+      <div class="card-grid" id="shopCardGrid">${cardsHtml}</div>
+    </div>
+
+    <!-- 神秘盲盒 -->
     <div class="shop-section" style="margin-top: 40px;">
       <h3 class="section-title">神秘盲盒</h3>
       <div class="shelf-container">
         ${shelvesHtml}
+        <!-- 卡包入口 -->
+        <div class="mystery-box" onclick="openCardPack()">
+          <div class="box-progress">${validCardsCount}/${totalCards}</div>
+          <div class="box-img" style="display: flex; align-items: center; justify-content: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="4" width="12" height="16" rx="2" ry="2" transform="rotate(-15 12 12)" fill="var(--accent-soft)"></rect>
+              <rect x="6" y="4" width="12" height="16" rx="2" ry="2" fill="var(--surface)"></rect>
+              <path d="M12 8v8"></path>
+              <path d="M9 12h6"></path>
+            </svg>
+          </div>
+          <div class="box-price">${STAR_ICON} 200</div>
+        </div>
         <div class="shelf-board"></div>
       </div>
     </div>
 
-    <!-- 新增：外观装扮区 -->
+    <!-- 外观装扮区 -->
     <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
       <h3 class="section-title">外观装扮</h3>
       <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px;">
@@ -136,7 +224,6 @@ function renderShop() {
           <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">包含 4 款全彩图标 + 复古牛皮纸底色</p>
         </div>
         
-        <!-- 核心切换逻辑 -->
         ${currentTheme === 'doodle' 
           ? `<button onclick="setTheme('default')" class="primary" style="background: var(--text-secondary); padding: 6px 12px; font-size: 13px; white-space: nowrap;">切回默认</button>`
           : (ownedThemes.includes('doodle')
@@ -147,7 +234,6 @@ function renderShop() {
     </div>
   `;
 }
-
 // 在 shop.js 最下面加上购买逻辑
 function buyTheme(themeName, price) {
   if (currentTheme === themeName) {
@@ -232,4 +318,149 @@ function openMysteryBox(poolKey) {
     resultEl.style.animation = "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
     
   }, 800); 
+}
+
+// === 拾迹卡牌抽取逻辑 ===
+function openCardPack() {
+  const price = 200;
+  if (userStars < price) {
+    showToast("星迹不足，快去记录吧！");
+    return;
+  }
+  
+  userStars -= price;
+  localStorage.setItem("mini-stars", userStars.toString());
+  
+  // 1. 找出所有未拥有的卡牌
+  const unownedCards = CARD_POOL.filter(c => !unlockedCards.includes(c.id));
+  const ownedCount = CARD_POOL.length - unownedCards.length;
+  
+  let drawnCard;
+  let targetRarity;
+
+  // 【核心保底机制】：如果已经收集过半，且有未拥有的卡，直接大幅提升未拥有卡的概率
+  if (ownedCount >= 5 && unownedCards.length > 0) {
+    // 80% 概率直接从“未拥有”里抽，20% 概率正常抽（给一点随机感）
+    if (Math.random() < 0.8) {
+      drawnCard = unownedCards[Math.floor(Math.random() * unownedCards.length)];
+    } else {
+      // 正常概率抽
+      const rand = Math.random() * 100;
+      targetRarity = rand < 5 ? "SSR" : (rand < 30 ? "R" : "N");
+      const pool = CARD_POOL.filter(c => c.rarity === targetRarity);
+      drawnCard = pool[Math.floor(Math.random() * pool.length)];
+    }
+  } else {
+    // 如果收集度还低，按正常概率抽
+    const rand = Math.random() * 100;
+    targetRarity = rand < 5 ? "SSR" : (rand < 30 ? "R" : "N");
+    const pool = CARD_POOL.filter(c => c.rarity === targetRarity);
+    drawnCard = pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  // 如果所有卡都已经集齐了，就不做未拥有判断了
+  if (unownedCards.length === 0) {
+    const rand = Math.random() * 100;
+    targetRarity = rand < 5 ? "SSR" : (rand < 30 ? "R" : "N");
+    const pool = CARD_POOL.filter(c => c.rarity === targetRarity);
+    drawnCard = pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  const isDuplicate = unlockedCards.includes(drawnCard.id);
+
+  if (!isDuplicate) {
+    unlockedCards.push(drawnCard.id);
+    saveCards();
+    checkStoryTrigger("draw_box"); 
+  }
+
+  // 触发全屏翻牌动画
+  playCardDrawAnimation(drawnCard, isDuplicate);
+}
+
+function playCardDrawAnimation(card, isDuplicate) {
+  const overlay = document.getElementById("boxOverlay");
+  overlay.style.display = "flex";
+  
+  overlay.innerHTML = `
+    <div class="flip-card-container">
+      <div class="flip-card" id="drawFlipCard">
+        <!-- 背面（初始状态显示）：卡背 -->
+        <div class="flip-card-back" style="background: url('./assets/card-back.jpg') center/cover; background-size: cover;"></div>
+        
+        <!-- 正面（翻转后显示）：卡牌 -->
+        <div class="flip-card-front">
+          <div class="card-inner">
+            <img src="${card.img}" class="card-img">
+            <div class="card-quote">${card.quote}</div>
+          </div>
+          <div class="card-rarity rarity-${card.rarity.toLowerCase()}" style="position: absolute; top: 6px; right: 6px; z-index: 5;">${card.rarity}</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 翻转后浮现的文字与按钮（缩小了字号和间距） -->
+    <div id="cardResultContent" style="opacity: 0; display: flex; flex-direction: column; align-items: center; margin-top: 20px; transition: opacity 0.6s ease; text-align: center;">
+      <div style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">
+        ${isDuplicate ? '重复获得' : '🎉 获得全新卡牌'}
+      </div>
+      <div style="font-size: 18px; font-family: 'Songti SC', serif; font-weight: 700; margin: 6px 0; color: #fff;">
+        【${card.title}】
+      </div>
+      <div style="font-size: 12px; color: #fcd34d; margin-bottom: 16px;">
+        ${isDuplicate ? '自动转化为 80 星迹' : '已收入拾迹精灵图鉴'}
+      </div>
+      <button class="primary" style="width: 160px; background: #fff; color: #333; border-radius: 20px; padding: 10px; font-size: 14px; font-weight: bold;" onclick="document.getElementById('boxOverlay').style.display='none'; renderShop();">收下卡牌</button>
+    </div>
+  `;
+
+  if (isDuplicate) {
+    userStars += 80; 
+    localStorage.setItem("mini-stars", userStars.toString());
+  }
+
+  const flipCard = document.getElementById("drawFlipCard");
+  const resultContent = document.getElementById("cardResultContent");
+  
+  flipCard.style.animation = "cardShake 0.5s ease-in-out 2"; 
+  
+  setTimeout(() => {
+    flipCard.style.animation = "none";
+    void flipCard.offsetWidth; 
+    
+    flipCard.classList.add("flipped");
+    
+    setTimeout(() => {
+      resultContent.style.opacity = "1";
+    }, 800); 
+  }, 1000); 
+}
+
+function previewCard(cardId) {
+  const card = CARD_POOL.find(c => c.id === cardId);
+  if (!card) return;
+  
+  const overlay = document.getElementById("boxOverlay");
+  overlay.style.display = "flex";
+  
+  overlay.innerHTML = `
+    <div class="collect-card" style="width: 240px; height: 340px; padding: 12px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: scale(1.1);">
+      <div class="card-inner">
+        <img src="${card.img}" class="card-img">
+        <div class="card-quote">${card.quote}</div>
+      </div>
+      <div class="card-rarity rarity-${card.rarity.toLowerCase()}" style="font-size: 12px; padding: 4px 8px; top: 8px; right: 8px; z-index: 5;">${card.rarity}</div>
+    </div>
+    <button class="primary" style="margin-top: 40px; background: #fff; color: #333; padding: 10px 30px; border-radius: 20px;" onclick="document.getElementById('boxOverlay').style.display='none';">关闭预览</button>
+  `;
+}
+
+function toggleCardGrid() {
+  isCardGridExpanded = !isCardGridExpanded;
+  renderShop();
+}
+
+function toggleBadgeGrid() {
+  isBadgeGridExpanded = !isBadgeGridExpanded;
+  renderShop();
 }
