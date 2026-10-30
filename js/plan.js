@@ -307,3 +307,37 @@ function checkAllDailyCleared() {
     checkStoryTrigger("all_tasks_done");
   }
 }
+
+// --- 倒计时交互 ---
+function openCountdownModal() {
+  document.getElementById("countdownModal").hidden = false;
+}
+
+function closeCountdownModal() {
+  document.getElementById("countdownModal").hidden = true;
+  document.getElementById("cdTitleInput").value = "";
+  document.getElementById("cdDateInput").value = "";
+}
+
+function saveCountdown() {
+  const title = document.getElementById("cdTitleInput").value.trim();
+  const date = document.getElementById("cdDateInput").value;
+  
+  if (!title || !date) {
+    alert("请把名字和日期填完整哦！");
+    return;
+  }
+  
+  countdowns.push({ id: Date.now().toString(), title, date });
+  saveCountdowns();
+  closeCountdownModal();
+  renderPlanView();
+}
+
+function deleteCountdown(id) {
+  if (confirm("确定要删除这个倒计时吗？")) {
+    countdowns = countdowns.filter(c => c.id !== id);
+    saveCountdowns();
+    renderPlanView();
+  }
+}

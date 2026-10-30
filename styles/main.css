@@ -1680,3 +1680,27 @@ body {
 .header-checkin-btn[hidden] {
   display: none !important;
 }
+
+/* ================= 底部导航栏 ================= */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+  background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+  display: flex; justify-content: space-around; align-items: center;
+  border-top: 1px solid var(--border); z-index: 900;
+  padding-bottom: env(safe-area-inset-bottom); /* 适配 iPhone 底部 */
+}
+
+/* 手账主题适配 */
+html[data-theme="doodle"] .bottom-nav { background: rgba(251, 250, 247, 0.95); }
+
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; color: var(--text-tertiary); cursor: pointer; transition: all 0.2s ease;
+  flex: 1; height: 100%;
+}
+.nav-item span { font-size: 10px; font-weight: 500; }
+.nav-item.active { color: var(--text-primary); }
+.nav-item.active svg { stroke: var(--accent); }
+
+/* 防止内容被底部导航遮挡 */
+.app { padding-bottom: 80px; }

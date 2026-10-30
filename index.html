@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>拾迹</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#1f2937" />
@@ -15,8 +16,7 @@
       <!-- 左侧：主页显示拾迹，子页面显示返回按钮 -->
       <div id="headerLeft">
         <h1 id="appTitle">拾迹</h1>
-        <!-- 返回按钮，默认隐藏 -->
-        <button id="subBackBtn" class="back-btn-icon" onclick="switchView('record')" hidden>
+        <button id="subBackBtn" class="back-btn-icon" hidden>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M10.793 19.793a.707.707 0 0 0 1.207-.5V16a1 1 0 0 1 1-1h6a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-6a1 1 0 0 1-1-1V4.707a.707.707 0 0 0-1.207-.5l-6.94 6.94a1.207 1.207 0 0 0 0 1.707z"/>
           </svg>
@@ -25,15 +25,9 @@
 
       <!-- 右侧：主页显示导航，子页面显示标题 -->
       <div id="headerRight">
-        <!-- 极简签到按钮（默认是个日历图标） -->
         <button id="headerCheckinBtn" class="header-checkin-btn" onclick="openCheckinPage()">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
         </button>
-        <div class="tabs" id="mainTabs">
-          <button data-view="record" class="active">记录</button>
-          <button data-view="timeline">时间轴</button>
-          <button data-view="more">更多</button>
-        </div>
         <span id="subPageTitle" class="sub-page-title" hidden>页面名</span>
       </div>
     </header>
@@ -59,7 +53,7 @@
       <div id="tagDetailContent" style="padding-bottom: 60px;"></div>
     </section>
 
-    <!-- 新增：回顾页视图 -->
+    <!-- 回顾页视图 -->
     <section id="reviewView" hidden>
       <div id="reviewContent"></div>
     </section>
@@ -81,7 +75,6 @@
 
       <div id="bookList" class="book-grid"></div>
       
-      <!-- 新增：长按多选底部操作栏 -->
       <div id="bookSelectionBar" class="selection-bar" hidden>
         <span id="selectedCountText">已选择 0 本书</span>
         <button id="batchDeleteBtn" class="danger-btn" onclick="batchDeleteBooks()">删除</button>
@@ -94,17 +87,13 @@
     <!-- 沉浸式书页视图 -->
     <section id="bookReadView" class="book-read-page" hidden>
       <div id="bookPageContent" class="book-page-content">
-        
-        <!-- 顶部工具栏 -->
         <div class="book-read-header">
           <button class="back-btn" onclick="closeBookRead()">← 返回书架</button>
-          <!-- 右侧按钮动态区 -->
           <div id="brHeaderActions">
             <button id="brEditBtn" class="primary" style="padding: 6px 12px; font-size: 13px;" onclick="startEditBookDetail()">编辑</button>
           </div>
         </div>
 
-        <!-- 书籍信息区 -->
         <div class="book-read-info">
           <div id="brCover" class="br-cover"></div>
           <div class="br-meta">
@@ -112,7 +101,6 @@
             <p id="brAuthor">作者</p>
             <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
               <span id="brStatusBadge" class="status-badge"></span>
-              <!-- 新增：标记读完按钮 -->
               <button id="brMarkReadBtn" class="page-btn-edit" style="font-size: 11px; padding: 2px 8px; border-color: #d1c7b8; color: #8c8273;" onclick="markBookAsRead()">标记为已读完</button>
             </div>
             <div id="brQuote" class="br-quote">金句</div>
@@ -121,14 +109,11 @@
 
         <div class="book-divider">✧ ✧ ✧</div>
 
-        <!-- 内容区：阅读态 -->
         <div id="brTextView" class="paper-read-area"></div>
 
-        <!-- 内容区：编辑态（默认隐藏，且去掉了底部按钮） -->
         <div id="brEditArea" hidden>
           <textarea id="brDetailInput" class="paper-textarea" placeholder="在此写下你的阅读心得..."></textarea>
         </div>
-
       </div>
     </section>
 
@@ -149,32 +134,32 @@
           <span class="more-icon">📚</span>
           <span>私人书架</span>
         </div>
-        <div class="more-card" onclick="switchView('plan')">
-          <span class="more-icon">🎯</span>
-          <span>计划倒计时</span>
-        </div>
         <div class="more-card" onclick="switchView('shop')">
           <span class="more-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.983 21.186a1 1 0 0 1-1.966 0 10 10 0 0 0-8.203-8.203 1 1 0 0 1 0-1.966 10 10 0 0 0 8.203-8.203 1 1 0 0 1 1.966 0 10 10 0 0 0 8.203 8.203 1 1 0 0 1 0 1.966 10 10 0 0 0-8.203 8.203"/></svg>
           </span>
           <span>拾光商店</span>
         </div>
-                <div class="more-card" onclick="openCapsuleModal()">
+        <div class="more-card" onclick="openCapsuleModal()">
           <span class="more-icon">✉️</span>
           <span>时间胶囊</span>
         </div>
       </div>
-      
-      <!-- 快捷设置：自定义首页 -->
-      <div style="margin-top: 40px; padding: 20px; background: var(--surface); border-radius: 12px; border: 1px solid var(--border);">
-        <label style="font-size: 14px; font-weight: 600; color: var(--text-primary);">默认启动首页</label>
-        <select id="defaultViewSelect" class="card-select" style="margin-top: 10px;" onchange="saveDefaultView(this.value)">
-          <option value="record">记录</option>
-          <option value="timeline">时间轴</option>
-          <option value="review">回顾看板</option>
-          <option value="book">私人书架</option>
-          <option value="plan">计划倒计时</option>
-        </select>
+    </section>
+
+    <!-- 我的页面 -->
+    <section id="mineView" hidden>
+      <div style="text-align: center; padding: 30px 0 20px 0;">
+        <img src="./assets/girl-color.png" style="width: 80px; height: 80px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); margin-bottom: 10px;">
+        <h2 style="margin: 0; font-size: 20px; color: var(--text-primary);">拾迹</h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: var(--text-tertiary);">收集时间的痕迹</p>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <div class="more-card" onclick="switchView('settings')" style="flex-direction: row; justify-content: flex-start; gap: 16px; padding: 16px 20px;">
+          <span class="more-icon" style="font-size: 20px;">⚙️</span>
+          <span style="font-size: 15px; font-weight: 500;">应用设置</span>
+        </div>
       </div>
     </section>
 
@@ -182,19 +167,61 @@
     <section id="shopView" hidden>
       <div id="shopContent"></div>
     </section>
+
+    <!-- 新增：应用设置页 -->
+    <section id="settingsView" hidden>
+      <div style="padding: 10px 0;">
+        
+        <!-- 数据安全区 -->
+        <h3 class="section-title">数据与备份</h3>
+        <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; margin-bottom: 24px;">
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-size: 15px; color: var(--text-primary); font-weight: 500;">完整打包备份 (ZIP)</div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">包含所有文字与图片，防丢失</div>
+            </div>
+            <button class="primary" style="padding: 6px 12px; font-size: 13px;" onclick="alert('ZIP打包功能即将上线，我们下一步就做！')">打包</button>
+          </div>
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 15px; color: var(--text-primary);">导出 Markdown</div>
+            <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="exportMarkdown()">导出</button>
+          </div>
+          <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 15px; color: var(--text-primary);">导出 JSON 备份</div>
+            <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="exportJson()">导出</button>
+          </div>
+          <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 15px; color: var(--text-primary);">导入备份文件</div>
+            <button style="background: var(--surface-muted); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; cursor: pointer;" onclick="document.getElementById('importFile').click()">导入</button>
+          </div>
+        </div>
+
+        <!-- 偏好设置区 -->
+        <h3 class="section-title">偏好设置</h3>
+        <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; padding: 16px; margin-bottom: 30px;">
+          <label style="font-size: 15px; color: var(--text-primary); display: block; margin-bottom: 10px;">默认启动首页</label>
+          <select id="defaultViewSelect" class="card-select" onchange="saveDefaultView(this.value)" style="width: 100%;">
+            <option value="record">记录</option>
+            <option value="timeline">时间轴</option>
+            <option value="review">回顾看板</option>
+            <option value="book">私人书架</option>
+            <option value="plan">计划倒计时</option>
+            <option value="mine">我的</option>
+          </select>
+        </div>
+
+        <div style="text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 40px;">
+          <p>拾迹 v1.0.0</p>
+          <p>收集时间的痕迹，见证每一次蜕变。</p>
+        </div>
+
+      </div>
+    </section>
+
     <!-- 开盲盒全屏遮罩 -->
     <div id="boxOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
-      
-      <!-- 抖动的大盲盒 -->
-      <div id="openingBoxContainer" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
-        <!-- 这里的内容由 JS 动态注入图片 -->
-      </div>
-      
-      <!-- 结果展示区 -->
-      <div id="boxResult" style="display: none; width: 320px; background: #fff; border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-        <!-- 这里的内容由 JS 动态注入 -->
-      </div>
-      
+      <div id="openingBoxContainer" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;"></div>
+      <div id="boxResult" style="display: none; width: 320px; background: #fff; border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);"></div>
     </div>
 
     <!-- 添加倒计时弹窗 -->
@@ -215,7 +242,7 @@
       </div>
     </div>
 
-        <!-- 新增：添加习惯弹窗 -->
+    <!-- 添加习惯弹窗 -->
     <div id="habitModal" class="modal-mask" hidden>
       <div class="modal-content">
         <div class="modal-header">
@@ -236,14 +263,14 @@
       </div>
     </div>
 
-    <!-- 新增：添加书籍弹窗 -->
+    <!-- 添加书籍弹窗 -->
     <div id="bookModal" class="modal-mask" hidden>
       <div class="modal-content">
         <div class="modal-header">
           <span class="modal-date">添加新书</span>
           <button class="close-btn" onclick="closeBookModal()">×</button>
         </div>
-                <div class="modal-edit-area">
+        <div class="modal-edit-area">
           <input type="text" id="bookTitleInput" placeholder="书名" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
           <input type="text" id="bookAuthorInput" placeholder="作者（可选）" style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
           <select id="bookStatusInput" class="book-sort-select" style="width: 100%; padding: 12px; margin-bottom: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface);">
@@ -252,7 +279,6 @@
             <option value="read">已读</option>
           </select>
 
-          <!-- 新增：封面上传区 -->
           <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
             <label for="bookCoverInput" class="upload-btn" style="margin: 0; display: inline-flex; align-items: center; gap: 6px;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -265,7 +291,7 @@
             <img id="bookCoverPreview" style="width: 40px; height: 56px; object-fit: cover; border-radius: 4px; display: none; border: 1px solid var(--border);">
           </div>
 
-          <textarea id="bookQuoteInput" maxlength="50" placeholder="最打动你的一句话 / 核心感悟（限50字）" ...></textarea>
+          <textarea id="bookQuoteInput" maxlength="50" placeholder="最打动你的一句话 / 核心感悟（限50字）"></textarea>
           
           <div class="modal-actions">
             <button class="primary" onclick="saveBook()">上架</button>
@@ -275,7 +301,7 @@
       </div>
     </div>
 
-    <!-- 卡片生成器（居中显示） -->
+    <!-- 卡片生成器 -->
     <div id="cardGeneratorModal" class="card-modal-overlay" hidden>
       <div class="card-modal-container">
         <div class="modal-header">
@@ -283,7 +309,6 @@
           <button class="close-btn" onclick="closeCardGenerator()">×</button>
         </div>
 
-        <!-- 预览区 -->
         <div id="cardPreviewArea" class="card-preview-area">
           <div class="card-top">
             <span id="cardDateDisplay" class="card-date">2025.10.18</span>
@@ -293,7 +318,6 @@
             <div id="cardContentDisplay" class="card-content">记录的内容</div>
             <div id="cardDetailDisplay" class="card-detail">感悟与细节...</div>
           </div>
-          <!-- 图片容器 -->
           <div id="cardImageWrapper" class="card-image-wrapper" hidden>
           </div>
           <div class="card-footer">
@@ -301,7 +325,6 @@
           </div>
         </div>
 
-        <!-- 控制区 -->
         <div class="card-controls">
             <div class="control-row">
               <div class="control-group" style="flex: 1;">
@@ -350,11 +373,9 @@
         <div id="modalContent" class="modal-body-text"></div>
         <div id="modalTags" class="tags"></div>
         
-        <!-- 阅读态 -->
         <div id="detailViewMode" class="detail-view-mode">
           <div id="detailTextView" class="detail-text-block"></div>
-          <div id="detailImagesView" class="detail-images-grid"></div> <!-- 新增：图片展示区 -->
-          <!-- 新增这个按钮 -->
+          <div id="detailImagesView" class="detail-images-grid"></div>
           <button id="generateCardBtn" class="edit-detail-btn" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 10px; border-color: var(--accent); color: var(--accent-text);" onclick="openCardGenerator()">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12.65 7.65a2 2 0 012.629-1.046l5.51 2.374a2 2 0 011.046 2.628l-3.957 9.184a2 2 0 01-2.628 1.046l-5.51-2.374a2 2 0 01-1.046-2.628z"/>
@@ -372,11 +393,9 @@
           </button>
         </div>
 
-        <!-- 编辑态（默认隐藏） -->
         <div id="detailEditMode" class="modal-edit-area" hidden>
           <textarea id="modalDetailInput" placeholder="记录一些心得、背景或细节..."></textarea>
           
-          <!-- 新增：图片上传区 -->
           <div class="image-upload-area">
             <label id="cameraBtnLabel" for="imageInput" class="upload-btn" style="display: inline-flex; align-items: center; gap: 6px;">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -397,64 +416,55 @@
       </div>
     </div>
 
-    <footer>
-      <button id="exportMdBtn">导出 Markdown</button>
-      <button id="exportJsonBtn">导出 JSON</button>
-      <button id="importBtn">导入备份</button> <!-- 新增导入按钮 -->
-      <input type="file" id="importFile" accept=".json" style="display: none;" />
-    </footer>
+    <!-- 把文件输入放在这里，供设置页调用 -->
+    <input type="file" id="importFile" accept=".json" style="display: none;" />
   </div>
 
-      <!-- 整书分享卡片生成器 -->
-    <div id="bookCardModal" class="card-modal-overlay" hidden>
-      <div class="card-modal-container">
-        <div class="modal-header">
-          <span class="modal-date">生成读书卡片</span>
-          <button class="close-btn" onclick="closeBookCardModal()">×</button>
+  <!-- 整书分享卡片生成器 -->
+  <div id="bookCardModal" class="card-modal-overlay" hidden>
+    <div class="card-modal-container">
+      <div class="modal-header">
+        <span class="modal-date">生成读书卡片</span>
+        <button class="close-btn" onclick="closeBookCardModal()">×</button>
+      </div>
+      
+      <div id="bookCardPreview" class="book-card-preview">
+        <div class="bcard-top">
+          <span>READING NOTES</span>
+          <span>✧ 阅</span>
         </div>
-        
-        <!-- 预览区 -->
-        <div id="bookCardPreview" class="book-card-preview">
-          <div class="bcard-top">
-            <span>READING NOTES</span>
-            <span>✧ 阅</span>
-          </div>
-          <div class="bcard-info">
-            <div id="bcardCover" class="bcard-cover"></div>
-            <div class="bcard-meta">
-              <h2 id="bcardTitle">书名</h2>
-              <p id="bcardAuthor">作者</p>
-            </div>
-          </div>
-          <div id="bcardQuote" class="bcard-quote">“金句”</div>
-          <div id="bcardReview" class="bcard-review">读后感摘要...</div>
-          <div class="bcard-footer">
-            <span>拾迹 · 私人书房</span>
+        <div class="bcard-info">
+          <div id="bcardCover" class="bcard-cover"></div>
+          <div class="bcard-meta">
+            <h2 id="bcardTitle">书名</h2>
+            <p id="bcardAuthor">作者</p>
           </div>
         </div>
-
-        <!-- 新增：自由编辑区 -->
-        <div class="card-edit-inputs">
-          <textarea id="bcardReviewInput" placeholder="挑选部分书评填入卡片（太长会不好看）..." style="height: 80px;"></textarea>
-        </div>
-
-        <div class="modal-actions" style="margin-top: 15px;">
-          <button id="downloadBookCardBtn" class="primary" style="width: 100%;">保存图片到相册</button>
+        <div id="bcardQuote" class="bcard-quote">“金句”</div>
+        <div id="bcardReview" class="bcard-review">读后感摘要...</div>
+        <div class="bcard-footer">
+          <span>拾迹 · 私人书房</span>
         </div>
       </div>
-    </div>
 
-  <!-- 新增：全屏图片预览 -->
+      <div class="card-edit-inputs">
+        <textarea id="bcardReviewInput" placeholder="挑选部分书评填入卡片（太长会不好看）..." style="height: 80px;"></textarea>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 15px;">
+        <button id="downloadBookCardBtn" class="primary" style="width: 100%;">保存图片到相册</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 全屏图片预览 -->
   <div id="imagePreviewModal" class="image-preview-modal" hidden onclick="closeImagePreview()">
     <img id="imagePreviewImg" src="" alt="预览图">
   </div>
 
   <!-- 拾迹专属剧情对话框 -->
   <div id="storyOverlay" class="story-overlay" style="display: none;">
-    <!-- 立绘：你的小女孩 -->
     <img src="./assets/girl-color.png" alt="拾迹" class="story-character">
-    
-    <!-- 羊皮纸对话框 -->
     <div class="story-dialog-box" onclick="handleStoryClick()">
       <div class="story-speaker">拾迹</div>
       <div class="story-text" id="storyText"></div>
@@ -487,7 +497,6 @@
   <div id="envelopeOverlay" class="envelope-overlay" style="display: none;">
     <p id="envelopeHint" style="color: #8c8273; font-size: 14px; letter-spacing: 2px; margin-bottom: 20px; transition: opacity 0.3s;">点击信封拆阅</p>
     
-    <!-- 信封外壳（只管外壳视觉，不包含信纸） -->
     <div class="envelope-wrapper" id="envelopeWrapper" onclick="openEnvelope()">
       <div class="envelope-back"></div>
       <div class="envelope-mask" id="envelopeMask"></div>
@@ -496,13 +505,11 @@
       <div class="wax-seal" id="waxSeal">拾</div>
     </div>
 
-    <!-- 【核心改动】：信纸独立放在外层，方便独立做动画 -->
     <div class="envelope-paper" id="envelopePaper">
       <div class="paper-content" id="capsuleTextContent"></div>
       <div class="paper-date" id="capsuleDateContent"></div>
     </div>
 
-    <!-- 阅读完后出现的按钮 -->
     <button id="flyAwayBtn" onclick="flyPaperAway()" class="primary" style="display: none;">
       封存信件
     </button>
@@ -510,54 +517,40 @@
 
   <!-- 年度报告全屏遮罩 -->
   <div id="annualReportOverlay" class="report-overlay" style="display: none;">
-    <!-- 幻灯片容器 -->
     <div class="report-slides-container" id="reportSlidesContainer">
-      <!-- 第 1 页：小女孩开场 -->
       <div class="report-slide active" id="slide-1">
         <img src="./assets/girl-color.png" class="report-girl-intro">
         <p class="rs-desc" style="margin-top: 20px; font-size: 18px; line-height: 1.8;">
           又见面了。<br>我们一起走过了三百多天，来看看轨迹吧。
         </p>
       </div>
-
-      <!-- 第 2 页：总览 -->
       <div class="report-slide" id="slide-2">
         <h2 class="rs-title">这一年</h2>
         <div class="rs-num" id="rs-total-entries">0</div>
         <p class="rs-desc">片碎片，被你拾起</p>
       </div>
-
-      <!-- 第 3 页：大事记 -->
       <div class="report-slide" id="slide-3">
         <h2 class="rs-title">高光时刻</h2>
         <div class="rs-num" id="rs-total-milestones">0</div>
         <p class="rs-desc">件大事，被你用力记住</p>
         <div class="rs-graphic-line"></div>
       </div>
-
-      <!-- 第 4 页：最特别的一天（需要长按） -->
       <div class="report-slide" id="slide-4">
         <h2 class="rs-title">最特别的一天</h2>
         <div class="rs-date" id="rs-special-date">某月某日</div>
         <p class="rs-desc" style="font-size: 18px; color: #fff; margin-top: 16px; font-family: 'Kaiti', serif; line-height: 1.8;">“ <span id="rs-special-content">...</span> ”</p>
         <p class="rs-desc" style="margin-top: 20px; font-size: 14px;">这是你写得最多的一条。</p>
       </div>
-
-      <!-- 第 5 页：高频标签 -->
       <div class="report-slide" id="slide-5">
         <h2 class="rs-title">频繁出现的词</h2>
         <div class="rs-highlight" id="rs-top-tag">#生活</div>
         <p class="rs-desc">原来你总是围绕着它记录</p>
       </div>
-      
-      <!-- 第 6 页：深夜记录 -->
       <div class="report-slide" id="slide-6">
         <h2 class="rs-title">在深夜</h2>
         <div class="rs-num" id="rs-night-entries">0</div>
         <p class="rs-desc">次，你在凌晨留下了痕迹</p>
       </div>
-      
-      <!-- 第 7 页：小女孩结尾 -->
       <div class="report-slide" id="slide-7">
         <img src="./assets/girl-color.png" class="report-girl-outro">
         <h2 class="rs-title" style="margin-top: 20px;">时间就是这样</h2>
@@ -565,26 +558,17 @@
         <button class="primary" style="margin-top: 30px; background: #fff; color: #000; padding: 10px 24px; border-radius: 20px;" onclick="closeAnnualReport()">退出回顾</button>
       </div>
     </div>
-    
-    <!-- 底部提示 -->
     <div class="report-hint" id="reportHint">轻触屏幕继续 ▸</div>
   </div>
 
   <!-- 专注钟全屏遮罩 -->
   <div id="focusOverlay" class="focus-overlay" style="display: none;">
-    <!-- 星光容器 -->
     <div id="starField" class="star-field"></div>
-    
-    <!-- 中央倒计时 -->
     <div class="focus-content">
       <div class="focus-time" id="focusTime">25:00</div>
       <div class="focus-label" id="focusLabel">专注中，星光正在汇聚...</div>
     </div>
-
-    <!-- 小女孩陪伴 -->
     <img src="./assets/girl-color.png" alt="陪伴" class="focus-girl">
-    
-    <!-- 底部按钮 -->
     <button class="focus-quit-btn" onclick="quitFocus()">结束专注</button>
   </div>
 
@@ -608,10 +592,8 @@
 
   <!-- 全屏签到独立页面 -->
   <div id="checkinOverlay" class="checkin-overlay" style="display: none;">
-    <!-- 横向日历 -->
     <div class="horizontal-calendar" id="horizontalCalendar"></div>
 
-    <!-- 卡牌区域 -->
     <div class="checkin-card-wrapper">
       <div class="checkin-card" id="checkinCard">
         <div class="card-face card-back">
@@ -625,13 +607,11 @@
       </div>
     </div>
 
-    <!-- 操作按钮区（固定在底部） -->
     <div class="checkin-actions">
       <button id="btnFlipCard" class="primary" onclick="openMoodModal()">签到并翻开</button>
       <button id="btnCloseCheckin" class="primary" onclick="closeCheckinPage()">收下这份记忆</button>
     </div>
     
-    <!-- 心情选择弹窗 -->
     <div id="moodModal" class="modal-mask" hidden>
       <div class="modal-content" style="max-width: 400px; margin: 0 auto; border-radius: 20px 20px 0 0;">
         <div class="modal-header">
@@ -639,7 +619,6 @@
           <button class="close-btn" onclick="closeMoodModal()">×</button>
         </div>
         <div class="mood-grid">
-          <!-- 用 SVG 替代 Emoji -->
           <button class="mood-btn" data-mood="sun" onclick="submitCheckin('sun', '充满阳光')">
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
           </button>
@@ -659,6 +638,30 @@
       </div>
     </div>
   </div>
+
+  <!-- 底部导航栏 -->
+  <nav class="bottom-nav">
+    <div class="nav-item" data-view="record" onclick="switchView('record')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>记录</span>
+    </div>
+    <div class="nav-item" data-view="timeline" onclick="switchView('timeline')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>时间轴</span>
+    </div>
+    <div class="nav-item" data-view="plan" onclick="switchView('plan')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+      <span>计划</span>
+    </div>
+    <div class="nav-item" data-view="more" onclick="switchView('more')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      <span>更多</span>
+    </div>
+    <div class="nav-item" data-view="mine" onclick="switchView('mine')">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>我的</span>
+    </div>
+  </nav>
 
   <script src="js/state.js"></script>
   <script src="js/utils.js"></script>

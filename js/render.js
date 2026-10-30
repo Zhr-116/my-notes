@@ -1,53 +1,77 @@
 function render() {
-  const pageTitles = { 'review': '回顾', 'book': '书架', 'plan': '计划', 'shop': '拾光商店', 'tagDetail': '标签档案' };
+  // 字典：需要显示顶部返回按钮和标题的子页面
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置' };
   const isSubPage = Object.keys(pageTitles).includes(currentView);
 
-  const mainTabs = document.getElementById("mainTabs");
   const subPageTitle = document.getElementById("subPageTitle");
   const appTitle = document.getElementById("appTitle");
   const subBackBtn = document.getElementById("subBackBtn");
-  const headerCheckinBtn = document.getElementById("headerCheckinBtn"); // 新增
+  const headerCheckinBtn = document.getElementById("headerCheckinBtn");
 
+  // 处理顶部栏状态
   if (isSubPage) {
-    mainTabs.hidden = true;
     subPageTitle.hidden = false;
     subPageTitle.innerText = pageTitles[currentView];
     appTitle.hidden = true;
     subBackBtn.hidden = false;
     headerCheckinBtn.hidden = true; 
   } else {
-    mainTabs.hidden = false;
     subPageTitle.hidden = true;
     appTitle.hidden = false;
     subBackBtn.hidden = true;
     headerCheckinBtn.hidden = false;
   }
 
+  // 【核心修复】动态返回按钮逻辑
+  if (subBackBtn) {
+    subBackBtn.onclick = () => {
+      if (currentView === "tagDetail") {
+        switchView("record"); // 标签档案回记录
+      } else if (currentView === "settings") {
+        switchView("mine");   // 设置回我的
+      } else {
+        switchView("more");   // 回顾、书架、商店回更多
+      }
+    };
+  }
+
+  // 页面显隐控制
   document.getElementById("recordView").hidden = currentView !== "record";
   document.getElementById("timelineView").hidden = currentView !== "timeline";
   document.getElementById("reviewView").hidden = currentView !== "review";
   document.getElementById("bookView").hidden = currentView !== "book";
   document.getElementById("planView").hidden = currentView !== "plan";
   document.getElementById("moreView").hidden = currentView !== "more";
+  document.getElementById("mineView").hidden = currentView !== "mine";
   document.getElementById("shopView").hidden = currentView !== "shop";
-  document.getElementById("tagDetailView").hidden = currentView !== "tagDetail"; 
+  document.getElementById("tagDetailView").hidden = currentView !== "tagDetail";
+  document.getElementById("settingsView").hidden = currentView !== "settings"; 
 
-  document.querySelectorAll(".tabs button").forEach((btn) => {
-    const isMorePage = ["review", "book", "plan", "shop", "more"].includes(currentView);
-    if (btn.dataset.view === "more") {
-      btn.classList.toggle("active", isMorePage);
+  // 【核心修复】底部导航栏高亮
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    const view = item.dataset.view;
+    const isMoreSub = ["review", "book", "shop"].includes(currentView);
+    const isMineSub = ["settings"].includes(currentView);
+    
+    if (view === "more" && isMoreSub) {
+      item.classList.add("active"); // 在子页面时，父级Tab保持高亮
+    } else if (view === "mine" && isMineSub) {
+      item.classList.add("active");
+    } else if (view === "record" && currentView === "tagDetail") {
+      item.classList.add("active");
     } else {
-      btn.classList.toggle("active", btn.dataset.view === currentView);
+      item.classList.toggle("active", view === currentView);
     }
   });
 
-  // 动态替换相机图标（在 index.html 里的那个 label）
+  // 动态替换图标
   const camLabel = document.getElementById("cameraBtnLabel");
   if (camLabel) camLabel.innerHTML = getIcon('camera') + ' 添加图片';
 
   const genCardBtn = document.getElementById("generateCardBtn");
   if (genCardBtn) genCardBtn.innerHTML = getIcon('card') + ' 生成分享卡片';
 
+  // 路由渲染分发
   if (currentView === "record") { renderTagBar(); renderList(); } 
   else if (currentView === "timeline") { renderTimeline(); } 
   else if (currentView === "review") { renderReview(); } 
@@ -55,6 +79,10 @@ function render() {
   else if (currentView === "plan") { renderPlanView(); } 
   else if (currentView === "shop") { renderShop(); } 
   else if (currentView === "tagDetail") { renderTagDetailView(); } 
+  else if (currentView === "settings") {
+    const select = document.getElementById("defaultViewSelect");
+    if (select) select.value = localStorage.getItem("mini-default-view") || "record";
+  }
 }
 
 function switchView(viewName) {
@@ -134,7 +162,6 @@ function renderTimeline() {
 function renderItem(e) {
   const hasDetail = !!(e.detail && e.detail.trim());
   
-  // 动态获取铃铛/星星图标
   const milestoneBadge = `
     <span class="badge-toggle ${e.isMilestone ? 'is-milestone' : ''}" 
           onclick="event.stopPropagation(); toggleMilestone('${e.id}')"
@@ -144,8 +171,7 @@ function renderItem(e) {
     </span>
   `;
 
-  // 动态获取铅笔图标
-  const detailBadge = hasDetail ? `<span class="badge-detail" style="display:inline-flex; align-items:center; gap:4px;">${getIcon('pencil')} 详情</span>` : '';
+  const detailBadge = hasDetail ? `<span class="badge-detail" style="display:inline-flex;align-items:center; gap:4px;">${getIcon('pencil')} 详情</span>` : '';
 
   return `
     <div class="list-item ${e.isMilestone ? 'is-milestone-item' : ''}" data-id="${e.id}">
@@ -257,7 +283,6 @@ function renderTagDetailView() {
   const container = document.getElementById("tagDetailContent");
   if (!container) return;
 
-  // 1. 过滤出当前标签的所有记录
   const tagEntries = entries.filter(e => (e.tags || []).includes(currentTagDetail));
 
   if (!tagEntries.length) {
@@ -265,12 +290,10 @@ function renderTagDetailView() {
     return;
   }
 
-  // 2. 统计数据
   const total = tagEntries.length;
   const sortedAsc = tagEntries.slice().sort((a,b) => a.date.localeCompare(b.date));
   const firstDate = sortedAsc[0].date;
 
-  // 3. 构建近 60 天的微型热力图
   const today = new Date();
   let heatmapHtml = `<div class="heatmap-grid" style="grid-template-columns: repeat(15, 1fr); gap: 4px; margin-bottom: 20px;">`;
   const countMap = {};
@@ -291,7 +314,6 @@ function renderTagDetailView() {
   }
   heatmapHtml += `</div>`;
 
-  // 4. 按月分组，生成折叠列表
   const sortedDesc = tagEntries.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || "").localeCompare(a.createdAt || ""));
   const groups = {};
   sortedDesc.forEach(e => {
@@ -304,7 +326,6 @@ function renderTagDetailView() {
   let listHtml = "";
   months.forEach((month) => {
     const items = groups[month];
-    // 复用全局的 expandedMonths，但加个前缀防止和主页冲突
     const isExpanded = expandedMonths.has("tag-" + month);
     
     listHtml += `
@@ -315,12 +336,10 @@ function renderTagDetailView() {
     `;
     
     if (isExpanded) {
-      // 直接复用 renderItem，完美保留左滑、置顶等所有功能！
       listHtml += `<div class="list-container">${items.map(renderItem).join("")}</div>`;
     }
   });
 
-  // 5. 拼装完整 HTML
   container.innerHTML = `
     <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 20px;">
       <div class="stat-card">
@@ -343,7 +362,6 @@ function renderTagDetailView() {
   `;
 }
 
-// 标签页专属的折叠控制
 function toggleTagMonth(month) {
   const key = "tag-" + month;
   if (expandedMonths.has(key)) expandedMonths.delete(key);

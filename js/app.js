@@ -29,8 +29,6 @@ document.querySelectorAll(".tabs button").forEach((btn) => {
   };
 });
 
-document.getElementById("exportMdBtn").onclick = exportMarkdown;
-document.getElementById("exportJsonBtn").onclick = exportJson;
 
 // === 左滑手势逻辑（修复点击按钮不灵敏问题） ===
 let startX = 0;
@@ -245,12 +243,7 @@ document.getElementById("downloadCardBtn")?.addEventListener("click", async () =
 });
 
 // === 导入备份逻辑 ===
-const importBtn = document.getElementById("importBtn");
 const importFile = document.getElementById("importFile");
-
-importBtn.addEventListener("click", () => {
-  importFile.click();
-});
 
 importFile.addEventListener("change", (e) => {
   const file = e.target.files[0];
