@@ -135,23 +135,134 @@
     <!-- 更多功能页 -->
     <section id="moreView" hidden>
       <div class="more-grid">
+        
+        <!-- 回顾看板 -->
         <div class="more-card" onclick="switchView('review')">
-          <span class="more-icon">📊</span>
+          <span class="more-icon" style="color: var(--text-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+          </span>
           <span>回顾看板</span>
         </div>
+        
+        <!-- 私人书架 -->
         <div class="more-card" onclick="switchView('book')">
-          <span class="more-icon">📚</span>
+          <span class="more-icon" style="color: var(--text-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16"/><path d="M16 13h2"/><path d="M16 9h2"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/><path d="M6 13h2"/><path d="M6 9h2"/></svg>
+          </span>
           <span>私人书架</span>
         </div>
+
+        <!-- 拾光商店 -->
         <div class="more-card" onclick="switchView('shop')">
-          <span class="more-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.983 21.186a1 1 0 0 1-1.966 0 10 10 0 0 0-8.203-8.203 1 1 0 0 1 0-1.966 10 10 0 0 0 8.203-8.203 1 1 0 0 1 1.966 0 10 10 0 0 0 8.203 8.203 1 1 0 0 1 0 1.966 10 10 0 0 0-8.203 8.203"/></svg>
+          <span class="more-icon" style="color: var(--text-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/></svg>
           </span>
           <span>拾光商店</span>
         </div>
+
+        <!-- 拾光趣问 (游戏) -->
+        <div class="more-card" onclick="switchView('game')">
+          <span class="more-icon" style="color: var(--text-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+          </span>
+          <span>拾光趣问</span>
+        </div>
+
+        <!-- 时间胶囊 -->
         <div class="more-card" onclick="openCapsuleModal()">
-          <span class="more-icon">✉️</span>
+          <span class="more-icon" style="color: var(--text-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.363 17.634a2 2 0 00-.506.854l-.837 2.87a.5.5 0 00.62.62l2.87-.837a2 2 0 00.854-.506l3.013-3.009a1 1 0 10-3.004-3.004z"/><path d="M22 10.38V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2h6.25"/><path d="m22 7-8.991 5.727a2 2 0 01-2.009 0L2 7"/></svg>
+          </span>
           <span>时间胶囊</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 拾光关卡页视图 -->
+    <section id="gameView" hidden>
+      
+      <!-- 关卡首页（准备状态） -->
+      <div id="gameStartPanel" style="padding: 10px 0;">
+        
+        <!-- 词库选择：改成文化题库 -->
+        <div class="section-title" style="margin-bottom: 12px;">选择题库</div>
+        <div class="tag-bar" style="margin-bottom: 24px;">
+          <button class="tag-chip active" onclick="selectSubject(this, 'poem')">诗词接龙</button>
+          <button class="tag-chip" onclick="selectSubject(this, 'idiom')">成语探秘</button>
+          <button class="tag-chip" onclick="selectSubject(this, 'trivia')">冷知识百科</button>
+          <button class="tag-chip" onclick="selectSubject(this, 'history')">历史碎片</button>
+        </div>
+
+        <!-- 模式选择：改成玩法（或者像之前一样分限时和不限时） -->
+        <div class="section-title" style="margin-bottom: 12px;">选择模式</div>
+        <div class="mode-grid">
+          <!-- 限时冲分 -->
+          <div class="mode-card active" onclick="selectMode(this, 'rush')">
+            <div class="mode-icon" style="color: var(--accent); margin-bottom: 4px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="mode-name">限时冲分</div>
+            <div class="mode-desc">60秒极速答题</div>
+          </div>
+          <!-- 悠闲品读 -->
+          <div class="mode-card" onclick="selectMode(this, 'relax')">
+            <div class="mode-icon" style="color: var(--accent); margin-bottom: 4px;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v2"/><path d="M14 2v2"/><path d="M16 8a1 1 0 0 1 1 1v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V9a1 1 0 0 1 1-1h14a4 4 0 1 1 0 8h-1"/><path d="M6 2v2"/></svg>
+            </div>
+            <div class="mode-name">悠闲品读</div>
+            <div class="mode-desc">不限时看解析</div>
+          </div>
+        </div>
+
+        <!-- 开始按钮 -->
+        <div style="margin-top: 40px;">
+          <button class="primary" style="width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="startGame()">开启趣问</button>
+        </div>
+      </div>
+
+      <!-- 答题面板（答题状态，默认隐藏） -->
+      <div id="gamePlayPanel" hidden>
+        <!-- 顶部状态栏：包含进度、计时器、得分 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 14px; font-weight: bold; color: var(--text-secondary);">
+          <span id="gameProgressText">第 1 题</span>
+          <span id="gameTimerText" style="color: var(--accent); font-family: monospace; font-size: 16px;">⏳ 60s</span>
+          <span id="gameScoreText">得分: 0</span>
+        </div>
+
+        <!-- 题目卡片 -->
+        <div id="questionCard" style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 30px 20px; min-height: 160px; display: flex; align-items: center; justify-content: center; text-align: center; box-shadow: var(--shadow-card); margin-bottom: 24px;">
+          <div id="questionText" style="font-size: 20px; font-weight: 700; color: var(--text-primary); line-height: 1.5; font-family: 'Georgia', serif;">题目加载中...</div>
+        </div>
+
+        <!-- 选项列表 -->
+        <div id="optionsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+        <!-- 解析反馈区（语境模式特有，限时模式自动跳过） -->
+        <div id="feedbackPanel" hidden style="margin-top: 20px; padding: 16px; border-radius: 12px; background: var(--surface-muted); border: 1px dashed var(--border);">
+          <div id="feedbackResult" style="font-size: 16px; font-weight: bold; margin-bottom: 8px;"></div>
+          <div id="feedbackExplanation" style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;"></div>
+          <button class="primary" style="width: 100%; margin-top: 16px;" onclick="nextQuestion()">下一题</button>
+        </div>
+      </div>
+
+      <!-- 结算面板（结束状态，默认隐藏） -->
+      <div id="gameEndPanel" hidden style="text-align: center; padding: 40px 20px; animation: fadeInUp 0.4s ease;">
+        <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
+          <h2 style="font-size: 24px; color: var(--text-primary); margin: 0;">挑战完成！</h2>
+        </div>
+        
+        <div style="font-size: 48px; font-weight: 900; color: var(--accent); font-family: 'Georgia', serif; margin-bottom: 10px;">
+          <span id="finalScore">0</span> <span style="font-size: 20px; color: var(--text-secondary);">题</span>
+        </div>
+        
+        <p id="endTimeInfo" style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">时间到！</p>
+        <p id="endQuote" style="font-size: 15px; color: var(--text-secondary); margin-bottom: 40px; font-family: 'Kaiti', serif; line-height: 1.6;">“你的努力，我都记在心里。”</p>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <button class="primary" style="width: 200px; padding: 12px; font-size: 15px; border-radius: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="startGame()">再来一局</button>
+          <button style="background: transparent; border: none; color: var(--text-tertiary); font-size: 14px; cursor: pointer; padding: 10px;" onclick="resetGame()">返回大厅</button>
         </div>
       </div>
     </section>
@@ -751,6 +862,7 @@
   <script src="js/report.js"></script>
   <script src="js/focus.js"></script>
   <script src="js/checkin.js"></script>
+  <script src="js/game.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

@@ -49,39 +49,33 @@ let unlockedBadges = JSON.parse(localStorage.getItem("mini-badges") || "[]");
 let unlockedCards = JSON.parse(localStorage.getItem("mini-cards") || "[]"); 
 function saveCards() { localStorage.setItem("mini-cards", JSON.stringify(unlockedCards)); }
 
-// 每日星迹上限设定（50星迹）
-const DAILY_STAR_LIMIT = 50;
+// 每日星迹上限设定（100星迹）
+const DAILY_STAR_LIMIT = 100;
 
-function addStars(amount) {
+function addStars(amount, silent = false) {
   const today = todayStr();
-  // 获取今天已经获得的星迹记录
   let dailyData = JSON.parse(localStorage.getItem("mini-daily-stars") || '{"date":"", "count":0}');
   
-  // 如果跨天了，重置今日获取量
   if (dailyData.date !== today) {
     dailyData = { date: today, count: 0 };
   }
 
-  // 计算还能获得多少
   let remaining = DAILY_STAR_LIMIT - dailyData.count;
   
-  // 如果今天已经拿满了
   if (remaining <= 0) {
-    showToast(`今日星迹已达上限（${DAILY_STAR_LIMIT}），明天再来吧！`);
+    if (!silent) showToast(`今日星迹已达上限（${DAILY_STAR_LIMIT}），明天再来吧！`);
     return; 
   }
 
-  // 实际增加的星迹（不能超过上限）
   let actualAmount = Math.min(amount, remaining);
   
   userStars += actualAmount;
   dailyData.count += actualAmount;
 
-  // 保存数据
   localStorage.setItem("mini-stars", userStars.toString());
   localStorage.setItem("mini-daily-stars", JSON.stringify(dailyData));
   
-  showToast(`${STAR_ICON} 获得 ${actualAmount} 星迹！`);
+  if (!silent) showToast(`${STAR_ICON} 获得 ${actualAmount} 星迹！`);
 }
 
 // 记录当前查看的标签聚合页名称

@@ -1,6 +1,6 @@
 function render() {
   // 字典：需要显示顶部返回按钮和标题的子页面
-  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置' };
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡' };
   const isSubPage = Object.keys(pageTitles).includes(currentView);
   
   const subPageTitle = document.getElementById("subPageTitle");
@@ -57,7 +57,15 @@ function render() {
   // 动态返回按钮逻辑
   if (subBackBtn) {
     subBackBtn.onclick = () => {
-      if (currentView === "tagDetail") {
+      if (currentView === "game") {
+        if (typeof stopGameTimer === 'function') stopGameTimer();
+        // 如果在答题中或结算中，回大厅；如果本来就在大厅，回更多
+        if (!document.getElementById("gamePlayPanel").hidden || !document.getElementById("gameEndPanel").hidden) {
+          resetGame();
+        } else {
+          switchView("more", true);
+        }
+      } else if (currentView === "tagDetail") {
         switchView("record", true); 
       } else if (currentView === "settings") {
         switchView("mine", true);   
@@ -78,11 +86,12 @@ function render() {
   document.getElementById("shopView").hidden = currentView !== "shop";
   document.getElementById("tagDetailView").hidden = currentView !== "tagDetail";
   document.getElementById("settingsView").hidden = currentView !== "settings"; 
+  document.getElementById("gameView").hidden = currentView !== "game"; 
 
   // 底部导航栏高亮
   document.querySelectorAll(".nav-item").forEach((item) => {
     const view = item.dataset.view;
-    const isMoreSub = ["review", "book", "shop"].includes(currentView);
+    const isMoreSub = ["review", "book", "shop", "game"].includes(currentView); // 【加上 "game"】
     const isMineSub = ["settings"].includes(currentView);
     
     if (view === "more" && isMoreSub) {
@@ -332,7 +341,7 @@ function renderList() {
     const emptyMsg = isSearching || activeTag ? "没有找到匹配的记录。" : "还没有记录，写一条吧。";
     listEl.innerHTML = `
       <div class="empty" style="display:flex; flex-direction:column; align-items:center; justify-content:center; width:100%; margin-top: 60px;">
-        <img src="./assets/plane.svg" alt="纸飞机" class="plane-img">
+        <img src="./assets/plane.svg" alt="纸飞机" class="plane-img" style="width: 65px; height: 65px; object-fit: contain;">
         <span style="text-align:center; margin-top: 16px;">${emptyMsg}</span>
       </div>
     `;

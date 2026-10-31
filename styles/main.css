@@ -963,3 +963,115 @@ body {
   60% { transform: translate(-5px, 0) rotate(-3deg); }
   80% { transform: translate(5px, 0) rotate(3deg); }
 }
+
+/* ================= 拾光关卡 ================= */
+.game-option-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 15px;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+.game-option-btn:hover {
+  background: var(--surface-muted);
+  border-color: var(--text-tertiary);
+}
+.game-option-btn.correct {
+  background: #dcfce7;
+  border-color: #16a34a;
+  color: #166534;
+}
+.game-option-btn.wrong {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+.game-option-btn:disabled {
+  cursor: default;
+}
+/* 选项前缀字母 A B C D */
+.game-option-prefix {
+  font-family: monospace;
+  font-weight: bold;
+  color: var(--text-tertiary);
+  margin-right: 12px;
+  background: var(--surface-muted);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+/* ================= 拾光关卡大厅 ================= */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.mode-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--text-tertiary);
+}
+
+/* 选中状态：带一点主题色 */
+.mode-card.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.mode-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.mode-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.mode-desc {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  transform: scale(0.9);
+}
+
+/* 选中状态的微调 */
+.mode-card.active .mode-desc {
+  color: var(--accent-text);
+}
+
+/* 拾光趣问专属：向上滑出淡入 */
+.anim-slide-up {
+  animation: slideUpFade 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@keyframes slideUpFade {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}

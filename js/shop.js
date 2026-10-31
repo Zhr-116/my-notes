@@ -12,8 +12,10 @@ const CARD_POOL = [
   { id: "card_09", title: "满满心意", rarity: "R", img: "./assets/cards/card_09.png", quote: "收下我全部的心意。" },
   { id: "card_10", title: "满载而归", rarity: "SSR", img: "./assets/cards/card_10.png", quote: "恭喜完成，这是属于你的荣光。" }
 ];
-let isBadgeGridExpanded = false; // 记录徽章区是否展开
-let isCardGridExpanded = false; // 记录卡牌区是否展开
+
+let isBadgeGridExpanded = false;
+let isCardGridExpanded = false;
+
 const BOX_POOLS = {
   nature: {
     name: "自然物语", price: 100, 
@@ -36,32 +38,15 @@ const BOX_POOLS = {
       { id: "s5", title: "星云", color1: "#2dd4bf", color2: "#115e59", icon: `<img src="./assets/star3.svg" style="width: 36px; height: 36px; object-fit: contain; filter: brightness(0) invert(1);">` }
     ]
   },
-  // 第三个盲盒：林间生灵（动物类）
   animal: {
     name: "林间生灵", price: 120, 
     img: "./assets/box-yellow.svg", 
     items: [
-      { 
-        id: "a1", title: "猫", color1: "#fca5a5", color2: "#991b1b", 
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z" /><path d="M8 14v.5" /><path d="M16 14v.5" /><path d="M11.25 16.25h1.5L12 17l-.75-.75Z" /></svg>` 
-      },
-      { 
-        id: "a2", title: "狗", color1: "#fcd34d", color2: "#b45309", 
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.25 16.25h1.5L12 17z" /><path d="M16 14v.5" /><path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444a11.702 11.702 0 0 0-.493-3.309" /><path d="M8 14v.5" /><path d="M8.5 8.5c-.384 1.05-1.083 2.028-2.344 2.5-1.931.722-3.576-.297-3.656-1-.113-.994 1.177-6.53 4-7 1.923-.321 3.651.845 3.651 2.235A7.497 7.497 0 0 1 14 5.277c0-1.39 1.844-2.598 3.767-2.277 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.855-1.45-2.239-2.5" /></svg>` 
-      },
-      { 
-        id: "a3", title: "爪印", color1: "#f9a8d4", color2: "#831843", 
-        // 【修改点】把有问题的兔子换成了完美无缺的爪印
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>` 
-      },
-      { 
-        id: "a4", title: "飞鸟", color1: "#93c5fd", color2: "#1e40af", 
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01" /><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20" /><path d="m20 7 2 .5-2 .5" /><path d="M10 18v3" /><path d="M14 17.75V21" /><path d="M7 18a6 6 0 0 0 3.84-10.61" /></svg>` 
-      },
-      { 
-        id: "a5", title: "游鱼", color1: "#5eead4", color2: "#115e59", 
-        icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z" /><path d="M18 12v.5" /><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86" /><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33" /><path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4" /><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98" /></svg>` 
-      }
+      { id: "a1", title: "猫", color1: "#fca5a5", color2: "#991b1b", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z" /><path d="M8 14v.5" /><path d="M16 14v.5" /><path d="M11.25 16.25h1.5L12 17l-.75-.75Z" /></svg>` },
+      { id: "a2", title: "狗", color1: "#fcd34d", color2: "#b45309", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.25 16.25h1.5L12 17z" /><path d="M16 14v.5" /><path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444a11.702 11.702 0 0 0-.493-3.309" /><path d="M8 14v.5" /><path d="M8.5 8.5c-.384 1.05-1.083 2.028-2.344 2.5-1.931.722-3.576-.297-3.656-1-.113-.994 1.177-6.53 4-7 1.923-.321 3.651.845 3.651 2.235A7.497 7.497 0 0 1 14 5.277c0-1.39 1.844-2.598 3.767-2.277 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.855-1.45-2.239-2.5" /></svg>` },
+      { id: "a3", title: "爪印", color1: "#f9a8d4", color2: "#831843", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg>` },
+      { id: "a4", title: "飞鸟", color1: "#93c5fd", color2: "#1e40af", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h.01" /><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20" /><path d="m20 7 2 .5-2 .5" /><path d="M10 18v3" /><path d="M14 17.75V21" /><path d="M7 18a6 6 0 0 0 3.84-10.61" /></svg>` },
+      { id: "a5", title: "游鱼", color1: "#5eead4", color2: "#115e59", icon: `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 12c.94-3.46 4.94-6 8.5-6 3.56 0 6.06 2.54 7 6-.94 3.47-3.44 6-7 6s-7.56-2.53-8.5-6Z" /><path d="M18 12v.5" /><path d="M16 17.93a9.77 9.77 0 0 1 0-11.86" /><path d="M7 10.67C7 8 5.58 5.97 2.73 5.5c-1 1.5-1 5 .23 6.5-1.24 1.5-1.24 5-.23 6.5C5.58 18.03 7 16 7 13.33" /><path d="M10.46 7.26C10.2 5.88 9.17 4.24 8 3h5.8a2 2 0 0 1 1.98 1.67l.23 1.4" /><path d="m16.01 17.93-.23 1.4A2 2 0 0 1 13.8 21H9.5a5.96 5.96 0 0 0 1.49-3.98" /></svg>` }
     ]
   }
 };
@@ -70,47 +55,32 @@ function renderShop() {
   const container = document.getElementById("shopContent");
   if (!container) return;
 
-  // --- 1. 徽章部分（带折叠逻辑） ---
   let badgesHtml = "";
   const allItems = Object.values(BOX_POOLS).flatMap(p => p.items);
   const totalItemsCount = allItems.length;
-  
-  // 提取有效已解锁徽章对象列表
-  const validUnlockedBadges = unlockedBadges
-    .map(id => allItems.find(b => b.id === id))
-    .filter(b => b !== undefined);
+  const validUnlockedBadges = unlockedBadges.map(id => allItems.find(b => b.id === id)).filter(b => b !== undefined);
   const validUnlockedCount = validUnlockedBadges.length;
 
   if (validUnlockedCount === 0) {
     badgesHtml = `<div class="empty" style="grid-column: 1/-1; padding: 20px 0; font-size: 13px; color: var(--text-tertiary);">继续记录，去解锁隐藏的惊喜吧！</div>`;
   } else {
-    // 默认只展示前 4 个（一排）
-    const badgesToDisplay = (!isBadgeGridExpanded && validUnlockedCount > 4)
-      ? validUnlockedBadges.slice(0, 4)
-      : validUnlockedBadges;
-
+    const badgesToDisplay = (!isBadgeGridExpanded && validUnlockedCount > 4) ? validUnlockedBadges.slice(0, 4) : validUnlockedBadges;
     badgesHtml = badgesToDisplay.map(badge => `
       <div class="badge-item">
-        <div class="luxury-badge" style="--c1: ${badge.color1}; --c2: ${badge.color2};">
-          ${badge.icon}
-        </div>
+        <div class="luxury-badge" style="--c1: ${badge.color1}; --c2: ${badge.color2};">${badge.icon}</div>
         <span class="badge-name">${badge.title}</span>
       </div>
     `).join("");
-
-    // 如果超过 4 个，加折叠按钮
     if (validUnlockedCount > 4) {
       badgesHtml += `
         <div style="grid-column: 1 / -1; text-align: center; margin-top: -6px; margin-bottom: -6px;">
           <button onclick="toggleBadgeGrid()" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;">
             ${isBadgeGridExpanded ? '收起橱窗 ▴' : `展开全部 ${validUnlockedCount} 款 ▾`}
           </button>
-        </div>
-      `;
+        </div>`;
     }
   }
 
-  // --- 2. 卡牌部分（带折叠逻辑，只展示一排3张） ---
   let cardsHtml = "";
   const totalCards = CARD_POOL.length;
   const unlockedCardList = CARD_POOL.filter(c => unlockedCards.includes(c.id));
@@ -119,89 +89,64 @@ function renderShop() {
   if (validCardsCount === 0) {
     cardsHtml = `<div class="empty" style="grid-column: 1/-1; padding: 20px 0; font-size: 13px; color: var(--text-tertiary);">继续记录，去收集拾迹的精灵卡牌吧！</div>`;
   } else {
-    // 默认只展示前 3 张（一排）
-    const cardsToDisplay = (!isCardGridExpanded && validCardsCount > 3) 
-      ? unlockedCardList.slice(0, 3) 
-      : unlockedCardList;
-
+    const cardsToDisplay = (!isCardGridExpanded && validCardsCount > 3) ? unlockedCardList.slice(0, 3) : unlockedCardList;
     cardsHtml = cardsToDisplay.map(card => `
       <div class="collect-card" onclick="previewCard('${card.id}')">
         <div class="card-inner">
-          <img src="${card.img}" alt="${card.title}" class="card-img">
+          <img src="${card.img}" alt="${card.title}" class="card-img" loading="lazy">
           <div class="card-quote">${card.quote}</div>
         </div>
         <div class="card-rarity rarity-${card.rarity.toLowerCase()}">${card.rarity}</div>
       </div>
     `).join("");
-
-    // 如果超过 3 张，加折叠按钮
     if (validCardsCount > 3) {
       cardsHtml += `
         <div style="grid-column: 1 / -1; text-align: center; margin-top: -6px; margin-bottom: -6px;">
           <button onclick="toggleCardGrid()" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;">
             ${isCardGridExpanded ? '收起卡册 ▴' : `展开全部 ${validCardsCount} 张 ▾`}
           </button>
-        </div>
-      `;
+        </div>`;
     }
   }
 
-  // --- 3. 盲盒货架部分 ---
   let shelvesHtml = Object.keys(BOX_POOLS).map(key => {
     const box = BOX_POOLS[key];
     const poolTotal = box.items.length;
     const poolUnlocked = box.items.filter(item => unlockedBadges.includes(item.id)).length;
-    
     return `
       <div class="mystery-box" onclick="openMysteryBox('${key}')">
         <div class="box-progress">${poolUnlocked}/${poolTotal}</div>
-        <img src="${box.img}" alt="${box.name}" class="box-img">
+        <img src="${box.img}" alt="${box.name}" class="box-img" loading="lazy">
         <div class="box-price">${STAR_ICON} ${box.price}</div>
-      </div>
-    `;
+      </div>`;
   }).join("");
 
-  // --- 4. 拼装完整 HTML ---
   container.innerHTML = `
     <div class="shop-header">
       <div class="stars-display">${STAR_ICON} 星迹：<span>${userStars}</span></div>
     </div>
 
     <div class="shop-section">
-      <h3 class="section-title">
-        荣誉橱窗 
-        <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">
-          已集齐 ${validUnlockedCount} / ${totalItemsCount} 款
-        </span>
-      </h3>
+      <h3 class="section-title">荣誉橱窗 <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">已集齐 ${validUnlockedCount} / ${totalItemsCount} 款</span></h3>
       <div class="badge-showcase">${badgesHtml}</div>
     </div>
 
-    <!-- 拾迹卡牌 -->
     <div class="shop-section" style="margin-top: 40px;">
-      <h3 class="section-title">
-        拾迹精灵 
-        <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">
-          已收集 ${validCardsCount} / ${totalCards} 张
-        </span>
-      </h3>
+      <h3 class="section-title">拾迹精灵 <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">已收集 ${validCardsCount} / ${totalCards} 张</span></h3>
       <div class="card-grid" id="shopCardGrid">${cardsHtml}</div>
     </div>
 
-    <!-- 神秘盲盒 -->
     <div class="shop-section" style="margin-top: 40px;">
       <h3 class="section-title">神秘盲盒</h3>
       <div class="shelf-container">
         ${shelvesHtml}
-        <!-- 卡包入口 -->
         <div class="mystery-box" onclick="openCardPack()">
           <div class="box-progress">${validCardsCount}/${totalCards}</div>
           <div class="box-img" style="display: flex; align-items: center; justify-content: center;">
             <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
               <rect x="6" y="4" width="12" height="16" rx="2" ry="2" transform="rotate(-15 12 12)" fill="var(--accent-soft)"></rect>
               <rect x="6" y="4" width="12" height="16" rx="2" ry="2" fill="var(--surface)"></rect>
-              <path d="M12 8v8"></path>
-              <path d="M9 12h6"></path>
+              <path d="M12 8v8"></path><path d="M9 12h6"></path>
             </svg>
           </div>
           <div class="box-price">${STAR_ICON} 200</div>
@@ -211,30 +156,32 @@ function renderShop() {
     </div>
 
     <!-- 外观装扮区 -->
-    <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
+    <div class="shop-section" style="margin-top: 30px; margin-bottom: 30px;">
       <h3 class="section-title">外观装扮</h3>
-      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 16px;">
-        <div class="theme-preview" style="display: flex; gap: 8px; background: var(--surface-muted); padding: 10px; border-radius: 8px;">
-           <img src="./assets/theme-doodle/bell.svg" style="width: 24px; height: 24px;">
-           <img src="./assets/theme-doodle/pencil.svg" style="width: 24px; height: 24px;">
-           <img src="./assets/theme-doodle/card.svg" style="width: 24px; height: 24px;">
-        </div>
-        <div class="theme-info" style="flex: 1;">
-          <h4 style="margin: 0 0 4px 0; font-size: 15px;">手账涂鸦包</h4>
-          <p style="margin: 0; font-size: 12px; color: var(--text-secondary);">包含 4 款全彩图标 + 复古牛皮纸底色</p>
+      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <!-- 左侧：小图标预览 + 名字 -->
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div class="theme-preview" style="display: flex; gap: 4px; background: var(--surface-muted); padding: 4px 8px; border-radius: 6px;">
+             <img src="./assets/theme-doodle/bell.svg" style="width: 16px; height: 16px;">
+             <img src="./assets/theme-doodle/pencil.svg" style="width: 16px; height: 16px;">
+             <img src="./assets/theme-doodle/card.svg" style="width: 16px; height: 16px;">
+          </div>
+          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">手账涂鸦包</h4>
         </div>
         
+        <!-- 右侧：按钮 -->
         ${currentTheme === 'doodle' 
-          ? `<button onclick="setTheme('default')" class="primary" style="background: var(--text-secondary); padding: 6px 12px; font-size: 13px; white-space: nowrap;">切回默认</button>`
+          ? `<button onclick="setTheme('default')" class="primary" style="background: var(--text-secondary); padding: 6px 14px; font-size: 13px; white-space: nowrap;">切回默认</button>`
           : (ownedThemes.includes('doodle')
-              ? `<button onclick="setTheme('doodle')" class="primary" style="padding: 6px 12px; font-size: 13px; white-space: nowrap;">切换手账</button>`
-              : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 12px; font-size: 13px; white-space: nowrap;">✨ 500 购买</button>`)
+              ? `<button onclick="setTheme('doodle')" class="primary" style="padding: 6px 14px; font-size: 13px; white-space: nowrap;">切换手账</button>`
+              : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 14px; font-size: 13px; white-space: nowrap;">500 购买</button>`)
         }
       </div>
     </div>
   `;
 }
-// 在 shop.js 最下面加上购买逻辑
+
 function buyTheme(themeName, price) {
   if (currentTheme === themeName) {
     showToast("你已经在使用这个主题啦");
@@ -244,11 +191,10 @@ function buyTheme(themeName, price) {
     showToast("星迹不足，快去记录吧！");
     return;
   }
-  
   if (confirm(`确定花费 ${price} 星迹解锁并切换至该主题吗？`)) {
     userStars -= price;
     localStorage.setItem("mini-stars", userStars.toString());
-    setTheme(themeName); // 这个方法在 theme.js 里，会自动 render()
+    setTheme(themeName);
   }
 }
 
@@ -264,63 +210,55 @@ function openMysteryBox(poolKey) {
   renderShop(); 
 
   const overlay = document.getElementById("boxOverlay");
+  // 强制重置 HTML，防止被卡牌撑爆
+  overlay.innerHTML = `
+    <div id="openingBoxContainer" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;"></div>
+    <div id="boxResult" style="display: none; width: 320px; background: #fff; border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);"></div>
+  `;
   const boxContainer = document.getElementById("openingBoxContainer");
   const resultEl = document.getElementById("boxResult");
   
   overlay.style.display = "flex";
   boxContainer.style.display = "flex";
   resultEl.style.display = "none";
-  resultEl.innerHTML = "";
   
   boxContainer.innerHTML = `<img src="${pool.img}" style="width: 120px; height: 120px; object-fit: contain;">`;
-
   boxContainer.style.animation = "none";
   boxContainer.offsetHeight; 
   boxContainer.style.animation = "boxShake 0.4s ease-in-out infinite";
 
   setTimeout(() => {
     boxContainer.style.display = "none";
-    
     const randomIndex = Math.floor(Math.random() * pool.items.length);
     const drawnItem = pool.items[randomIndex];
     const isDuplicate = unlockedBadges.includes(drawnItem.id);
     
     if (isDuplicate) {
-      // 退款提高到 40%
       const refund = Math.floor(pool.price * 0.4);
       userStars += refund;
       localStorage.setItem("mini-stars", userStars.toString());
-      
       resultEl.innerHTML = `
-        <div class="luxury-badge" style="filter: grayscale(100%); opacity: 0.5; --c1: #ccc; --c2: #999; width: 80px; height: 80px;">
-          ${drawnItem.icon}
-        </div>
+        <div class="luxury-badge" style="filter: grayscale(100%); opacity: 0.5; --c1: #ccc; --c2: #999; width: 80px; height: 80px;">${drawnItem.icon}</div>
         <div class="result-title" style="color: #666; margin-top: 16px;">重复的【${drawnItem.title}】</div>
         <div class="result-desc" ...>已退还 ${STAR_ICON} ${refund} 星迹</div>
-        <button class="primary" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('boxOverlay').style.display='none'; renderShop();">我知道了</button>
+        <button class="primary" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = ''; renderShop();">我知道了</button>
       `;
     } else {
       unlockedBadges.push(drawnItem.id);
       checkStoryTrigger("draw_box");
       localStorage.setItem("mini-badges", JSON.stringify(unlockedBadges));
-      
       resultEl.innerHTML = `
-        <div class="luxury-badge" style="--c1: ${drawnItem.color1}; --c2: ${drawnItem.color2}; width: 90px; height: 90px; margin-bottom: 20px;">
-          ${drawnItem.icon}
-        </div>
+        <div class="luxury-badge" style="--c1: ${drawnItem.color1}; --c2: ${drawnItem.color2}; width: 90px; height: 90px; margin-bottom: 20px;">${drawnItem.icon}</div>
         <div class="result-title" style="color: var(--accent); font-size: 18px;">🎉 获得全新徽章</div>
         <div class="result-name">【${drawnItem.title}】</div>
-        <button class="primary" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('boxOverlay').style.display='none'; renderShop();">收入橱窗</button>
+        <button class="primary" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = ''; renderShop();">收入橱窗</button>
       `;
     }
-    
     resultEl.style.display = "flex";
     resultEl.style.animation = "popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards";
-    
   }, 800); 
 }
 
-// === 拾迹卡牌抽取逻辑 ===
 function openCardPack() {
   const price = 200;
   if (userStars < price) {
@@ -331,34 +269,28 @@ function openCardPack() {
   userStars -= price;
   localStorage.setItem("mini-stars", userStars.toString());
   
-  // 1. 找出所有未拥有的卡牌
   const unownedCards = CARD_POOL.filter(c => !unlockedCards.includes(c.id));
   const ownedCount = CARD_POOL.length - unownedCards.length;
   
   let drawnCard;
   let targetRarity;
 
-  // 【核心保底机制】：如果已经收集过半，且有未拥有的卡，直接大幅提升未拥有卡的概率
   if (ownedCount >= 5 && unownedCards.length > 0) {
-    // 80% 概率直接从“未拥有”里抽，20% 概率正常抽（给一点随机感）
     if (Math.random() < 0.8) {
       drawnCard = unownedCards[Math.floor(Math.random() * unownedCards.length)];
     } else {
-      // 正常概率抽
       const rand = Math.random() * 100;
       targetRarity = rand < 5 ? "SSR" : (rand < 30 ? "R" : "N");
       const pool = CARD_POOL.filter(c => c.rarity === targetRarity);
       drawnCard = pool[Math.floor(Math.random() * pool.length)];
     }
   } else {
-    // 如果收集度还低，按正常概率抽
     const rand = Math.random() * 100;
     targetRarity = rand < 5 ? "SSR" : (rand < 30 ? "R" : "N");
     const pool = CARD_POOL.filter(c => c.rarity === targetRarity);
     drawnCard = pool[Math.floor(Math.random() * pool.length)];
   }
 
-  // 如果所有卡都已经集齐了，就不做未拥有判断了
   if (unownedCards.length === 0) {
     const rand = Math.random() * 100;
     targetRarity = rand < 5 ? "SSR" : (rand < 30 ? "R" : "N");
@@ -374,7 +306,6 @@ function openCardPack() {
     checkStoryTrigger("draw_box"); 
   }
 
-  // 触发全屏翻牌动画
   playCardDrawAnimation(drawnCard, isDuplicate);
 }
 
@@ -385,13 +316,10 @@ function playCardDrawAnimation(card, isDuplicate) {
   overlay.innerHTML = `
     <div class="flip-card-container">
       <div class="flip-card" id="drawFlipCard">
-        <!-- 背面（初始状态显示）：卡背 -->
         <div class="flip-card-back" style="background: url('./assets/card-back.jpg') center/cover; background-size: cover;"></div>
-        
-        <!-- 正面（翻转后显示）：卡牌 -->
         <div class="flip-card-front">
           <div class="card-inner">
-            <img src="${card.img}" class="card-img">
+            <img src="${card.img}" class="card-img" loading="lazy">
             <div class="card-quote">${card.quote}</div>
           </div>
           <div class="card-rarity rarity-${card.rarity.toLowerCase()}" style="position: absolute; top: 6px; right: 6px; z-index: 5;">${card.rarity}</div>
@@ -399,18 +327,11 @@ function playCardDrawAnimation(card, isDuplicate) {
       </div>
     </div>
     
-    <!-- 翻转后浮现的文字与按钮（缩小了字号和间距） -->
     <div id="cardResultContent" style="opacity: 0; display: flex; flex-direction: column; align-items: center; margin-top: 20px; transition: opacity 0.6s ease; text-align: center;">
-      <div style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">
-        ${isDuplicate ? '重复获得' : '🎉 获得全新卡牌'}
-      </div>
-      <div style="font-size: 18px; font-family: 'Songti SC', serif; font-weight: 700; margin: 6px 0; color: #fff;">
-        【${card.title}】
-      </div>
-      <div style="font-size: 12px; color: #fcd34d; margin-bottom: 16px;">
-        ${isDuplicate ? '自动转化为 80 星迹' : '已收入拾迹精灵图鉴'}
-      </div>
-      <button class="primary" style="width: 160px; background: #fff; color: #333; border-radius: 20px; padding: 10px; font-size: 14px; font-weight: bold;" onclick="document.getElementById('boxOverlay').style.display='none'; renderShop();">收下卡牌</button>
+      <div style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">${isDuplicate ? '重复获得' : '🎉 获得全新卡牌'}</div>
+      <div style="font-size: 18px; font-family: 'Songti SC', serif; font-weight: 700; margin: 6px 0; color: #fff;">【${card.title}】</div>
+      <div style="font-size: 12px; color: #fcd34d; margin-bottom: 16px;">${isDuplicate ? '自动转化为 80 星迹' : '已收入拾迹精灵图鉴'}</div>
+      <button class="primary" style="width: 160px; background: #fff; color: #333; border-radius: 20px; padding: 10px; font-size: 14px; font-weight: bold;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = ''; renderShop();">收下卡牌</button>
     </div>
   `;
 
@@ -427,9 +348,7 @@ function playCardDrawAnimation(card, isDuplicate) {
   setTimeout(() => {
     flipCard.style.animation = "none";
     void flipCard.offsetWidth; 
-    
     flipCard.classList.add("flipped");
-    
     setTimeout(() => {
       resultContent.style.opacity = "1";
     }, 800); 
@@ -446,12 +365,12 @@ function previewCard(cardId) {
   overlay.innerHTML = `
     <div class="collect-card" style="width: 240px; height: 340px; padding: 12px; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: scale(1.1);">
       <div class="card-inner">
-        <img src="${card.img}" class="card-img">
+        <img src="${card.img}" class="card-img" loading="lazy">
         <div class="card-quote">${card.quote}</div>
       </div>
       <div class="card-rarity rarity-${card.rarity.toLowerCase()}" style="font-size: 12px; padding: 4px 8px; top: 8px; right: 8px; z-index: 5;">${card.rarity}</div>
     </div>
-    <button class="primary" style="margin-top: 40px; background: #fff; color: #333; padding: 10px 30px; border-radius: 20px;" onclick="document.getElementById('boxOverlay').style.display='none';">关闭预览</button>
+    <button class="primary" style="margin-top: 40px; background: #fff; color: #333; padding: 10px 30px; border-radius: 20px;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = '';">关闭预览</button>
   `;
 }
 
