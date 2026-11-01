@@ -11,7 +11,27 @@ function renderReview() {
   const milestoneCount = entries.filter(e => e.isMilestone).length;
   const streak = calculateStreak(entries);
 
-  // 2. 生成 HTML
+  // 2. 计算“专属时间人格”
+  let timePersonality = "随性的记录者";
+  if (entries.length > 3) {
+    const hourCounts = new Array(24).fill(0);
+    entries.forEach(e => {
+      if (e.createdAt) {
+        const hour = new Date(e.createdAt).getHours();
+        hourCounts[hour]++;
+      }
+    });
+    const maxHour = hourCounts.indexOf(Math.max(...hourCounts));
+    
+    if (maxHour >= 0 && maxHour <= 5) { timePersonality = "深夜的造梦师"; }
+    else if (maxHour >= 6 && maxHour <= 9) { timePersonality = "清晨的拾光者"; }
+    else if (maxHour >= 10 && maxHour <= 13) { timePersonality = "正午的向日葵"; }
+    else if (maxHour >= 14 && maxHour <= 17) { timePersonality = "午后的品茶人"; }
+    else if (maxHour >= 18 && maxHour <= 21) { timePersonality = "黄昏的拾荒者"; }
+    else { timePersonality = "星夜的晚风"; }
+  }
+
+  // 3. 拼装完整 HTML
   let html = `
     <div class="stats-grid">
       <div class="stat-card">
@@ -28,7 +48,8 @@ function renderReview() {
       </div>
     </div>
 
-    <div class="heatmap-section">
+    <!-- 近期足迹（热力图） -->
+    <div class="heatmap-section" style="margin-top: 30px;">
       <h3 class="section-title">近期足迹</h3>
       <div class="heatmap-wrapper">
         <div class="heatmap-grid" id="heatmapGrid"></div>
@@ -42,37 +63,23 @@ function renderReview() {
         </div>
       </div>
     </div>
-  `;
 
-  container.innerHTML = html;
-  drawHeatmap();
+    <!-- 时间人格：像手账末尾的斜体签名 -->
+    <div style="text-align: right; font-size: 14px; color: var(--text-secondary); font-family: 'Kaiti', serif; font-style: italic; margin-top: 15px; margin-bottom: 40px; padding-right: 10px;">
+      —— ${timePersonality}
+    </div>
 
-  // 在原本的统计和热力图下面，加上 11 和魔狗的对峙彩蛋
-  html += `
+    <!-- 彩蛋保留 -->
     <div class="easter-egg-container">
-      <!-- 左侧：11 和她的台词 -->
       <div class="character-left">
         <div class="speech-bubble">
           “ Friends don't lie. ”
         </div>
         <img src="./assets/eleven.svg" alt="11" class="eleven-img">
       </div>
-      
-      <!-- 右侧：虎视眈眈的魔狗 -->
       <div class="character-right">
         <img src="./assets/demogorgon.svg" alt="Demogorgon" class="demo-img">
       </div>
-    </div>
-  `;
-
-  // 在 container.innerHTML = ... 的末尾，加上这个入口
-  html += `
-    <div class="annual-report-entry" onclick="openAnnualReport()" style="margin-top: 30px; margin-bottom: 40px; background: linear-gradient(135deg, #1f2937 0%, #111827 100%); border-radius: 16px; padding: 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2);">
-      <div>
-        <h3 style="color: #fff; margin: 0 0 6px 0; font-size: 18px;">🎬 开启年度报告</h3>
-        <p style="color: #9ca3af; margin: 0; font-size: 13px;">看看这一年，你留下了什么痕迹。</p>
-      </div>
-      <span style="color: #fff; font-size: 20px;">▸</span>
     </div>
   `;
 
@@ -80,7 +87,7 @@ function renderReview() {
   drawHeatmap();
 }
 
-// 计算连续打卡天数
+// 计算连续天数
 function calculateStreak(entries) {
   const dates = [...new Set(entries.map(e => e.date))].sort().reverse();
   if (dates.length === 0) return 0;
@@ -105,14 +112,15 @@ function calculateStreak(entries) {
   return streak;
 }
 
-// 绘制热力图（最近 120 天）
+// 绘制热力图
 function drawHeatmap() {
   const grid = document.getElementById("heatmapGrid");
+  if (!grid) return;
+  
   const days = 120;
   const today = new Date();
-  const todayFormatted = todayStr(); // 获取今天的日期字符串
+  const todayFormatted = todayStr();
   
-  // 统计每天的记录数
   const countMap = {};
   entries.forEach(e => {
     countMap[e.date] = (countMap[e.date] || 0) + 1;
@@ -126,7 +134,6 @@ function drawHeatmap() {
     let d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     
-    // 手动格式化日期，避免时区偏差
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
@@ -139,7 +146,6 @@ function drawHeatmap() {
     if (count > 2) level = 2;
     if (count > 4) level = 3;
 
-    // 如果是今天，加一个 today 类名用于高亮
     const isToday = dateStr === todayFormatted ? "today" : "";
 
     html += `<div class="heat-cell level-${level} ${isToday}" title="${dateStr}: ${count}条"></div>`;

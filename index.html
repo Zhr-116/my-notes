@@ -27,6 +27,10 @@
 
       <!-- 右侧：主页显示导航，子页面显示标题 -->
       <div id="headerRight">
+        <!-- 新增：树洞入口（羽毛图标） -->
+        <button id="headerTreeHoleBtn" class="header-checkin-btn" onclick="openTreeHole()" title="拾迹树洞">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-feather"><path d="M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>
+        </button>
         <!-- 新增：专注闹钟按钮（仅在计划页显示） -->
         <button id="headerFocusBtn" class="header-checkin-btn" onclick="openFocusModal()" hidden>
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-alarm-clock"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/><path d="M6.38 18.7 4 21"/><path d="M17.64 18.67 20 21"/></svg>
@@ -168,6 +172,14 @@
           <span>拾光趣问</span>
         </div>
 
+        <!-- 拾光摘录 -->
+        <div class="more-card" onclick="switchView('quotes')">
+          <span class="more-icon" style="color: var(--text-primary);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+          </span>
+          <span>拾光摘录</span>
+        </div>
+
         <!-- 时间胶囊 -->
         <div class="more-card" onclick="openCapsuleModal()">
           <span class="more-icon" style="color: var(--text-primary);">
@@ -267,6 +279,21 @@
       </div>
     </section>
 
+    <!-- 拾光摘录页视图 -->
+    <section id="quotesView" hidden>
+      <!-- 顶部操作栏 -->
+      <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+        <button class="primary" style="flex: 1; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="openQuoteModal()">+ 摘录一句话</button>
+        <button class="primary" style="background: var(--accent-soft); color: var(--accent-text); border: 1px solid var(--accent); flex: 1; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 6px;" onclick="randomQuote()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="12" height="12" x="2" y="10" rx="2" ry="2"/><path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6"/><path d="M6 18h.01"/><path d="M10 14h.01"/><path d="M15 6h.01"/><path d="M18 9h.01"/></svg>
+          岁月漫游
+        </button>
+      </div>
+      
+      <!-- 摘录列表 -->
+      <div id="quotesList" class="quotes-grid"></div>
+    </section>
+
     <!-- 我的页面 -->
     <section id="mineView" hidden>
       <div style="display: flex; align-items: center; gap: 16px; padding: 10px 10px 20px 10px;">
@@ -342,6 +369,55 @@
             <option value="plan">计划倒计时</option>
             <option value="mine">我的</option>
           </select>
+        </div>
+
+        <!-- 新增：拾迹定制区 -->
+        <h3 class="section-title">拾迹定制</h3>
+        <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; padding: 16px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 16px;">
+          
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-size: 15px; color: var(--text-primary);">时间轴导航</span>
+            <input type="checkbox" id="featTimeline" onchange="toggleFeature('timeline', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+          </label>
+          
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-size: 15px; color: var(--text-primary);">计划与专注导航</span>
+            <input type="checkbox" id="featPlan" onchange="toggleFeature('plan', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+          </label>
+
+          <div style="border-top: 1px dashed var(--border); padding-top: 16px; display: flex; flex-direction: column; gap: 16px;">
+            <span style="font-size: 12px; color: var(--text-tertiary);">更多页内置模块（开启任意一项会自动保留底部“更多”入口）</span>
+            
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span style="font-size: 15px; color: var(--text-primary);">拾光商店</span>
+              <input type="checkbox" id="featShop" onchange="toggleFeature('shop', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+            </label>
+            
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span style="font-size: 15px; color: var(--text-primary);">拾光趣问</span>
+              <input type="checkbox" id="featGame" onchange="toggleFeature('game', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+            </label>
+
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span style="font-size: 15px; color: var(--text-primary);">私人书架</span>
+              <input type="checkbox" id="featBook" onchange="toggleFeature('book', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+            </label>
+
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span style="font-size: 15px; color: var(--text-primary);">回顾看板</span>
+              <input type="checkbox" id="featReview" onchange="toggleFeature('review', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+            </label>
+
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span style="font-size: 15px; color: var(--text-primary);">时间胶囊</span>
+              <input type="checkbox" id="featCapsule" onchange="toggleFeature('capsule', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+            </label>
+
+            <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+              <span style="font-size: 15px; color: var(--text-primary);">拾光摘录</span>
+              <input type="checkbox" id="featQuotes" onchange="toggleFeature('quotes', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+            </label>
+          </div>
         </div>
 
         <div style="text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 40px;">
@@ -438,6 +514,46 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 拾迹树洞全屏遮罩 -->
+    <div id="treeHoleOverlay" class="treehole-overlay" style="display: none;">
+      <!-- 新增：右上角关闭按钮 -->
+      <button class="close-btn" style="position: absolute; top: max(20px, env(safe-area-inset-top)); right: 20px; z-index: 20; background: rgba(0,0,0,0.05);" onclick="closeTreeHole()">×</button>
+      <!-- 飘散动画的容器 -->
+      <div id="windContainer" style="position: absolute; inset: 0; pointer-events: none; z-index: 9999;"></div>
+      <!-- 输入区 -->
+      <div id="treeHoleInputArea" style="width: 90%; max-width: 500px; display: flex; flex-direction: column; align-items: center; z-index: 10;">
+        <p style="color: #8c8273; font-size: 13px; letter-spacing: 2px; margin-bottom: 20px;">在这里，什么都不用留下</p>
+        <textarea id="treeHoleText" placeholder="写点什么，然后让它随风去吧..." style="width: 100%; height: 40vh; background: transparent; border: none; outline: none; resize: none; font-family: 'Kaiti', 'STKaiti', serif; font-size: 18px; line-height: 1.8; color: #333; text-align: center;"></textarea>
+        <div style="margin-top: 20px;">
+          <button class="primary" style="padding: 12px 40px; border-radius: 24px; font-size: 16px; letter-spacing: 2px;" onclick="blowAway()">随风散去</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加摘录弹窗 -->
+    <div id="quoteModal" class="modal-mask" hidden>
+      <div class="modal-content">
+        <div class="modal-header">
+          <span class="modal-date">拾取一段光</span>
+          <button class="close-btn" onclick="closeQuoteModal()">×</button>
+        </div>
+        <div class="modal-edit-area">
+          <textarea id="quoteContentInput" placeholder="写下那句打动你的话..." style="min-height: 100px; font-family: 'Kaiti', serif; font-size: 16px;"></textarea>
+          <input type="text" id="quoteSourceInput" placeholder="出处（如：某本书、某首歌，选填）" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
+          <div class="modal-actions">
+            <button class="primary" onclick="saveQuote()">收下</button>
+            <button onclick="closeQuoteModal()">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 岁月漫游（随机抽取展示）遮罩 -->
+    <div id="quoteRandomOverlay" class="report-overlay" style="display: none; align-items: center; justify-content: center; padding: 20px;">
+      <div id="randomQuoteCard" class="random-quote-card"></div>
+      <button class="primary" style="margin-top: 30px; background: #fff; color: #000; border-radius: 20px; padding: 10px 24px;" onclick="closeRandomQuote()">收下这份回忆</button>
     </div>
 
     <!-- 卡片生成器 -->

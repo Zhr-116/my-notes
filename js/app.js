@@ -542,3 +542,140 @@ document.getElementById("importZipFile")?.addEventListener("change", async (e) =
     e.target.value = "";
   }
 });
+
+function toggleFeature(key, isChecked) {
+  appFeatures[key] = isChecked;
+  saveFeatures(); // 存入 localStorage
+  render();       // 立刻重新渲染
+}
+
+// ================= 拾迹树洞逻辑 =================
+function openTreeHole() {
+  const overlay = document.getElementById("treeHoleOverlay");
+  const textarea = document.getElementById("treeHoleText");
+  const p = document.querySelector("#treeHoleInputArea p");
+  const btn = document.querySelector("#treeHoleInputArea button");
+
+  // 【核心修复】打开时，重置所有状态，防止上次关闭的残留
+  textarea.value = "";
+  textarea.classList.remove("treehole-fade-out");
+  p.style.opacity = "1";
+  btn.style.opacity = "1";
+  btn.disabled = false;
+  
+  overlay.style.display = "flex";
+  overlay.offsetHeight; // 强制重绘
+  overlay.classList.add("show");
+  
+  setTimeout(() => textarea.focus(), 300);
+}
+
+function closeTreeHole() {
+  const overlay = document.getElementById("treeHoleOverlay");
+  overlay.classList.remove("show");
+  setTimeout(() => overlay.style.display = "none", 400);
+}
+
+function blowAway() {
+  const textarea = document.getElementById("treeHoleText");
+  
+  if (!textarea.value.trim()) {
+    closeTreeHole();
+    return;
+  }
+
+  const p = document.querySelector("#treeHoleInputArea p");
+  const btn = document.querySelector("#treeHoleInputArea button");
+
+  // 1. 隐藏提示语和按钮
+  p.style.opacity = "0";
+  btn.style.opacity = "0";
+  btn.disabled = true;
+
+  // 2. 开始原地模糊动画
+  textarea.classList.add("treehole-fade-out");
+
+  // 3. 等待 1.8 秒，文字彻底模糊
+  setTimeout(() => {
+    // 4. 触发遮罩层的淡出（此时按钮已经被隐藏了，绝对不会闪现）
+    closeTreeHole();
+    
+    // 5. 清空文字内容
+    textarea.value = "";
+
+    // 6. 等遮罩层彻底看不见了（400ms后），再弹出那句温柔的提示
+    setTimeout(() => {
+      showToast("已随风散去", 3000);
+    }, 400);
+
+  }, 1800);
+}
+
+// ================= 拾光摘录逻辑 =================
+function openQuoteModal() {
+  document.getElementById("quoteModal").hidden = false;
+  document.getElementById("quoteContentInput").value = "";
+  document.getElementById("quoteSourceInput").value = "";
+  setTimeout(() => document.getElementById("quoteContentInput").focus(), 300);
+}
+
+function closeQuoteModal() {
+  document.getElementById("quoteModal").hidden = true;
+}
+
+function saveQuote() {
+  const content = document.getElementById("quoteContentInput").value.trim();
+  const source = document.getElementById("quoteSourceInput").value.trim();
+  
+  if (!content) {
+    alert("写点什么再收下吧~");
+    return;
+  }
+  
+  quotes.unshift({
+    id: Date.now().toString(),
+    content: content,
+    source: source,
+    date: todayStr()
+  });
+  
+  saveQuotes();
+  closeQuoteModal();
+  renderQuotesView(); // 刷新列表
+  showToast("已收入摘录本");
+}
+
+function deleteQuote(id, event) {
+  event.stopPropagation(); // 阻止触发卡片的点击事件
+  if (confirm("确定要把这句话丢掉吗？")) {
+    quotes = quotes.filter(q => q.id !== id);
+    saveQuotes();
+    renderQuotesView();
+  }
+}
+
+function randomQuote() {
+  if (quotes.length === 0) {
+    showToast("摘录本还是空的，快去收集几句吧！");
+    return;
+  }
+  
+  const random = quotes[Math.floor(Math.random() * quotes.length)];
+  const overlay = document.getElementById("quoteRandomOverlay");
+  const card = document.getElementById("randomQuoteCard");
+  
+  card.innerHTML = `
+    <div style="font-family: 'Kaiti', serif; font-size: 22px; color: #333; line-height: 1.8; margin-bottom: 20px;">“ ${random.content} ”</div>
+    <div style="font-size: 14px; color: #8c8273; font-style: italic;">—— ${random.source || '未知出处'}</div>
+    <div style="font-size: 12px; color: #ccc; margin-top: 20px;">拾于 ${random.date}</div>
+  `;
+  
+  overlay.style.display = "flex";
+  overlay.classList.add("show");
+}
+
+function closeRandomQuote() {
+  const overlay = document.getElementById("quoteRandomOverlay");
+  overlay.classList.remove("show");
+  setTimeout(() => overlay.style.display = "none", 400);
+}

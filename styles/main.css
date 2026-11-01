@@ -1075,3 +1075,98 @@ body {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ================= 拾迹树洞 ================= */
+.treehole-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(247, 247, 245, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* 适配手账主题底色 */
+html[data-theme="doodle"] .treehole-overlay {
+  background: rgba(251, 250, 247, 0.95);
+}
+
+.treehole-overlay.show {
+  opacity: 1;
+}
+
+/* 拾迹树洞：文字原地失焦消失 */
+.treehole-fade-out {
+  animation: blurOutText 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none; /* 动画期间禁止点击 */
+}
+
+@keyframes blurOutText {
+  0% { filter: blur(0px); opacity: 1; transform: scale(1); }
+  50% { filter: blur(4px); opacity: 0.5; }
+  100% { filter: blur(15px); opacity: 0; transform: scale(1.03); }
+}
+
+/* ================= 拾光摘录 ================= */
+.quotes-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.quote-card {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s;
+}
+.quote-card:hover { transform: translateY(-2px); }
+
+.quote-card-content {
+  font-family: 'Kaiti', 'STKaiti', serif;
+  font-size: 18px;
+  color: var(--text-primary);
+  line-height: 1.8;
+  margin-bottom: 12px;
+  white-space: pre-wrap;
+}
+
+.quote-card-source {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  text-align: right;
+  font-style: italic;
+}
+
+.quote-card-delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--border);
+  font-size: 20px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.quote-card-delete:hover { color: #ef4444; }
+
+/* 岁月漫游展示卡片 */
+.random-quote-card {
+  background: #fcf9f2;
+  border: 1px solid #d1c7b8;
+  border-radius: 16px;
+  padding: 40px 30px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  text-align: center;
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}

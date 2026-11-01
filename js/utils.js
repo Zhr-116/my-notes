@@ -18,12 +18,19 @@ function escapeHtml(str) {
   });
 }
 
-function showToast(msg) {
+function showToast(msg, duration = 1400) {
   const t = document.createElement("div");
   t.className = "toast";
   t.innerHTML = msg; 
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 1400);
+  
+  // 到了时间开始淡出
+  setTimeout(() => {
+    t.style.transition = "opacity 0.4s ease";
+    t.style.opacity = "0";
+    // 等淡出动画结束再移除 DOM
+    setTimeout(() => t.remove(), 400);
+  }, duration);
 }
 
 function download(filename, text, type = "text/plain;charset=utf-8") {

@@ -1,6 +1,22 @@
 function render() {
+  // 【核心修复】把 hasMoreModules 的定义提前到第一行，解决 TDZ 报错
+  const hasMoreModules = appFeatures.shop || appFeatures.game || appFeatures.book || appFeatures.review || appFeatures.capsule || appFeatures.quotes;
+
+  // 安全拦截：如果当前页面所在的模块被关了，强制退回记录页
+  if (
+    (currentView === 'timeline' && !appFeatures.timeline) ||
+    (currentView === 'plan' && !appFeatures.plan) ||
+    (currentView === 'shop' && !appFeatures.shop) ||
+    (currentView === 'game' && !appFeatures.game) ||
+    (currentView === 'book' && !appFeatures.book) ||
+    (currentView === 'review' && !appFeatures.review) ||
+    ((currentView === 'more') && !hasMoreModules)
+  ) {
+    currentView = 'record';
+  }
+
   // 字典：需要显示顶部返回按钮和标题的子页面
-  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡' };
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡', 'quotes': '拾光摘录'};
   const isSubPage = Object.keys(pageTitles).includes(currentView);
   
   const subPageTitle = document.getElementById("subPageTitle");
@@ -8,7 +24,8 @@ function render() {
   const subBackBtn = document.getElementById("subBackBtn");
   const headerCheckinBtn = document.getElementById("headerCheckinBtn");
   const headerSettingsBtn = document.getElementById("headerSettingsBtn");
-  const headerFocusBtn = document.getElementById("headerFocusBtn"); // 【修复1】补上漏掉的声明
+  const headerFocusBtn = document.getElementById("headerFocusBtn");
+  const headerTreeHoleBtn = document.getElementById("headerTreeHoleBtn");
 
   // 处理顶部栏状态
   if (isSubPage) {
@@ -21,6 +38,7 @@ function render() {
     headerCheckinBtn.hidden = true; 
     if (headerSettingsBtn) headerSettingsBtn.hidden = true; 
     if (headerFocusBtn) headerFocusBtn.hidden = true;
+    if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; // 【新增】子页面隐藏树洞
   } else {
     subPageTitle.hidden = true;
     appTitle.hidden = false;
@@ -31,16 +49,23 @@ function render() {
       headerCheckinBtn.hidden = true;
       if (headerSettingsBtn) headerSettingsBtn.hidden = false;
       if (headerFocusBtn) headerFocusBtn.hidden = true;
+      if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; // 【新增】我的页面隐藏树洞
     } else if (currentView === "plan") {
       // 计划页显示签到和专注闹钟
       headerCheckinBtn.hidden = false;
       if (headerSettingsBtn) headerSettingsBtn.hidden = true;
       if (headerFocusBtn) headerFocusBtn.hidden = false;
+      if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; // 【新增】计划页隐藏树洞
     } else {
-      // 其他页面（记录、时间轴、更多）只显示签到
+      // 其他主页面（记录、时间轴、更多）
       headerCheckinBtn.hidden = false;
       if (headerSettingsBtn) headerSettingsBtn.hidden = true;
       if (headerFocusBtn) headerFocusBtn.hidden = true;
+      
+      // 【核心修复】树洞只在“记录”页显示，时间轴和更多页都隐藏
+      if (headerTreeHoleBtn) {
+        headerTreeHoleBtn.hidden = (currentView !== "record");
+      }
     }
   }
 
@@ -59,7 +84,6 @@ function render() {
     subBackBtn.onclick = () => {
       if (currentView === "game") {
         if (typeof stopGameTimer === 'function') stopGameTimer();
-        // 如果在答题中或结算中，回大厅；如果本来就在大厅，回更多
         if (!document.getElementById("gamePlayPanel").hidden || !document.getElementById("gameEndPanel").hidden) {
           resetGame();
         } else {
@@ -69,6 +93,8 @@ function render() {
         switchView("record", true); 
       } else if (currentView === "settings") {
         switchView("mine", true);   
+      } else if (currentView === "quotes") { // 【新增这行】明确指出摘录回更多
+        switchView("more", true);
       } else {
         switchView("more", true);   
       }
@@ -87,11 +113,56 @@ function render() {
   document.getElementById("tagDetailView").hidden = currentView !== "tagDetail";
   document.getElementById("settingsView").hidden = currentView !== "settings"; 
   document.getElementById("gameView").hidden = currentView !== "game"; 
+  document.getElementById("quotesView").hidden = currentView !== "quotes";
+
+  // ================= 模块定制：动态底部导航 =================
+  const navContainer = document.querySelector(".bottom-nav");
+  if (navContainer) {
+    let navHtml = `
+      <div class="nav-item" data-view="record" onclick="switchView('record')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>记录</span>
+      </div>
+    `;
+    
+    if (appFeatures.timeline) {
+      navHtml += `
+      <div class="nav-item" data-view="timeline" onclick="switchView('timeline')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>时间轴</span>
+      </div>`;
+    }
+    
+    if (appFeatures.plan) {
+      navHtml += `
+      <div class="nav-item" data-view="plan" onclick="switchView('plan')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>计划</span>
+      </div>`;
+    }
+
+    if (hasMoreModules) {
+      navHtml += `
+      <div class="nav-item" data-view="more" onclick="switchView('more')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+        <span>更多</span>
+      </div>`;
+    }
+
+    navHtml += `
+      <div class="nav-item" data-view="mine" onclick="switchView('mine')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>我的</span>
+      </div>
+    `;
+    
+    navContainer.innerHTML = navHtml;
+  }
 
   // 底部导航栏高亮
   document.querySelectorAll(".nav-item").forEach((item) => {
     const view = item.dataset.view;
-    const isMoreSub = ["review", "book", "shop", "game"].includes(currentView); // 【加上 "game"】
+    const isMoreSub = ["review", "book", "shop", "game"].includes(currentView); 
     const isMineSub = ["settings"].includes(currentView);
     
     if (view === "more" && isMoreSub) {
@@ -124,7 +195,100 @@ function render() {
     const select = document.getElementById("defaultViewSelect");
     if (select) select.value = localStorage.getItem("mini-default-view") || "record";
   }
-  else if (currentView === "mine") { renderMineView(); } // 【修复2】补上“我的”页面的渲染调用
+  else if (currentView === "mine") { renderMineView(); } 
+  // 【新增】动态渲染更多页
+  else if (currentView === "more") {
+    renderMoreView();
+  } else if (currentView === "quotes") { renderQuotesView(); }
+    // 同步设置页的勾选状态
+  if (document.getElementById("featTimeline")) document.getElementById("featTimeline").checked = appFeatures.timeline;
+  if (document.getElementById("featPlan")) document.getElementById("featPlan").checked = appFeatures.plan;
+  if (document.getElementById("featShop")) document.getElementById("featShop").checked = appFeatures.shop;
+  if (document.getElementById("featGame")) document.getElementById("featGame").checked = appFeatures.game;
+  if (document.getElementById("featBook")) document.getElementById("featBook").checked = appFeatures.book;
+  if (document.getElementById("featReview")) document.getElementById("featReview").checked = appFeatures.review;
+  if (document.getElementById("featCapsule")) document.getElementById("featCapsule").checked = appFeatures.capsule;
+}
+
+// 动态渲染“更多”页面
+function renderMoreView() {
+  const grid = document.querySelector("#moreView .more-grid");
+  if (!grid) return;
+
+  let html = "";
+
+  // 回顾看板
+  if (appFeatures.review) {
+    html += `
+      <div class="more-card" onclick="switchView('review')">
+        <span class="more-icon" style="color: var(--text-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg>
+        </span>
+        <span>回顾看板</span>
+      </div>`;
+  }
+
+  // 私人书架
+  if (appFeatures.book) {
+    html += `
+      <div class="more-card" onclick="switchView('book')">
+        <span class="more-icon" style="color: var(--text-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16"/><path d="M16 13h2"/><path d="M16 9h2"/><path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z"/><path d="M6 13h2"/><path d="M6 9h2"/></svg>
+        </span>
+        <span>私人书架</span>
+      </div>`;
+  }
+
+  // 拾光商店
+  if (appFeatures.shop) {
+    html += `
+      <div class="more-card" onclick="switchView('shop')">
+        <span class="more-icon" style="color: var(--text-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/></svg>
+        </span>
+        <span>拾光商店</span>
+      </div>`;
+  }
+
+  // 拾光趣问
+  if (appFeatures.game) {
+    html += `
+      <div class="more-card" onclick="switchView('game')">
+        <span class="more-icon" style="color: var(--text-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/><line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>
+        </span>
+        <span>拾光趣问</span>
+      </div>`;
+  }
+
+  // 拾光摘录
+  if (appFeatures.quotes) {
+    html += `
+      <div class="more-card" onclick="switchView('quotes')">
+        <span class="more-icon" style="color: var(--text-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+        </span>
+        <span>拾光摘录</span>
+      </div>`;
+  }
+
+  // 时间胶囊
+  if (appFeatures.capsule) {
+    html += `
+      <div class="more-card" onclick="openCapsuleModal()">
+        <span class="more-icon" style="color: var(--text-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.363 17.634a2 2 0 00-.506.854l-.837 2.87a.5.5 0 00.62.62l2.87-.837a2 2 0 00.854-.506l3.013-3.009a1 1 0 10-3.004-3.004z"/><path d="M22 10.38V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2h6.25"/><path d="m22 7-8.991 5.727a2 2 0 01-2.009 0L2 7"/></svg>
+        </span>
+        <span>时间胶囊</span>
+      </div>`;
+  }
+
+  // 如果全关了，给个提示
+  if (html === "") {
+    html = `<div class="empty" style="grid-column: 1/-1;">没有开启任何模块哦，去“我的-设置”里开启吧。</div>`;
+  }
+
+  grid.innerHTML = html;
 }
 
 function switchView(viewName, isBack = false) {
@@ -490,4 +654,22 @@ async function renderMineView() {
   }
   // 如果没头像或者没取到，用默认小女孩
   avatarEl.src = "./assets/girl-color.png";
+}
+
+function renderQuotesView() {
+  const list = document.getElementById("quotesList");
+  if (!list) return;
+
+  if (quotes.length === 0) {
+    list.innerHTML = `<div class="empty" style="padding: 40px 0;">这里空空如也，去拾起第一句打动你的话吧。</div>`;
+    return;
+  }
+
+  list.innerHTML = quotes.map(q => `
+    <div class="quote-card">
+      <button class="quote-card-delete" onclick="deleteQuote('${q.id}', event)">×</button>
+      <div class="quote-card-content">“ ${q.content} ”</div>
+      <div class="quote-card-source">—— ${q.source || '未知出处'}</div>
+    </div>
+  `).join("");
 }

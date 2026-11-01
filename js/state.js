@@ -86,3 +86,28 @@ let userProfile = JSON.parse(localStorage.getItem("mini-user-profile") || '{"nic
 function saveProfile() {
   localStorage.setItem("mini-user-profile", JSON.stringify(userProfile));
 }
+
+// ================= 模块定制中心配置 =================
+let defaultFeatures = {
+  timeline: true,  // 时间轴
+  plan: true,      // 计划页（含待办、习惯、专注钟）
+  shop: true,      // 拾光商店（在更多里）
+  game: true,      // 拾光趣问（在更多里）
+  book: true,      // 书架（在更多里）
+  review: true,    // 回顾（在更多里）
+  capsule: true,   // 时间胶囊（在更多里）
+  checkin: true,   // 首页右上角签到
+  story: true,      // 剧情小女孩
+  quotes: true
+};
+
+let appFeatures = JSON.parse(localStorage.getItem("mini-features") || JSON.stringify(defaultFeatures));
+function saveFeatures() {
+  localStorage.setItem("mini-features", JSON.stringify(appFeatures));
+}
+
+// === 拾光摘录数据 ===
+let quotes = JSON.parse(localStorage.getItem("mini-quotes") || "[]");
+function saveQuotes() {
+  localStorage.setItem("mini-quotes", JSON.stringify(quotes));
+}
