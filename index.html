@@ -301,11 +301,12 @@
         <!-- 左侧：头像容器 -->
         <div style="position: relative; flex-shrink: 0; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
           
-          <!-- 底层：头像（加上 3px 的白色内边距，像相纸的留白） -->
-          <img id="myAvatar" src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--surface); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #ffffff; box-sizing: border-box;">
+          <!-- 底层：头像（去掉了白边和背景，只保留阴影） -->
+          <img id="myAvatar" src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
           
-          <!-- 顶层：头像框（放大到 160%，增加微小的投影让线条凸显） -->
-          <img id="myAvatarFrame" src="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; object-fit: contain; pointer-events: none; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); display: none;">
+          <!-- 顶层：头像框容器 -->
+          <div id="myAvatarFrame" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10; display: none;">
+          </div>
           
         </div>
         
@@ -868,14 +869,19 @@
         <button class="close-btn" onclick="closeProfileModal()">×</button>
       </div>
       <div class="modal-edit-area">
-        <div style="text-align: center; margin-bottom: 20px;">
+        <div style="text-align: center; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center;">
           <label for="profileAvatarInput" style="cursor: pointer; position: relative; display: inline-block;">
-            <img id="profileAvatarPreview" src="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px dashed var(--border);">
+            <!-- 头像预览容器 -->
+            <div style="position: relative; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+              <!-- 头像 -->
+              <img id="profileAvatarPreview" src="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px dashed var(--border); box-sizing: border-box;">
+              <!-- 头像框预览容器 -->
+              <div id="profileAvatarFramePreview" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10; display: none;"></div>
+            </div>
             <div style="font-size: 12px; color: var(--accent); margin-top: 8px; font-weight: 600;">点击更换头像</div>
           </label>
           <input type="file" id="profileAvatarInput" accept="image/*" style="display: none;">
           
-          <!-- 【位置调整】把更换头像框的按钮紧贴在上方文字的下面 -->
           <div style="margin-top: 4px;">
             <button onclick="openFrameModal()" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; text-decoration: underline; padding: 4px;">更换头像框</button>
           </div>

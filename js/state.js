@@ -114,10 +114,18 @@ function saveQuotes() {
 
 // === 头像框数据 ===
 const FRAME_POOL = [
-  { id: "none", name: "无边框", img: "" },
-  { id: "moon", name: "星月夜", img: "./assets/frames/frame_moon.png" },
+  { id: "none", name: "无边框" },
+  { id: "moon", name: "星月夜", img: "./assets/frames/frame_moon.png", scale: 1.3 }, // 确保你的图片叫这个
   { id: "flower", name: "水彩花环", img: "./assets/frames/frame_flower.png" },
-  { id: "tape", name: "碎花胶带", img: "./assets/frames/frame_tape.png" }
+  { id: "tape", name: "碎花胶带", img: "./assets/frames/frame_tape.png" },
+  { id: "f_07", name: "水墨", img: "./assets/frames/frame_07.png" },
+  { id: "f_08", name: "多彩斑点", img: "./assets/frames/frame_08.png", scale: 1.3 },
+  { id: "f_09", name: "画框", img: "./assets/frames/frame_09.png" },
+  { id: "f_10", name: "藤曼", img: "./assets/frames/frame_10.png" },
+  { id: "f_11", name: "云中月", img: "./assets/frames/frame_11.png", scale: 1.3 },
+  { id: "f_12", name: "蝴蝶", img: "./assets/frames/frame_12.png" },
+  { id: "f_13", name: "春", img: "./assets/frames/frame_13.png", scale: 1.1 },
+  { id: "f_14", name: "star", img: "./assets/frames/frame_14.png" }
 ];
 
 // 确保 userProfile 里有 frameId（如果没有，默认无边框）

@@ -347,6 +347,7 @@ if (window.visualViewport) {
 
 // === 个人资料编辑逻辑 ===
 let tempAvatarId = null;
+let tempFrameId = "none"; // 新增：临时记录正在试穿的头像框
 
 async function openProfileModal() {
   document.getElementById("profileModal").hidden = false;
@@ -355,13 +356,40 @@ async function openProfileModal() {
   
   const preview = document.getElementById("profileAvatarPreview");
   tempAvatarId = userProfile.avatarId || null;
+  tempFrameId = userProfile.frameId || "none"; // 初始化试穿框
   
   if (tempAvatarId) {
-    if (!imageDB.db) await imageDB.init(); 
+    if (!imageDB.db) await imageDB.init();
     const base64 = await imageDB.get(tempAvatarId);
     preview.src = base64 || "./assets/girl-color.png";
   } else {
     preview.src = "./assets/girl-color.png";
+  }
+  
+  updateProfileFramePreview(); // 渲染弹窗里的框
+}
+
+// 新增辅助函数：专门更新资料弹窗里的头像框
+function updateProfileFramePreview() {
+  const frameEl = document.getElementById("profileAvatarFramePreview");
+  if (!frameEl) return;
+  const currentFrame = FRAME_POOL.find(f => f.id === tempFrameId);
+  
+  if (currentFrame) {
+    const scaleVal = currentFrame.scale || 1;
+    if (currentFrame.svg) {
+      frameEl.innerHTML = `<div style="width: 100%; height: 100%; transform: scale(${scaleVal});">${currentFrame.svg}</div>`;
+      frameEl.style.display = "block";
+    } else if (currentFrame.img) {
+      frameEl.innerHTML = `<img src="${currentFrame.img}" style="width: 100%; height: 100%; object-fit: contain; transform: scale(${scaleVal});">`;
+      frameEl.style.display = "block";
+    } else {
+      frameEl.innerHTML = "";
+      frameEl.style.display = "none";
+    }
+  } else {
+    frameEl.innerHTML = "";
+    frameEl.style.display = "none";
   }
 }
 
@@ -391,6 +419,7 @@ function saveProfileData() {
   
   userProfile.nickname = nickname;
   userProfile.signature = signature;
+  userProfile.frameId = tempFrameId; // 【核心】在这里才真正保存
   
   if (tempAvatarId) {
     userProfile.avatarId = tempAvatarId;
@@ -399,12 +428,10 @@ function saveProfileData() {
   saveProfile();
   closeProfileModal();
   
-  // 先同步更新 DOM 上的文字，保证立刻看到效果
   document.getElementById("myNickname").innerText = userProfile.nickname;
   document.getElementById("mySignature").innerText = userProfile.signature;
   
-  // 再异步渲染一下头像（如果你有 renderMineView 函数就调用它，这步不影响文字）
-  renderMineView(); 
+  renderMineView(); // 现在外面的头像和框会一起更新
   showToast("资料已更新");
 }
 
@@ -694,26 +721,34 @@ function closeFrameModal() {
 
 function renderFrameGrid() {
   const grid = document.getElementById("frameGrid");
+  if (!grid) return;
+
   grid.innerHTML = FRAME_POOL.map(frame => {
-    const isSelected = userProfile.frameId === frame.id;
+    const isSelected = tempFrameId === frame.id; // 这里改成判断 tempFrameId
     const borderColor = isSelected ? "var(--accent)" : "transparent";
     
-    // 如果是“无边框”，就显示一个淡淡的叉号图标；否则显示预览图
-    const previewHtml = frame.img 
-      ? `<img src="${frame.img}" style="width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply;">`
-      : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 24px;">/</div>`;
+    // 兼容图片和 SVG，支持单独缩放
+    let previewHtml = "";
+    const scaleVal = frame.scale || 1;
+
+    if (frame.svg) {
+      previewHtml = `<div style="width: 100%; height: 100%; transform: scale(${scaleVal});">${frame.svg}</div>`;
+    } else if (frame.img) {
+      previewHtml = `<img src="${frame.img}" style="width: 100%; height: 100%; object-fit: contain; transform: scale(${scaleVal});">`;
+    } else {
+      previewHtml = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 18px;">无</div>`;
+    }
 
     return `
       <div onclick="selectFrame('${frame.id}')" style="cursor: pointer; text-align: center;">
-        
-        <!-- 预览容器：加大到 72px，居中 -->
-        <div style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid ${borderColor}; margin: 0 auto 8px auto; background: var(--surface); position: relative; display: flex; align-items: center; justify-content: center;">
+        <!-- 预览容器 -->
+        <div style="width: 64px; height: 64px; border-radius: 50%; border: 2px solid ${borderColor}; margin: 0 auto 8px auto; background: var(--surface); position: relative; display: flex; align-items: center; justify-content: center;">
           
-          <!-- 底层：小头像（带白边） -->
-          <img src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-sizing: border-box;">
+          <!-- 底层小头像（去掉白边） -->
+          <img src="./assets/girl-color.png" style="width: 110%; height: 110%; border-radius: 50%; object-fit: cover;">
           
-          <!-- 顶层：小头像框 -->
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+          <!-- 顶层小框 -->
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10;">
             ${previewHtml}
           </div>
           
@@ -725,15 +760,9 @@ function renderFrameGrid() {
 }
 
 function selectFrame(frameId) {
-  userProfile.frameId = frameId;
-  saveProfile();
-  
-  renderFrameGrid(); // 刷新弹窗里的高亮状态
-  
-  // 延迟一点点关闭弹窗，确保底层页面先刷新完
-  setTimeout(() => {
-    closeFrameModal();
-    renderMineView(); 
-    showToast("头像框已更换");
-  }, 100);
+  tempFrameId = frameId; // 只修改试穿数据
+  renderFrameGrid(); // 刷新框弹窗的高亮
+  updateProfileFramePreview(); // 刷新资料弹窗的预览
+  closeFrameModal(); // 选完直接退回资料弹窗
 }
+

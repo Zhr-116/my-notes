@@ -671,12 +671,22 @@ async function renderMineView() {
   const avatarEl = document.getElementById("myAvatar");
   const frameEl = document.getElementById("myAvatarFrame");
 
+  // 1. 强制等待数据库就绪
+  if (!imageDB.db) {
+    await imageDB.init();
+  }
+
+  // 2. 严格加载头像
   if (avatarEl) {
     if (userProfile.avatarId) {
       try {
-        if (!imageDB.db) await imageDB.init(); 
         const base64 = await imageDB.get(userProfile.avatarId);
-        if (base64) avatarEl.src = base64;
+        if (base64) {
+          avatarEl.src = base64;
+        } else {
+          // 如果数据库里找不到，才用默认
+          avatarEl.src = "./assets/girl-color.png"; 
+        }
       } catch (err) {
         console.error("头像加载失败", err);
         avatarEl.src = "./assets/girl-color.png";
@@ -686,13 +696,25 @@ async function renderMineView() {
     }
   }
 
-  // 【核心修复】强制刷新头像框显示
+  // 【修复】渲染头像框（支持单独缩放）
   if (frameEl) {
     const currentFrame = FRAME_POOL.find(f => f.id === userProfile.frameId);
-    if (currentFrame && currentFrame.img) {
-      frameEl.src = currentFrame.img;
-      frameEl.style.display = "block";
+    if (currentFrame) {
+      // 如果没有写 scale，默认就是 1
+      const scaleVal = currentFrame.scale || 1;
+      
+      if (currentFrame.svg) {
+        frameEl.innerHTML = `<div style="width: 100%; height: 100%; transform: scale(${scaleVal});">${currentFrame.svg}</div>`;
+        frameEl.style.display = "block";
+      } else if (currentFrame.img) {
+        frameEl.innerHTML = `<img src="${currentFrame.img}" style="width: 100%; height: 100%; object-fit: contain; transform: scale(${scaleVal});">`;
+        frameEl.style.display = "block";
+      } else {
+        frameEl.innerHTML = "";
+        frameEl.style.display = "none";
+      }
     } else {
+      frameEl.innerHTML = "";
       frameEl.style.display = "none";
     }
   }
