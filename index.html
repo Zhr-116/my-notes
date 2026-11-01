@@ -299,8 +299,14 @@
       <div style="display: flex; align-items: center; gap: 16px; padding: 10px 10px 20px 10px;">
         
         <!-- 左侧：头像容器 -->
-        <div style="position: relative; flex-shrink: 0;">
-          <img id="myAvatar" src="./assets/girl-color.png" style="width: 72px; height: 72px; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); background: var(--surface);">
+        <div style="position: relative; flex-shrink: 0; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+          
+          <!-- 底层：头像（加上 3px 的白色内边距，像相纸的留白） -->
+          <img id="myAvatar" src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--surface); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #ffffff; box-sizing: border-box;">
+          
+          <!-- 顶层：头像框（放大到 160%，增加微小的投影让线条凸显） -->
+          <img id="myAvatarFrame" src="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; object-fit: contain; pointer-events: none; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); display: none;">
+          
         </div>
         
         <!-- 右侧：昵称与个签 -->
@@ -362,12 +368,6 @@
         <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; padding: 16px; margin-bottom: 30px;">
           <label style="font-size: 15px; color: var(--text-primary); display: block; margin-bottom: 10px;">默认启动首页</label>
           <select id="defaultViewSelect" class="card-select" onchange="saveDefaultView(this.value)" style="width: 100%;">
-            <option value="record">记录</option>
-            <option value="timeline">时间轴</option>
-            <option value="review">回顾看板</option>
-            <option value="book">私人书架</option>
-            <option value="plan">计划倒计时</option>
-            <option value="mine">我的</option>
           </select>
         </div>
 
@@ -874,6 +874,11 @@
             <div style="font-size: 12px; color: var(--accent); margin-top: 8px; font-weight: 600;">点击更换头像</div>
           </label>
           <input type="file" id="profileAvatarInput" accept="image/*" style="display: none;">
+          
+          <!-- 【位置调整】把更换头像框的按钮紧贴在上方文字的下面 -->
+          <div style="margin-top: 4px;">
+            <button onclick="openFrameModal()" style="background: transparent; border: none; color: var(--text-tertiary); font-size: 12px; cursor: pointer; text-decoration: underline; padding: 4px;">更换头像框</button>
+          </div>
         </div>
         
         <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">昵称</label>
@@ -886,6 +891,19 @@
           <button class="primary" onclick="saveProfileData()">保存</button>
           <button onclick="closeProfileModal()">取消</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 头像框选择弹窗 -->
+  <div id="frameModal" class="modal-mask" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">选择头像框</span>
+        <button class="close-btn" onclick="closeFrameModal()">×</button>
+      </div>
+      <div id="frameGrid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px 0;">
+        <!-- JS 动态注入 -->
       </div>
     </div>
   </div>

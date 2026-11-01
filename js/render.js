@@ -72,7 +72,8 @@ function render() {
   // 动态控制底部导航栏的显隐
   const bottomNav = document.querySelector(".bottom-nav");
   if (bottomNav) {
-    if (isSubPage) {
+    // 【核心修复】不仅看是否为子页面，还要看键盘是否弹起
+    if (isSubPage || window.isKeyboardOpen) {
       bottomNav.style.display = "none";
     } else {
       bottomNav.style.display = "flex"; 
@@ -193,7 +194,31 @@ function render() {
   else if (currentView === "tagDetail") { renderTagDetailView(); } 
   else if (currentView === "settings") {
     const select = document.getElementById("defaultViewSelect");
-    if (select) select.value = localStorage.getItem("mini-default-view") || "record";
+    if (select) {
+      // 收集当前开启的可作为启动页的模块
+      let optionsHtml = `<option value="record">记录</option>`;
+      if (appFeatures.timeline) optionsHtml += `<option value="timeline">时间轴</option>`;
+      if (appFeatures.plan) optionsHtml += `<option value="plan">计划倒计时</option>`;
+      if (appFeatures.review) optionsHtml += `<option value="review">回顾看板</option>`;
+      if (appFeatures.book) optionsHtml += `<option value="book">私人书架</option>`;
+      if (appFeatures.game) optionsHtml += `<option value="game">拾光趣问</option>`;
+      if (appFeatures.quotes) optionsHtml += `<option value="quotes">拾光摘录</option>`;
+      if (appFeatures.shop) optionsHtml += `<option value="shop">拾光商店</option>`;
+      optionsHtml += `<option value="mine">我的</option>`;
+      
+      select.innerHTML = optionsHtml;
+      
+      // 获取当前保存的默认页，如果它被关闭了，强制回退到 record
+      let savedDefault = localStorage.getItem("mini-default-view") || "record";
+      let availableValues = Array.from(select.options).map(o => o.value);
+      
+      if (!availableValues.includes(savedDefault)) {
+        savedDefault = "record";
+        localStorage.setItem("mini-default-view", "record");
+      }
+      
+      select.value = savedDefault;
+    }
   }
   else if (currentView === "mine") { renderMineView(); } 
   // 【新增】动态渲染更多页
@@ -644,16 +669,33 @@ async function renderMineView() {
   document.getElementById("mySignature").innerText = userProfile.signature;
   
   const avatarEl = document.getElementById("myAvatar");
-  if (userProfile.avatarId) {
-    if (!imageDB.db) await imageDB.init(); // 核心修复：确保数据库已初始化
-    const base64 = await imageDB.get(userProfile.avatarId);
-    if (base64) {
-      avatarEl.src = base64;
-      return;
+  const frameEl = document.getElementById("myAvatarFrame");
+
+  if (avatarEl) {
+    if (userProfile.avatarId) {
+      try {
+        if (!imageDB.db) await imageDB.init(); 
+        const base64 = await imageDB.get(userProfile.avatarId);
+        if (base64) avatarEl.src = base64;
+      } catch (err) {
+        console.error("头像加载失败", err);
+        avatarEl.src = "./assets/girl-color.png";
+      }
+    } else {
+      avatarEl.src = "./assets/girl-color.png";
     }
   }
-  // 如果没头像或者没取到，用默认小女孩
-  avatarEl.src = "./assets/girl-color.png";
+
+  // 【核心修复】强制刷新头像框显示
+  if (frameEl) {
+    const currentFrame = FRAME_POOL.find(f => f.id === userProfile.frameId);
+    if (currentFrame && currentFrame.img) {
+      frameEl.src = currentFrame.img;
+      frameEl.style.display = "block";
+    } else {
+      frameEl.style.display = "none";
+    }
+  }
 }
 
 function renderQuotesView() {

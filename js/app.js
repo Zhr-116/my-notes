@@ -329,16 +329,18 @@ render();
 initCheckin(); 
 
 // === 移动端键盘弹出时，隐藏底部导航栏 ===
+window.isKeyboardOpen = false;
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', () => {
-    const nav = document.querySelector('.bottom-nav');
-    if (!nav) return;
-    
-    // 如果视口高度明显小于屏幕高度（通常差值 > 100px），说明键盘弹出了
+    // 视口高度明显变小，说明键盘弹出了
     if (window.visualViewport.height < window.innerHeight - 100) {
-      nav.style.display = 'none'; // 键盘弹起，隐藏导航
+      window.isKeyboardOpen = true;
+      const nav = document.querySelector('.bottom-nav');
+      if (nav) nav.style.display = 'none';
     } else {
-      nav.style.display = 'flex'; // 键盘收起，恢复导航
+      window.isKeyboardOpen = false;
+      // 键盘收起时，通知重新渲染一次底部导航栏
+      if (typeof render === 'function') render();
     }
   });
 }
@@ -678,4 +680,60 @@ function closeRandomQuote() {
   const overlay = document.getElementById("quoteRandomOverlay");
   overlay.classList.remove("show");
   setTimeout(() => overlay.style.display = "none", 400);
+}
+
+// ================= 头像框系统 =================
+function openFrameModal() {
+  document.getElementById("frameModal").hidden = false;
+  renderFrameGrid();
+}
+
+function closeFrameModal() {
+  document.getElementById("frameModal").hidden = true;
+}
+
+function renderFrameGrid() {
+  const grid = document.getElementById("frameGrid");
+  grid.innerHTML = FRAME_POOL.map(frame => {
+    const isSelected = userProfile.frameId === frame.id;
+    const borderColor = isSelected ? "var(--accent)" : "transparent";
+    
+    // 如果是“无边框”，就显示一个淡淡的叉号图标；否则显示预览图
+    const previewHtml = frame.img 
+      ? `<img src="${frame.img}" style="width: 100%; height: 100%; object-fit: contain; mix-blend-mode: multiply;">`
+      : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 24px;">/</div>`;
+
+    return `
+      <div onclick="selectFrame('${frame.id}')" style="cursor: pointer; text-align: center;">
+        
+        <!-- 预览容器：加大到 72px，居中 -->
+        <div style="width: 72px; height: 72px; border-radius: 50%; border: 2px solid ${borderColor}; margin: 0 auto 8px auto; background: var(--surface); position: relative; display: flex; align-items: center; justify-content: center;">
+          
+          <!-- 底层：小头像（带白边） -->
+          <img src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #ffffff; box-sizing: border-box;">
+          
+          <!-- 顶层：小头像框 -->
+          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));">
+            ${previewHtml}
+          </div>
+          
+        </div>
+        <div style="font-size: 12px; color: ${isSelected ? 'var(--accent-text)' : 'var(--text-secondary)'};">${frame.name}</div>
+      </div>
+    `;
+  }).join("");
+}
+
+function selectFrame(frameId) {
+  userProfile.frameId = frameId;
+  saveProfile();
+  
+  renderFrameGrid(); // 刷新弹窗里的高亮状态
+  
+  // 延迟一点点关闭弹窗，确保底层页面先刷新完
+  setTimeout(() => {
+    closeFrameModal();
+    renderMineView(); 
+    showToast("头像框已更换");
+  }, 100);
 }

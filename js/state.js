@@ -111,3 +111,17 @@ let quotes = JSON.parse(localStorage.getItem("mini-quotes") || "[]");
 function saveQuotes() {
   localStorage.setItem("mini-quotes", JSON.stringify(quotes));
 }
+
+// === 头像框数据 ===
+const FRAME_POOL = [
+  { id: "none", name: "无边框", img: "" },
+  { id: "moon", name: "星月夜", img: "./assets/frames/frame_moon.png" },
+  { id: "flower", name: "水彩花环", img: "./assets/frames/frame_flower.png" },
+  { id: "tape", name: "碎花胶带", img: "./assets/frames/frame_tape.png" }
+];
+
+// 确保 userProfile 里有 frameId（如果没有，默认无边框）
+if (!userProfile.frameId) {
+  userProfile.frameId = "none";
+  saveProfile();
+}
