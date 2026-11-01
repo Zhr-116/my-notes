@@ -322,6 +322,16 @@
           <p id="mySignature" style="margin: 0; font-size: 12px; color: var(--text-tertiary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">收集时间的痕迹</p>
         </div>
       </div>
+      <!-- 新增：外观主题切换器 -->
+      <div style="margin-top: 10px; padding: 10px;">
+        <div class="more-card" onclick="openThemeModal()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">外观主题</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-tertiary);">当前：<span id="currentThemeText">极简白</span> ▸</span>
+        </div>
+      </div>
     </section>
 
     <!-- 拾光商店页 -->
@@ -437,7 +447,7 @@
     <!-- 开盲盒全屏遮罩 -->
     <div id="boxOverlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
       <div id="openingBoxContainer" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;"></div>
-      <div id="boxResult" style="display: none; width: 320px; background: #fff; border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);"></div>
+      <div id="boxResult" style="display: none; width: 320px; background: var(--surface); border-radius: 24px; padding: 40px 20px; text-align: center; flex-direction: column; align-items: center; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.3);"></div>
     </div>
 
     <!-- 新增：倒计时管理弹窗 -->
@@ -964,6 +974,37 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主题选择弹窗 -->
+  <div id="themeModal" class="modal-mask" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">选择外观主题</span>
+        <button class="close-btn" onclick="closeThemeModal()">×</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 10px 0 20px 0;">
+        
+        <!-- 极简白 -->
+        <div class="theme-option-btn" data-theme="default" onclick="setTheme('default')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #f7f7f5; color: #1f2937; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">极简白</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #ffffff; border: 1px solid #e5e7eb;"></div>
+        </div>
+
+        <!-- 手账风 -->
+        <div class="theme-option-btn" data-theme="doodle" onclick="handleThemeSelect('doodle')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #fbfaf7; color: #33312e; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">手账风</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #10b981; border: 2px dashed #047857;"></div>
+        </div>
+
+        <!-- 星夜 -->
+        <div class="theme-option-btn" data-theme="night" onclick="handleThemeSelect('night')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #121212; color: #E5E7EB; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">星夜</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #1E1E1E; border: 1px solid #FCD34D; box-shadow: 0 0 8px rgba(252,211,77,0.3);"></div>
+        </div>
+
       </div>
     </div>
   </div>

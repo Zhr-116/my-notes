@@ -316,6 +316,10 @@ function renderMoreView() {
   }
 
   grid.innerHTML = html;
+  // 渲染“我的”页面时，同步主题按钮的高亮
+  if (typeof updateThemeUI === 'function') {
+    updateThemeUI();
+  }
 }
 
 function switchView(viewName, isBack = false) {

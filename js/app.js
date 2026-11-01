@@ -766,3 +766,16 @@ function selectFrame(frameId) {
   closeFrameModal(); // 选完直接退回资料弹窗
 }
 
+// 初始化时检查主题并高亮按钮
+if (typeof initThemeUI === 'function') {
+  initThemeUI();
+}
+
+function openThemeModal() {
+  document.getElementById("themeModal").hidden = false;
+  updateThemeUI(); // 每次打开同步高亮
+}
+
+function closeThemeModal() {
+  document.getElementById("themeModal").hidden = true;
+}

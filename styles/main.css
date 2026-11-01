@@ -2,6 +2,11 @@ html {
   scrollbar-gutter: stable;
 }
 
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
 :root {
   --bg: #f7f7f5;
   --surface: #ffffff;
@@ -616,7 +621,7 @@ button.primary:active { transform: translateY(1px); }
 .story-continue.show { opacity: 1; }
 @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(5px); } }
 
-/* ================= 换肤：手账涂鸦风 ================= */
+/* ================= 主题 1：手账涂鸦风（优化版） ================= */
 html[data-theme="doodle"] {
   --bg: #fbfaf7;          
   --surface: #ffffff;     
@@ -628,8 +633,37 @@ html[data-theme="doodle"] {
   --accent: #10b981;       
   --accent-soft: #d1fae5;
   --accent-text: #047857;
-  --detail-soft: #fff1f2;
-  --detail-text: #fb7185; 
+}
+
+/* 涂鸦风：全局字体强制切换为楷体/宋体 */
+html[data-theme="doodle"] body,
+html[data-theme="doodle"] input,
+html[data-theme="doodle"] textarea,
+html[data-theme="doodle"] button {
+  font-family: "Kaiti", "STKaiti", "Georgia", serif;
+}
+
+/* 涂鸦风：给纸张加一点极淡的噪点纹理 */
+html[data-theme="doodle"] .app {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ================= 主题 2：星夜模式（新增） ================= */
+html[data-theme="night"] {
+  --bg: #121212;          
+  --surface: #1E1E1E;     
+  --surface-muted: #2A2A2A; 
+  --text-primary: #E5E7EB;  
+  --text-secondary: #9CA3AF;
+  --text-tertiary: #6B7280;
+  --border: #374151;      
+  
+  /* 【修改点】将星夜模式的强调色改为高级的星云紫 */
+  --accent: #c084fc;       
+  --accent-soft: #4c1d95;  /* 深紫色的柔和背景 */
+  --accent-text: #e9d5ff;  /* 淡紫色的文字 */
+  
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 /* ================= 时间胶囊与拆信动画 ================= */
@@ -1192,4 +1226,181 @@ html[data-theme="doodle"] .treehole-overlay {
 .word-cloud-item:hover {
   transform: translate(-50%, -50%) scale(1.1) !important;
   color: var(--text-primary) !important;
+}
+
+/* ================= 星夜模式导航栏适配 ================= */
+html[data-theme="night"] header {
+  background: rgba(18, 18, 18, 0.85);
+  border-bottom: 1px solid var(--border);
+}
+html[data-theme="night"] .bottom-nav {
+  background: rgba(18, 18, 18, 0.95);
+  border-top: 1px solid var(--border);
+}
+
+/* 星夜模式下的输入框和搜索框 */
+html[data-theme="night"] input,
+html[data-theme="night"] textarea {
+  color: #E5E7EB;
+}
+html[data-theme="night"] input::placeholder,
+html[data-theme="night"] textarea::placeholder {
+  color: #6B7280;
+}
+
+/* ================= 星夜模式专项修复 ================= */
+
+/* 1. 树洞背景和文字适配 */
+html[data-theme="night"] .treehole-overlay {
+  background: rgba(18, 18, 18, 0.95); /* 用深色半透明替换白色 */
+}
+html[data-theme="night"] .treehole-overlay p {
+  color: #a1a1aa !important;
+}
+html[data-theme="night"] #treeHoleText {
+  color: #E5E7EB !important;
+}
+html[data-theme="night"] #treeHoleText::placeholder {
+  color: #6B7280;
+}
+
+/* 2. 岁月漫游（摘录随机卡）适配 */
+html[data-theme="night"] .random-quote-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+html[data-theme="night"] #randomQuoteCard div {
+  /* 把卡牌里的深色文字改成浅色 */
+  color: var(--text-primary) !important; 
+}
+html[data-theme="night"] #randomQuoteCard div[style*="color: #8c8273"] {
+  color: var(--text-secondary) !important;
+}
+
+/* 3. 故事对话框适配（羊皮纸在黑夜变成黑纸） */
+html[data-theme="night"] .story-dialog-box {
+  background: #1E1E1E;
+  border-color: #374151;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 0 4px rgba(255, 255, 255, 0.05);
+}
+html[data-theme="night"] .story-text {
+  color: #E5E7EB;
+}
+html[data-theme="night"] .story-speaker {
+  background: #4B5563;
+  border-color: #6B7280;
+}
+
+/* 4. 沉浸式书页在晚上的护眼微调 */
+html[data-theme="night"] .book-page-content {
+  background: #1E1E1E;
+  color: #E5E7EB;
+}
+html[data-theme="night"] .br-meta h1,
+html[data-theme="night"] .paper-read-area {
+  color: #E5E7EB !important;
+}
+html[data-theme="night"] .paper-read-area {
+  background-image: linear-gradient(transparent 95%, #374151 95%); /* 稿纸暗线 */
+}
+
+/* ================= 星夜模式专项修复（对比度提升） ================= */
+
+/* 1. 修复所有主按钮（黑底变星轨黄，文字变黑） */
+html[data-theme="night"] button.primary {
+  background: #FCD34D; /* 星夜的强调色 */
+  color: #121212;      /* 深色文字，极其清晰 */
+  font-weight: 600;
+}
+
+/* 2. 修复弹窗里的普通按钮（灰色底、浅色字） */
+html[data-theme="night"] .modal-actions button:not(.primary) {
+  background: var(--surface-muted);
+  color: var(--text-primary);
+}
+html[data-theme="night"] .close-btn {
+  background: var(--surface-muted);
+  color: var(--text-secondary);
+}
+
+/* 3. 修复标签筛选器（Tag Chips） */
+html[data-theme="night"] .tag-chip {
+  background: var(--surface-muted);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+html[data-theme="night"] .tag-chip.active {
+  background: var(--text-primary);
+  color: #121212; /* 激活时深色文字 */
+}
+
+/* 4. 修复游戏大厅的选项卡片（限时/悠闲） */
+html[data-theme="night"] .mode-card {
+  background: var(--surface-muted);
+  border-color: var(--border);
+}
+html[data-theme="night"] .mode-card.active {
+  background: var(--accent-soft); /* 深色模式下的淡黄底 */
+  border-color: var(--accent);
+  color: #121212;
+}
+html[data-theme="night"] .mode-card.active .mode-name,
+html[data-theme="night"] .mode-card.active .mode-desc {
+  color: #121212; /* 激活时字变黑 */
+}
+
+/* 5. 修复答题选项 */
+html[data-theme="night"] .game-option-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+html[data-theme="night"] .game-option-btn:hover {
+  background: var(--surface-muted);
+}
+
+/* 6. 修复设置页的勾选框 */
+html[data-theme="night"] input[type="checkbox"] {
+  accent-color: var(--accent);
+}
+
+/* 修复盲盒价格标签的白底隐形问题 */
+html[data-theme="night"] .box-price {
+  background: var(--surface-muted); /* 用深色底 */
+  color: var(--text-primary);       /* 用亮色字 */
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+/* 因为强调色变成了紫色，所有主按钮换成紫色+黑字（或者深色字） */
+html[data-theme="night"] button.primary {
+  background: var(--accent);
+  color: #121212;
+  font-weight: 600;
+}
+
+/* 游戏大厅模式卡片的选中状态也同步成紫色 */
+html[data-theme="night"] .mode-card.active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+html[data-theme="night"] .mode-card.active .mode-name,
+html[data-theme="night"] .mode-card.active .mode-desc {
+  color: var(--accent-text);
+}
+
+/* 修复计划页：今日待办的添加按钮 */
+html[data-theme="night"] .task-add-row button:not([title="设定周期习惯"]) {
+  background: var(--accent); /* 变成星云紫 */
+  color: #121212;            /* 深色文字 */
+  font-weight: bold;
+}
+
+/* 顺手把今日待办输入框的文字颜色也调一下，防止看不见 */
+html[data-theme="night"] .task-add-row input {
+  color: var(--text-primary);
+  background: var(--surface);
+}
+html[data-theme="night"] .task-add-row input::placeholder {
+  color: var(--text-tertiary);
 }

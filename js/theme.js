@@ -1,31 +1,7 @@
 let currentTheme = localStorage.getItem("mini-theme") || "default";
-// 获取已拥有的主题列表，默认拥有"default"
 let ownedThemes = JSON.parse(localStorage.getItem("mini-owned-themes") || '["default"]');
 
-function buyTheme(themeName, price) {
-  // 如果已经买过了，直接切换
-  if (ownedThemes.includes(themeName)) {
-    setTheme(themeName);
-    return;
-  }
-  if (userStars < price) {
-    showToast("星迹不足，快去记录吧！");
-    return;
-  }
-  
-  if (confirm(`确定花费 ${price} 星迹解锁并切换至该主题吗？`)) {
-    userStars -= price;
-    localStorage.setItem("mini-stars", userStars.toString());
-    
-    // 记录已购买
-    ownedThemes.push(themeName);
-    localStorage.setItem("mini-owned-themes", JSON.stringify(ownedThemes));
-    
-    setTheme(themeName); 
-  }
-}
-
-// 核心图标库
+// ================= 核心图标库（之前漏掉的，现在补回来） =================
 const THEME_ICONS = {
   // 默认主题：极简 Lucide 线条
   default: {
@@ -35,7 +11,7 @@ const THEME_ICONS = {
     card: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.65 7.65a2 2 0 012.629-1.046l5.51 2.374a2 2 0 011.046 2.628l-3.957 9.184a2 2 0 01-2.628 1.046l-5.51-2.374a2 2 0 01-1.046-2.628z"/><path d="M18 7.777V4a2 2 0 00-2-2h-6a2 2 0 00-2 2v10a2 2 0 001.137 1.805"/><path d="m8 4.389-4.364.809a2 2 0 00-1.602 2.33l1.822 9.833a2 2 0 002.331 1.602l2.542-.47"/></svg>`
   },
   
-  // 新主题：手账涂鸦风（你刚找的彩色图标）
+  // 新主题：手账涂鸦风
   doodle: {
     bell: `<img src="./assets/theme-doodle/bell.svg" style="width: 16px; height: 16px; object-fit: contain;">`,
     pencil: `<img src="./assets/theme-doodle/pencil.svg" style="width: 16px; height: 16px; object-fit: contain; vertical-align: middle; margin-right: 4px;">`,
@@ -44,23 +20,79 @@ const THEME_ICONS = {
   }
 };
 
-// 全局获取图标的函数
 function getIcon(name) {
-  return THEME_ICONS[currentTheme][name] || THEME_ICONS["default"][name];
+  const themeSet = THEME_ICONS[currentTheme] || THEME_ICONS["default"];
+  return themeSet[name] || THEME_ICONS["default"][name];
 }
 
-// 切换主题并刷新页面
+// ================= 主题切换逻辑 =================
+
+function handleThemeSelect(themeName) {
+  if (!ownedThemes.includes(themeName)) {
+    showToast("未解锁该主题，去商店看看吧！");
+    return;
+  }
+  setTheme(themeName);
+}
+
 function setTheme(themeName) {
   currentTheme = themeName;
   localStorage.setItem("mini-theme", themeName);
   
-  // 【关键新增】把主题写到 html 标签上
   if (themeName === "default") {
     document.documentElement.removeAttribute("data-theme");
   } else {
     document.documentElement.setAttribute("data-theme", themeName);
   }
   
+  updateThemeUI();
   render(); 
   showToast("外观已切换！");
+}
+
+// 独立的高亮刷新函数
+function updateThemeUI() {
+  // 更新入口的文字
+  const textEl = document.getElementById("currentThemeText");
+  if (textEl) {
+    if (currentTheme === 'default') textEl.innerText = "极简白";
+    else if (currentTheme === 'doodle') textEl.innerText = "手账风";
+    else if (currentTheme === 'night') textEl.innerText = "星夜";
+  }
+
+  // 更新弹窗里的高亮
+  document.querySelectorAll(".theme-option-btn").forEach(btn => {
+    if (btn.dataset.theme === currentTheme) {
+      btn.style.boxShadow = "0 0 0 2px var(--accent)";
+      btn.style.borderColor = "transparent";
+    } else {
+      btn.style.boxShadow = "none";
+      btn.style.borderColor = "var(--border)";
+    }
+  });
+}
+
+// 修改 setTheme，切换后顺便关掉弹窗
+function setTheme(themeName) {
+  currentTheme = themeName;
+  localStorage.setItem("mini-theme", themeName);
+  
+  if (themeName === "default") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", themeName);
+  }
+  
+  updateThemeUI();
+  render(); 
+  closeThemeModal(); // 切换后关闭弹窗
+  showToast("外观已切换！");
+}
+
+function initThemeUI() {
+  const savedTheme = localStorage.getItem("mini-theme") || "default";
+  if (savedTheme !== "default") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }
+  setTimeout(updateThemeUI, 100);
 }

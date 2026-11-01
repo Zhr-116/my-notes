@@ -156,26 +156,28 @@ function renderShop() {
     </div>
 
     <!-- 外观装扮区 -->
-    <div class="shop-section" style="margin-top: 30px; margin-bottom: 30px;">
+    <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
       <h3 class="section-title">外观装扮</h3>
-      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-        
-        <!-- 左侧：小图标预览 + 名字 -->
+      
+      <!-- 手账风 -->
+      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="theme-preview" style="display: flex; gap: 4px; background: var(--surface-muted); padding: 4px 8px; border-radius: 6px;">
-             <img src="./assets/theme-doodle/bell.svg" style="width: 16px; height: 16px;">
-             <img src="./assets/theme-doodle/pencil.svg" style="width: 16px; height: 16px;">
-             <img src="./assets/theme-doodle/card.svg" style="width: 16px; height: 16px;">
-          </div>
           <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">手账涂鸦包</h4>
         </div>
-        
-        <!-- 右侧：按钮 -->
-        ${currentTheme === 'doodle' 
-          ? `<button onclick="setTheme('default')" class="primary" style="background: var(--text-secondary); padding: 6px 14px; font-size: 13px; white-space: nowrap;">切回默认</button>`
-          : (ownedThemes.includes('doodle')
-              ? `<button onclick="setTheme('doodle')" class="primary" style="padding: 6px 14px; font-size: 13px; white-space: nowrap;">切换手账</button>`
-              : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 14px; font-size: 13px; white-space: nowrap;">500 购买</button>`)
+        ${ownedThemes.includes('doodle')
+          ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
+          : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 14px; font-size: 13px;">500 解锁</button>`
+        }
+      </div>
+
+      <!-- 星夜模式 -->
+      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">星夜模式</h4>
+        </div>
+        ${ownedThemes.includes('night')
+          ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
+          : `<button onclick="buyTheme('night', 300)" class="primary" style="padding: 6px 14px; font-size: 13px;">300 解锁</button>`
         }
       </div>
     </div>
@@ -183,18 +185,28 @@ function renderShop() {
 }
 
 function buyTheme(themeName, price) {
-  if (currentTheme === themeName) {
-    showToast("你已经在使用这个主题啦");
+  // 如果已经拥有，直接提示
+  if (ownedThemes.includes(themeName)) {
+    showToast("你已经在设置里解锁这个主题啦");
     return;
   }
+  
   if (userStars < price) {
     showToast("星迹不足，快去记录吧！");
     return;
   }
-  if (confirm(`确定花费 ${price} 星迹解锁并切换至该主题吗？`)) {
+  
+  if (confirm(`确定花费 ${price} 星迹解锁该主题吗？\n（解锁后可随时在“我的”页面自由切换）`)) {
     userStars -= price;
     localStorage.setItem("mini-stars", userStars.toString());
-    setTheme(themeName);
+    
+    // 记录已购买
+    ownedThemes.push(themeName);
+    localStorage.setItem("mini-owned-themes", JSON.stringify(ownedThemes));
+    
+    // 刷新商店视图，更新按钮状态
+    renderShop(); 
+    showToast("✨ 解锁成功！快去“我的”页面换上吧");
   }
 }
 
