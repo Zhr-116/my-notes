@@ -375,7 +375,12 @@
         <!-- 新增：拾迹定制区 -->
         <h3 class="section-title">拾迹定制</h3>
         <div style="background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; padding: 16px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 16px;">
-          
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-size: 15px; color: var(--text-primary);">拾迹的剧情陪伴 (小女孩弹窗)</span>
+            <input type="checkbox" id="featStory" onchange="toggleFeature('story', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+          </label>
+          <div style="border-top: 1px dashed var(--border); margin: 4px 0;"></div>
+
           <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
             <span style="font-size: 15px; color: var(--text-primary);">时间轴导航</span>
             <input type="checkbox" id="featTimeline" onchange="toggleFeature('timeline', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">

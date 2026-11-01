@@ -101,7 +101,8 @@ let defaultFeatures = {
   quotes: true
 };
 
-let appFeatures = JSON.parse(localStorage.getItem("mini-features") || JSON.stringify(defaultFeatures));
+let savedFeatures = JSON.parse(localStorage.getItem("mini-features") || "{}");
+let appFeatures = Object.assign({}, defaultFeatures, savedFeatures);
 function saveFeatures() {
   localStorage.setItem("mini-features", JSON.stringify(appFeatures));
 }
@@ -115,7 +116,7 @@ function saveQuotes() {
 // === 头像框数据 ===
 const FRAME_POOL = [
   { id: "none", name: "无边框" },
-  { id: "moon", name: "星月夜", img: "./assets/frames/frame_moon.png", scale: 1.3 }, // 确保你的图片叫这个
+  { id: "moon", name: "星月夜", img: "./assets/frames/frame_moon.png", scale: 1.1 }, // 确保你的图片叫这个
   { id: "flower", name: "水彩花环", img: "./assets/frames/frame_flower.png" },
   { id: "tape", name: "碎花胶带", img: "./assets/frames/frame_tape.png" },
   { id: "f_07", name: "水墨", img: "./assets/frames/frame_07.png" },

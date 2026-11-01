@@ -70,15 +70,18 @@ function handleStoryClick() {
 
 // 剧情触发引擎（保持原样即可）
 function checkStoryTrigger(actionType, extraData = {}) {
+  if (typeof appFeatures !== 'undefined' && !appFeatures.story) return;
+  let rawViewed = JSON.parse(localStorage.getItem("mini-viewed-stories") || "[]");
   let viewedStories = JSON.parse(localStorage.getItem("mini-viewed-stories") || "[]");
   
   const trigger = (storyId) => {
     if (!viewedStories.includes(storyId)) {
+      // 【核心修复】立刻加入并保存，防止刷新或连点导致重复触发
+      viewedStories.push(storyId);
+      localStorage.setItem("mini-viewed-stories", JSON.stringify(viewedStories));
+      
       setTimeout(() => {
-        playStory(storyId, () => {
-          viewedStories.push(storyId);
-          localStorage.setItem("mini-viewed-stories", JSON.stringify(viewedStories));
-        });
+        playStory(storyId);
       }, 500);
       return true;
     }

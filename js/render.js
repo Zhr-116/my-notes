@@ -225,7 +225,8 @@ function render() {
   else if (currentView === "more") {
     renderMoreView();
   } else if (currentView === "quotes") { renderQuotesView(); }
-    // 同步设置页的勾选状态
+  // 同步设置页的勾选状态
+  if (document.getElementById("featStory")) document.getElementById("featStory").checked = appFeatures.story;
   if (document.getElementById("featTimeline")) document.getElementById("featTimeline").checked = appFeatures.timeline;
   if (document.getElementById("featPlan")) document.getElementById("featPlan").checked = appFeatures.plan;
   if (document.getElementById("featShop")) document.getElementById("featShop").checked = appFeatures.shop;
@@ -233,6 +234,7 @@ function render() {
   if (document.getElementById("featBook")) document.getElementById("featBook").checked = appFeatures.book;
   if (document.getElementById("featReview")) document.getElementById("featReview").checked = appFeatures.review;
   if (document.getElementById("featCapsule")) document.getElementById("featCapsule").checked = appFeatures.capsule;
+  if (document.getElementById("featQuotes")) document.getElementById("featQuotes").checked = appFeatures.quotes;
 }
 
 // 动态渲染“更多”页面
