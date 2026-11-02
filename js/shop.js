@@ -170,14 +170,14 @@ function renderShop() {
         }
       </div>
 
-      <!-- 星夜模式 -->
+      <!-- 落日橘 -->
       <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">星夜模式</h4>
+          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">落日橘</h4>
         </div>
-        ${ownedThemes.includes('night')
+        ${ownedThemes.includes('sunset')
           ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
-          : `<button onclick="buyTheme('night', 300)" class="primary" style="padding: 6px 14px; font-size: 13px;">300 解锁</button>`
+          : `<button onclick="buyTheme('sunset', 300)" class="primary" style="padding: 6px 14px; font-size: 13px;">300 解锁</button>`
         }
       </div>
     </div>

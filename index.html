@@ -326,7 +326,16 @@
       <div style="margin-top: 10px; padding: 10px;">
         <div class="more-card" onclick="openThemeModal()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2v20"/><path d="M2 12h20"/></svg>
+            
+            <!-- 【替换为调色板图标】 -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/>
+              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
+              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
+              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
+              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
+            </svg>
+            
             <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">外观主题</span>
           </div>
           <span style="font-size: 13px; color: var(--text-tertiary);">当前：<span id="currentThemeText">极简白</span> ▸</span>
@@ -1003,6 +1012,18 @@
         <div class="theme-option-btn" data-theme="night" onclick="handleThemeSelect('night')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #121212; color: #E5E7EB; cursor: pointer; transition: all 0.2s;">
           <span style="font-size: 15px; font-weight: 600;">星夜</span>
           <div style="width: 24px; height: 24px; border-radius: 50%; background: #1E1E1E; border: 1px solid #FCD34D; box-shadow: 0 0 8px rgba(252,211,77,0.3);"></div>
+        </div>
+
+        <!-- 海盐蓝 -->
+        <div class="theme-option-btn" data-theme="ocean" onclick="handleThemeSelect('ocean')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #f4f7f9; color: #1e293b; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">海盐蓝</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #0ea5e9; border: 1px solid #0369a1;"></div>
+        </div>
+
+        <!-- 落日橘 -->
+        <div class="theme-option-btn" data-theme="sunset" onclick="handleThemeSelect('sunset')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #fffaf7; color: #431407; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">落日橘</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #ea580c; border: 1px solid #9a3412;"></div>
         </div>
 
       </div>

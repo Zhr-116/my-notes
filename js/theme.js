@@ -1,6 +1,11 @@
 let currentTheme = localStorage.getItem("mini-theme") || "default";
 let ownedThemes = JSON.parse(localStorage.getItem("mini-owned-themes") || '["default"]');
 
+// 【核心修复】确保这三套基础主题默认拥有（兼容老用户）
+if (!ownedThemes.includes("night")) ownedThemes.push("night");
+if (!ownedThemes.includes("ocean")) ownedThemes.push("ocean");
+localStorage.setItem("mini-owned-themes", JSON.stringify(ownedThemes));
+
 // ================= 核心图标库（之前漏掉的，现在补回来） =================
 const THEME_ICONS = {
   // 默认主题：极简 Lucide 线条
@@ -58,6 +63,8 @@ function updateThemeUI() {
     if (currentTheme === 'default') textEl.innerText = "极简白";
     else if (currentTheme === 'doodle') textEl.innerText = "手账风";
     else if (currentTheme === 'night') textEl.innerText = "星夜";
+    else if (currentTheme === 'ocean') textEl.innerText = "海盐蓝";
+    else if (currentTheme === 'sunset') textEl.innerText = "落日橘";
   }
 
   // 更新弹窗里的高亮
