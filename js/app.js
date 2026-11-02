@@ -330,20 +330,20 @@ initCheckin();
 
 // === 移动端键盘弹出时，隐藏底部导航栏 ===
 window.isKeyboardOpen = false;
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', () => {
-    // 视口高度明显变小，说明键盘弹出了
-    if (window.visualViewport.height < window.innerHeight - 100) {
-      window.isKeyboardOpen = true;
-      const nav = document.querySelector('.bottom-nav');
-      if (nav) nav.style.display = 'none';
-    } else {
-      window.isKeyboardOpen = false;
-      // 键盘收起时，通知重新渲染一次底部导航栏
-      if (typeof render === 'function') render();
-    }
-  });
-}
+document.addEventListener('focusin', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    window.isKeyboardOpen = true;
+    const nav = document.querySelector('.bottom-nav');
+    if (nav) nav.classList.add('keyboard-open');
+  }
+});
+document.addEventListener('focusout', (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    window.isKeyboardOpen = false;
+    const nav = document.querySelector('.bottom-nav');
+    if (nav) nav.classList.remove('keyboard-open');
+  }
+});
 
 // === 个人资料编辑逻辑 ===
 let tempAvatarId = null;

@@ -155,6 +155,31 @@ function renderShop() {
       </div>
     </div>
 
+    <!-- 【新增】功能道具区 -->
+    <div class="shop-section" style="margin-top: 40px;">
+      <h3 class="section-title">功能道具</h3>
+      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+        
+        <!-- 左侧：名字与购买 -->
+        <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 600;">拾光回溯卡</h4>
+          <p style="margin: 0; font-size: 12px; color: var(--text-tertiary);">用于补救断签的心情或习惯。</p>
+          <div>
+            <button onclick="buyReplenishCard()" class="primary" style="padding: 6px 12px; font-size: 13px; border-radius: 8px; background: ${getReplenishPrice() === 800 ? '#ef4444' : 'var(--text-primary)'}; color: white;">
+              ${getReplenishPrice()} 星迹购买
+            </button>
+            ${getReplenishPrice() === 800 ? `<span style="font-size: 11px; color: #ef4444; margin-left: 8px;">冷却溢价中</span>` : ``}
+          </div>
+        </div>
+
+        <!-- 右侧：书包与库存 -->
+        <div onclick="openInventoryModal()" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; padding: 8px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-secondary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/></svg>
+          <span style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">库存 ${inventory.replenishCard || 0}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 外观装扮区 -->
     <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
       <h3 class="section-title">外观装扮</h3>
@@ -261,7 +286,7 @@ function openMysteryBox(poolKey) {
       localStorage.setItem("mini-badges", JSON.stringify(unlockedBadges));
       resultEl.innerHTML = `
         <div class="luxury-badge" style="--c1: ${drawnItem.color1}; --c2: ${drawnItem.color2}; width: 90px; height: 90px; margin-bottom: 20px;">${drawnItem.icon}</div>
-        <div class="result-title" style="color: var(--accent); font-size: 18px;">🎉 获得全新徽章</div>
+        <div class="result-title" style="color: var(--accent); font-size: 18px;">获得全新徽章</div>
         <div class="result-name">【${drawnItem.title}】</div>
         <button class="primary" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = ''; renderShop();">收入橱窗</button>
       `;
@@ -340,7 +365,7 @@ function playCardDrawAnimation(card, isDuplicate) {
     </div>
     
     <div id="cardResultContent" style="opacity: 0; display: flex; flex-direction: column; align-items: center; margin-top: 20px; transition: opacity 0.6s ease; text-align: center;">
-      <div style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">${isDuplicate ? '重复获得' : '🎉 获得全新卡牌'}</div>
+      <div style="font-size: 12px; color: #a1a1aa; letter-spacing: 1px;">${isDuplicate ? '重复获得' : '获得全新卡牌'}</div>
       <div style="font-size: 18px; font-family: 'Songti SC', serif; font-weight: 700; margin: 6px 0; color: #fff;">【${card.title}】</div>
       <div style="font-size: 12px; color: #fcd34d; margin-bottom: 16px;">${isDuplicate ? '自动转化为 80 星迹' : '已收入拾迹精灵图鉴'}</div>
       <button class="primary" style="width: 160px; background: #fff; color: #333; border-radius: 20px; padding: 10px; font-size: 14px; font-weight: bold;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = ''; renderShop();">收下卡牌</button>
@@ -394,4 +419,92 @@ function toggleCardGrid() {
 function toggleBadgeGrid() {
   isBadgeGridExpanded = !isBadgeGridExpanded;
   renderShop();
+}
+
+// 购买补签卡
+function buyReplenishCard() {
+  const price = getReplenishPrice();
+  
+  if (userStars < price) {
+    showToast("星迹不足，快去记录吧！");
+    return;
+  }
+  
+  if (confirm(`确定花费 ${price} 星迹购买 1 张【拾光回溯卡】吗？\n\n购买后若7天内未达成连续打卡7天，下次购买价格将上涨至800星迹。`)) {
+    userStars -= price;
+    localStorage.setItem("mini-stars", userStars.toString());
+    
+    // 增加库存
+    inventory.replenishCard = (inventory.replenishCard || 0) + 1;
+    saveInventory();
+    
+    // 记录购买时间
+    localStorage.setItem("mini-last-replenish-date", Date.now().toString());
+    
+    renderShop(); // 刷新商店，价格会自动变成 800
+    showToast("购买成功，已存入背包");
+  }
+}
+
+function openInventoryModal() {
+  document.getElementById("inventoryModal").hidden = false;
+  
+  const contentEl = document.querySelector("#inventoryModal .modal-content");
+  const cards = inventory.replenishCard || 0;
+
+  // 1. 寻找所有可以补签的习惯记录（只找昨天和前天的漏签）
+  let canReplenishList = [];
+  const today = new Date();
+  
+  [1, 2].forEach(daysAgo => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - daysAgo);
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    
+    // 遍历所有习惯
+    if (typeof habits !== 'undefined') {
+      habits.forEach(h => {
+        if (!h.isCompleted && !h.completedDates.includes(dateStr) && h.completedDates.length > 0) {
+          canReplenishList.push({ habitId: h.id, title: h.title, dateStr: dateStr, dateName: daysAgo === 1 ? "昨天" : "前天" });
+        }
+      });
+    }
+  });
+
+  // 2. 拼装 HTML
+  let html = `
+    <div class="modal-header">
+      <span class="modal-date">时光回溯台</span>
+      <button class="close-btn" onclick="document.getElementById('inventoryModal').hidden = true">×</button>
+    </div>
+    <div style="text-align: center; padding: 10px 0;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/></svg>
+      <h3 style="font-size: 18px; margin-bottom: 20px;">拾光回溯卡：${cards} 张</h3>
+  `;
+
+  if (canReplenishList.length === 0) {
+    html += `<p style="font-size: 13px; color: var(--text-tertiary);">近期没有漏签的记录，继续保持哦！</p>`;
+  } else {
+    html += `<div style="text-align: left; background: var(--surface-muted); border-radius: 12px; padding: 12px; margin-bottom: 10px;">`;
+    html += `<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">发现以下可挽回的痕迹：</div>`;
+    
+    canReplenishList.forEach((item, index) => {
+      html += `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px dashed var(--border);">
+          <span style="font-size: 14px; color: var(--text-primary);">${escapeHtml(item.title)} <span style="font-size: 11px; color: var(--text-tertiary);">(${item.dateName})</span></span>
+          <button onclick="handleInventoryReplenish('${item.habitId}', '${item.dateStr}')" class="primary" style="padding: 4px 10px; font-size: 12px; border-radius: 6px;">补签</button>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  contentEl.innerHTML = html;
+}
+
+// 在背包里点击补签
+function handleInventoryReplenish(habitId, dateStr) {
+  document.getElementById("inventoryModal").hidden = true; // 先关掉弹窗
+  handleReplenishHabit(habitId, dateStr); // 直接复用我们在 plan.js 里写好的丝滑连招！
 }

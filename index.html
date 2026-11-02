@@ -296,50 +296,79 @@
 
     <!-- 我的页面 -->
     <section id="mineView" hidden>
-      <div style="display: flex; align-items: center; gap: 16px; padding: 10px 10px 20px 10px;">
+      
+      <!-- 头部：头像与信息 -->
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 10px;">
         
-        <!-- 左侧：头像容器 -->
-        <div style="position: relative; flex-shrink: 0; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
-          
-          <!-- 底层：头像（去掉了白边和背景，只保留阴影） -->
-          <img id="myAvatar" src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
-          
-          <!-- 顶层：头像框容器 -->
-          <div id="myAvatarFrame" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10; display: none;">
+        <!-- 左侧：头像与昵称 -->
+        <div style="display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;">
+          <div style="position: relative; flex-shrink: 0; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+            <img id="myAvatar" src="./assets/girl-color.png" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--surface); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 3px solid #ffffff; box-sizing: border-box;">
+            <div id="myAvatarFrame" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 120%; height: 120%; pointer-events: none; z-index: 10; display: none;"></div>
           </div>
           
-        </div>
-        
-        <!-- 右侧：昵称与个签 -->
-        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
-          <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-            <h2 id="myNickname" style="margin: 0; font-size: 18px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">拾迹</h2>
-            <!-- 触发编辑的铅笔按钮 -->
-            <div onclick="openProfileModal()" style="cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px; transition: all 0.2s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-tertiary)'">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <h2 id="myNickname" style="margin: 0; font-size: 18px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">拾迹</h2>
+              <div onclick="openProfileModal()" style="cursor: pointer; color: var(--text-tertiary); display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 4px;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-tertiary)'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/></svg>
+              </div>
             </div>
+            <p id="mySignature" style="margin: 0; font-size: 12px; color: var(--text-tertiary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">收集时间的痕迹</p>
           </div>
-          <p id="mySignature" style="margin: 0; font-size: 12px; color: var(--text-tertiary); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">收集时间的痕迹</p>
         </div>
+
+        <!-- 右侧：大号称号 -->
+        <div id="myTitle" style="position: relative; flex-shrink: 0; margin-left: 12px; font-size: 16px; font-weight: 800; padding: 4px 8px; color: #333; font-family: 'Kaiti', 'STKaiti', 'Georgia', serif; letter-spacing: 1px; z-index: 1;">
+          拾光萌新
+        </div>
+        
       </div>
-      <!-- 新增：外观主题切换器 -->
-      <div style="margin-top: 10px; padding: 10px;">
+
+      <!-- 面板列表 -->
+      <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 12px;">
+        
+        <!-- 外观主题 -->
         <div class="more-card" onclick="openThemeModal()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            
-            <!-- 【替换为调色板图标】 -->
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/>
-              <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
-              <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
-              <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
-              <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
-            </svg>
-            
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z"/><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/></svg>
             <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">外观主题</span>
           </div>
           <span style="font-size: 13px; color: var(--text-tertiary);">当前：<span id="currentThemeText">极简白</span> ▸</span>
         </div>
+
+        <!-- 专注沙漏 -->
+        <div class="more-card" onclick="openFocusModal()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22"/><path d="M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2"/></svg>
+            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">开启专注</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-tertiary);">▸</span>
+        </div>
+
+        <!-- 动态抽屉：时间胶囊 -->
+        <div id="mineCapsule" class="more-card" onclick="openCapsuleModal()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.363 17.634a2 2 0 00-.506.854l-.837 2.87a.5.5 0 00.62.62l2.87-.837a2 2 0 00.854-.506l3.013-3.009a1 1 0 10-3.004-3.004z"/><path d="M22 10.38V6a2 2 0 00-2-2H4a2 2 0 00-2 2v12a2 2 0 002 2h6.25"/><path d="m22 7-8.991 5.727a2 2 0 01-2.009 0L2 7"/></svg>
+            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">时间胶囊</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-tertiary);">▸</span>
+        </div>
+
+        <!-- 数据备份 -->
+        <div class="more-card" onclick="backupZip()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">备份我的拾迹</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-tertiary);">打包数据 ▸</span>
+        </div>
+
+      </div>
+
+      <!-- 底部版本号 -->
+      <div style="text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 50px;">
+        <p>拾迹 v1.0.0</p>
       </div>
     </section>
 
@@ -499,6 +528,25 @@
             <button class="primary" onclick="saveHabit()">开始习惯</button>
             <button onclick="closeHabitModal()">取消</button>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 库存详情弹窗 -->
+    <div id="inventoryModal" class="modal-mask" hidden>
+      <div class="modal-content" style="max-width: 320px; border-radius: 16px; margin: auto;">
+        <div class="modal-header">
+          <span class="modal-date">道具背包</span>
+          <button class="close-btn" onclick="document.getElementById('inventoryModal').hidden = true">×</button>
+        </div>
+        <div style="text-align: center; padding: 10px 0;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/></svg>
+          <h3 style="font-size: 18px; margin-bottom: 8px;">拾光回溯卡：${inventory.replenishCard || 0} 张</h3>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
+            此道具无需在商店使用。<br>
+            当你的<b>心情签到</b>或<b>周期习惯</b>断签时，<br>
+            直接在对应页面点击<b>[补签]</b>即可消耗。
+          </p>
         </div>
       </div>
     </div>

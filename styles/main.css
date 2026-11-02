@@ -279,7 +279,7 @@ button.primary:active { transform: translateY(1px); }
 .book-sort-select { border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; font-size: 13px; background: var(--surface); color: var(--text-secondary); outline: none; cursor: pointer; }
 .book-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px 0; }
 .book-card { background: var(--surface); border-radius: 6px; padding: 6px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04); position: relative; display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; height: auto; border-bottom: 3px solid #f0ece1; }
-.book-card:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05); }
+.book-card:hover { box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05); }
 .book-cover-wrapper { width: 100%; aspect-ratio: 3 / 4; background: var(--surface-muted); border-radius: 4px; overflow: hidden; margin-bottom: 6px; position: relative; flex-shrink: 0; box-shadow: inset 0 0 10px rgba(0,0,0,0.05); }
 .book-cover-wrapper::after { content: ""; position: absolute; top: 0; left: 0; bottom: 0; width: 6px; background: linear-gradient(to right, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 100%); z-index: 2; pointer-events: none; }
 .book-cover-wrapper img { width: 100%; height: 100%; object-fit: cover; }
@@ -418,7 +418,7 @@ button.primary:active { transform: translateY(1px); }
 
 /* ================= 计划页 ================= */
 .countdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-input); padding: 24px; text-align: center; margin-bottom: 16px; cursor: pointer; box-shadow: var(--shadow-card); transition: all 0.2s ease; }
-.countdown-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
+.countdown-card:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.06); }
 .empty-countdown { border: 1px dashed var(--border); color: var(--text-tertiary); font-size: 14px; padding: 40px 24px; }
 .cd-title { font-size: 14px; color: var(--text-secondary); font-weight: 600; margin-bottom: 8px; }
 .cd-days { font-family: "Georgia", serif; font-size: 20px; color: var(--text-primary); font-weight: 700; }
@@ -442,7 +442,7 @@ button.primary:active { transform: translateY(1px); }
 /* 更多网格 */
 .more-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 10px; }
 .more-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-input); padding: 30px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; cursor: pointer; transition: all 0.2s ease; box-shadow: var(--shadow-card); }
-.more-card:hover { transform: translateY(-4px); border-color: var(--text-tertiary); }
+.more-card:hover { border-color: var(--text-tertiary); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
 .more-icon { font-size: 28px; }
 
 /* ================= 拾光商店 ================= */
@@ -808,3 +808,37 @@ html[data-theme="sunset"] {
 html[data-theme="sunset"] header { background: rgba(255, 250, 247, 0.85); border-bottom: 1px solid var(--border); }
 html[data-theme="sunset"] .bottom-nav { background: rgba(255, 250, 247, 0.95); }
 html[data-theme="sunset"] .treehole-overlay { background: rgba(255, 250, 247, 0.95); }
+/* 键盘弹起时，导航栏平滑降落 */
+.bottom-nav {
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bottom-nav.keyboard-open {
+  transform: translateY(110%);
+}
+
+/* ================= 称号荧光笔特效 ================= */
+#myTitle::before {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: -4%;
+  width: 108%;
+  height: 75%;
+  background-color: var(--title-color, rgba(167, 243, 208, 0.65));
+  z-index: -1;
+  /* 非常不规则的圆角，模拟笔触起始和收尾的挤压 */
+  border-radius: 12px 6px 16px 8px / 8px 16px 6px 12px;
+  /* 倾斜角度调小一点，显得更从容 */
+  transform: rotate(-1deg) skewX(-3deg);
+  /* 混合模式：在浅色纸上用正片叠底，字迹会透出来 */
+  mix-blend-mode: multiply; 
+}
+
+/* 星夜模式专属适配 */
+html[data-theme="night"] #myTitle {
+  color: #fff; /* 深色下文字变白 */
+}
+html[data-theme="night"] #myTitle::before {
+  mix-blend-mode: screen;
+  opacity: 0.5; /* 深色下发光不要太刺眼 */
+}

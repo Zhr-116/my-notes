@@ -72,8 +72,7 @@ function render() {
   // 动态控制底部导航栏的显隐
   const bottomNav = document.querySelector(".bottom-nav");
   if (bottomNav) {
-    // 【核心修复】不仅看是否为子页面，还要看键盘是否弹起
-    if (isSubPage || window.isKeyboardOpen) {
+    if (isSubPage) {
       bottomNav.style.display = "none";
     } else {
       bottomNav.style.display = "flex"; 
@@ -671,6 +670,15 @@ function toggleTagMonth(month) {
 
 // 渲染“我的”页面
 async function renderMineView() {
+  // 渲染称号
+  updateTitle(); 
+  const titleEl = document.getElementById("myTitle");
+  if (titleEl && userProfile.title) {
+    titleEl.innerText = userProfile.title;
+    const titleData = TITLE_POOL.find(t => t.name === userProfile.title) || TITLE_POOL[0];
+    // 【核心修改】把颜色赋给伪元素
+    titleEl.style.setProperty('--title-color', titleData.color);
+  }
   document.getElementById("myNickname").innerText = userProfile.nickname;
   document.getElementById("mySignature").innerText = userProfile.signature;
   
@@ -724,6 +732,11 @@ async function renderMineView() {
       frameEl.style.display = "none";
     }
   }
+
+  // 动态控制抽屉显隐
+  const mineCapsule = document.getElementById("mineCapsule");
+  const mineQuotes = document.getElementById("mineQuotes");
+  if (mineCapsule) mineCapsule.style.display = appFeatures.capsule ? "flex" : "none";
 }
 
 function renderQuotesView() {

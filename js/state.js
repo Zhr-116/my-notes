@@ -134,3 +134,62 @@ if (!userProfile.frameId) {
   userProfile.frameId = "none";
   saveProfile();
 }
+
+// ================= 通用道具（补签卡）系统 =================
+
+// 读取背包库存（默认 0 张卡）
+let inventory = JSON.parse(localStorage.getItem("mini-inventory") || '{"replenishCard": 0}');
+function saveInventory() {
+  localStorage.setItem("mini-inventory", JSON.stringify(inventory));
+}
+
+// 核心算法：动态计算补签卡的当前价格
+function getReplenishPrice() {
+  const lastBuy = localStorage.getItem("mini-last-replenish-date");
+  if (!lastBuy) return 200; // 从来没买过，原价 200
+  
+  const daysSinceLastBuy = (Date.now() - parseInt(lastBuy)) / (1000 * 60 * 60 * 24);
+  
+  // 借用 review.js 的连续打卡计算（如果没有这个函数，默认算 0）
+  let currentStreak = 0;
+  if (typeof calculateStreak === 'function') {
+    currentStreak = calculateStreak(entries);
+  }
+  
+  // 【冷却惩罚】7 天内买过，且连续打卡没达到 7 天，价格暴涨到 800
+  if (daysSinceLastBuy < 7 && currentStreak < 7) {
+    return 800; 
+  }
+  
+  return 200; // 冷却结束或达成连签，恢复原价
+}
+
+// ================= 称号系统 =================
+const TITLE_POOL = [
+  // 莫兰迪色系荧光笔，透明度经过精细调校
+  { id: "t1", name: "拾光萌新", req: 0, color: "rgba(167, 243, 208, 0.65)" },   // 初春嫩芽绿
+  { id: "t2", name: "时间旅人", req: 10, color: "rgba(191, 219, 254, 0.7)" },   // 晴空浅蓝
+  { id: "t3", name: "深夜造梦师", req: 30, color: "rgba(233, 213, 255, 0.7)" }, // 梦幻香芋紫
+  { id: "t4", name: "岁月拾荒者", req: 100, color: "rgba(253, 230, 138, 0.65)" }, // 落日鹅黄
+  { id: "t5", name: "不朽的史诗", req: 365, color: "rgba(254, 205, 211, 0.75)" }  // 古典玫瑰粉
+];
+
+// 确保 userProfile 有 title 字段
+if (!userProfile.title) {
+  userProfile.title = "拾光萌新";
+  saveProfile();
+}
+
+// 获取当前应该解锁的最高称号（根据记录天数）
+function updateTitle() {
+  const uniqueDays = new Set(entries.map(e => e.date)).size;
+  let maxTitle = TITLE_POOL[0].name;
+  for (let t of TITLE_POOL) {
+    if (uniqueDays >= t.req) maxTitle = t.name;
+  }
+  // 自动升级称号
+  if (userProfile.title === "拾光萌新" || userProfile.title === maxTitle) {
+    userProfile.title = maxTitle;
+    saveProfile();
+  }
+}

@@ -17,6 +17,10 @@ const STORY_LINES = {
 };
 
 function playStory(storyIdOrText, onComplete = null) {
+  if (typeof appFeatures !== 'undefined' && !appFeatures.story) {
+    if (onComplete) onComplete(); 
+    return;
+  }
   const text = STORY_LINES[storyIdOrText] || storyIdOrText;
   
   const overlay = document.getElementById("storyOverlay");

@@ -42,18 +42,54 @@ function renderTasks() {
       const streak = calcHabitStreak(h.completedDates, today);
       const isCheckedToday = h.completedDates.includes(today);
       
-      // 注意：习惯打卡完成时，不加 .completed 类，所以文字不会划线
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+      
+      const isBroken = !h.completedDates.includes(yStr) && !isCheckedToday && h.completedDates.length > 0;
+      
+      // 【新增】计算累计打卡天数（去重）
+      const totalDays = [...new Set(h.completedDates)].length;
+
+      let validStreak = streak;
+      let statusHtml = `累计 ${totalDays} 天 | 连续 ${streak} / ${h.targetDays} 天`;
+
+      if (isBroken) {
+        statusHtml = `
+          <span style="color: var(--text-tertiary);">累计 ${totalDays} 天 | 连续 0 / ${h.targetDays} 天</span> 
+          <span style="color: var(--border); margin: 0 6px;">|</span>
+          <span onclick="handleReplenishHabit('${h.id}', '${yStr}')" style="color: #ef4444; cursor: pointer; font-weight: bold; text-decoration: underline;">[ 是否补签 ]</span>
+        `;
+        validStreak = 0; // 连续归零
+      }
+
+      // 计算两个百分比
+      const totalPercent = Math.min((totalDays / h.targetDays) * 100, 100);
+      const streakPercent = Math.min((validStreak / h.targetDays) * 100, 100);
+
       html += `
-        <div class="task-item" style="padding: 14px 16px;">
+        <div class="task-item" id="habit-card-${h.id}" style="padding: 14px 16px; position: relative;">
           <div class="task-checkbox" onclick="checkHabit('${h.id}')" style="${isCheckedToday ? 'background: var(--text-primary); border-color: var(--text-primary);' : ''}">
             ${isCheckedToday ? '✓' : ''}
           </div>
-          <div style="flex: 1; display: flex; flex-direction: column;">
+          
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
             <span class="task-text" style="text-decoration: none; color: var(--text-primary); font-weight: 500;">${escapeHtml(h.title)}</span>
-            <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px; display: flex; gap: 8px; align-items: center;">
-              <span>连续 ${streak} / ${h.targetDays} 天</span>
+            
+            <!-- 【双层平滑进度条】 -->
+            <div style="position: relative; width: 100%; height: 3px; background: var(--surface-muted); border-radius: 2px; overflow: hidden;">
+              <!-- 底层：累计进度（半透明的主题色） -->
+              <div style="position: absolute; top: 0; left: 0; width: ${totalPercent}%; height: 100%; background: var(--accent); opacity: 0.3; border-radius: 2px; transition: width 0.4s ease;"></div>
+              <!-- 表层：连续进度（高亮主题色） -->
+              <div style="position: absolute; top: 0; left: 0; width: ${streakPercent}%; height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease;"></div>
+            </div>
+            
+            <!-- 状态文字 -->
+            <div style="font-size: 12px; color: var(--text-tertiary);">
+              ${statusHtml}
             </div>
           </div>
+          
           <button class="task-delete" onclick="deleteHabit('${h.id}')">×</button>
         </div>
       `;
@@ -394,4 +430,72 @@ function deleteCountdown(id) {
     renderCountdownManageList();
     renderCountdown();
   }
+}
+
+// ================= 补签卡连招逻辑 =================
+function handleReplenishHabit(habitId, dateStr) {
+  const h = habits.find(x => x.id === habitId);
+  if (!h) return;
+
+  // 定义一个放弃补签的本地刷新函数
+  const cancelReplenish = () => {
+    const statusEl = document.querySelector(`#habit-card-${habitId} div[style*="font-size: 12px"]`);
+    if (statusEl) {
+      statusEl.innerHTML = `连续 0 / ${h.targetDays} 天`;
+      statusEl.style.color = "var(--text-tertiary)";
+    }
+    const progressBar = document.querySelector(`#habit-card-${habitId} .task-text + div > div`);
+    if (progressBar) progressBar.style.background = "var(--accent)";
+  };
+
+  // 1. 有库存：问是否用卡
+  if (inventory.replenishCard > 0) {
+    if (confirm(`是否消耗 1 张【拾光回溯卡】补签 ${dateStr}？`)) {
+      useReplenishCard(habitId, dateStr);
+    } else {
+      cancelReplenish(); // 用户点“否”，直接原地恢复默认样式
+    }
+    return;
+  }
+
+  // 2. 无库存：问是否花钱买
+  const price = getReplenishPrice();
+  if (userStars < price) {
+    if (confirm(`补签需要 ${price} 星迹，你目前星迹不足。\n是否直接恢复默认状态？`)) {
+      cancelReplenish();
+    }
+    return;
+  }
+
+  if (confirm(`你没有补签卡。\n是否花费 ${price} 星迹购买一张并立即补签？`)) {
+    userStars -= price;
+    localStorage.setItem("mini-stars", userStars.toString());
+    localStorage.setItem("mini-last-replenish-date", Date.now().toString()); 
+    useReplenishCard(habitId, dateStr, true);
+  } else {
+    cancelReplenish(); // 用户点“否”，直接原地恢复默认样式
+  }
+}
+
+function useReplenishCard(habitId, dateStr, justBought = false) {
+  const h = habits.find(x => x.id === habitId);
+  if (!h) return;
+
+  // 如果没用钱买，就是消耗库存
+  if (!justBought) {
+    inventory.replenishCard -= 1;
+    saveInventory();
+  }
+
+  // 塞入日期并保存
+  h.completedDates.push(dateStr);
+  saveHabits();
+  renderTasks();
+  
+  // 看看有没有因为补签触发了全清
+  if (typeof checkAllDailyCleared === 'function') {
+    checkAllDailyCleared();
+  }
+  
+  showToast("时光已拾回");
 }
