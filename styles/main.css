@@ -820,17 +820,15 @@ html[data-theme="sunset"] .treehole-overlay { background: rgba(255, 250, 247, 0.
 #myTitle::before {
   content: "";
   position: absolute;
-  top: 15%;
-  left: -4%;
-  width: 108%;
-  height: 75%;
+  top: 20%; /* 稍微往下压一点 */
+  left: -2%; /* 从 -4% 收紧到 -2% */
+  width: 101%; 
+  height: 68%;
   background-color: var(--title-color, rgba(167, 243, 208, 0.65));
   z-index: -1;
-  /* 非常不规则的圆角，模拟笔触起始和收尾的挤压 */
-  border-radius: 12px 6px 16px 8px / 8px 16px 6px 12px;
-  /* 倾斜角度调小一点，显得更从容 */
+  /* 重新调整不规则圆角，让它显得更像一道笔触 */
+  border-radius: 6px 4px 8px 4px / 4px 8px 4px 6px;
   transform: rotate(-1deg) skewX(-3deg);
-  /* 混合模式：在浅色纸上用正片叠底，字迹会透出来 */
   mix-blend-mode: multiply; 
 }
 
