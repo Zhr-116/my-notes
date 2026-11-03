@@ -262,6 +262,10 @@ function useReplenishCheckin(dateStr, justBought = false) {
   // 刷新主页右上角的签到图标状态（防止补的是今天或影响了其他状态）
   if (typeof initCheckin === 'function') initCheckin();
 
+  if (document.getElementById("shopView") && !document.getElementById("shopView").hidden) {
+    if (typeof renderShop === 'function') renderShop();
+  }
+
   // 6. 给出提示
   showToast("时光已拾回");
 }

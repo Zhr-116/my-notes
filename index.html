@@ -349,6 +349,15 @@
           <span style="font-size: 13px; color: var(--text-tertiary);">▸</span>
         </div>
 
+        <!-- 进阶礼包入口 -->
+        <div class="more-card" onclick="switchView('ladder')" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 9-4-4-4 4"/><path d="M18 5v14"/><path d="m2 15 4 4 4-4"/><path d="M6 19V5"/></svg>
+            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">进阶礼包</span>
+          </div>
+          <span style="font-size: 13px; color: var(--text-tertiary);">▸</span>
+        </div>
+
         <!-- 动态抽屉：时间胶囊 -->
         <div id="mineCapsule" class="more-card" onclick="openCapsuleModal()" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -372,6 +381,38 @@
       <!-- 底部版本号 -->
       <div style="text-align: center; color: var(--text-tertiary); font-size: 12px; margin-top: 50px;">
         <p>拾迹 v1.0.0</p>
+      </div>
+    </section>
+
+    <!-- 进阶礼包（拾光阶梯）页视图 -->
+    <section id="ladderView" hidden>
+      
+      <!-- 顶部数据区（极简居中） -->
+      <div style="display: flex; justify-content: space-around; align-items: center; text-align: center; margin-bottom: 24px; padding: 10px 0;">
+        <div>
+          <div id="totalCheckinDays" style="font-size: 28px; font-family: 'Georgia', serif; font-weight: 700; color: var(--text-primary);">0</div>
+          <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">累计拾光 (天)</div>
+        </div>
+        
+        <div style="width: 1px; height: 30px; background: var(--border);"></div>
+        
+        <div>
+          <div style="font-size: 28px; font-family: 'Georgia', serif; font-weight: 700; color: var(--accent);">
+            <span id="currentCheckinStreak">0</span> <span id="streakTarget" style="font-size: 16px; color: var(--text-tertiary); font-family: var(--font-sans);">/ 30</span>
+          </div>
+          <div id="streakLabel" style="font-size: 12px; color: var(--text-tertiary); margin-top: 4px;">本轮连签 (天)</div>
+        </div>
+      </div>
+
+      <!-- Tab 切换 -->
+      <div style="display: flex; background: var(--surface-muted); border-radius: 8px; padding: 4px; margin-bottom: 20px;"> 
+        <button onclick="switchLadderTab('checkin')" id="tabCheckin" class="primary" style="flex: 1; background: var(--surface); color: var(--text-primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 8px; border-radius: 6px;">心情连签</button>
+        <button onclick="switchLadderTab('habit')" id="tabHabit" style="flex: 1; background: transparent; color: var(--text-tertiary); border: none; padding: 8px; cursor: pointer; border-radius: 6px;">习惯打卡</button>
+      </div>
+
+      <!-- 阶梯容器：去掉了顶部多余的 padding -->
+      <div id="ladderContent" style="padding: 0 20px 40px 20px; position: relative;">
+        <!-- 由 JS 动态渲染 -->
       </div>
     </section>
 
@@ -968,6 +1009,16 @@
         <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">个性签名</label>
         <input type="text" id="profileSignInput" placeholder="写一句喜欢的话" style="width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid var(--border); border-radius: 8px; outline: none;">
         
+        <!-- 【新增】称号选择区 -->
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px;">当前称号</label>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+          <!-- 当前选中的称号预览 -->
+          <div id="profileTitlePreview" style="position: relative; font-size: 12px; font-weight: 800; padding: 2px 8px; color: #333; font-family: 'Kaiti', serif; letter-spacing: 1px; z-index: 1; border-radius: 4px;">
+            拾光萌新
+          </div>
+          <button onclick="openTitleModal()" style="background: transparent; border: 1px dashed var(--border); padding: 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--text-secondary);">更换</button>
+        </div>
+
         <div class="modal-actions">
           <button class="primary" onclick="saveProfileData()">保存</button>
           <button onclick="closeProfileModal()">取消</button>
@@ -1077,6 +1128,31 @@
           <div style="width: 24px; height: 24px; border-radius: 50%; background: #ea580c; border: 1px solid #9a3412;"></div>
         </div>
 
+        <!-- 樱花粉 -->
+        <div class="theme-option-btn" data-theme="sakura" onclick="handleThemeSelect('sakura')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #fff5f6; color: #4c0519; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">樱花粉</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #f43f5e; border: 1px solid #be123c;"></div>
+        </div>
+
+        <!-- 抹茶绿 -->
+        <div class="theme-option-btn" data-theme="matcha" onclick="handleThemeSelect('matcha')" style="display: flex; align-items: center; justify-content: space-between; padding: 16px; border-radius: 12px; border: 1px solid var(--border); background: #f4f8f5; color: #1e2e22; cursor: pointer; transition: all 0.2s;">
+          <span style="font-size: 15px; font-weight: 600;">抹茶绿</span>
+          <div style="width: 24px; height: 24px; border-radius: 50%; background: #10b981; border: 1px solid #166534;"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 称号选择弹窗 -->
+  <div id="titleModal" class="modal-mask" hidden>
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">选择你的称号</span>
+        <button class="close-btn" onclick="document.getElementById('titleModal').hidden = true">×</button>
+      </div>
+      <div id="titleGrid" style="display: flex; flex-wrap: wrap; gap: 12px; padding: 10px 0;">
+        <!-- JS 动态注入 -->
       </div>
     </div>
   </div>

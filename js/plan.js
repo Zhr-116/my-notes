@@ -176,6 +176,7 @@ function saveHabit() {
     id: "h_" + Date.now().toString(),
     title: title,
     targetDays: days,
+    startDate: todayStr(), 
     completedDates: [],
     isCompleted: false
   });
@@ -204,7 +205,7 @@ function checkHabit(id) {
     // 达成目标
     const newEntry = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-      content: `🏅 完成了 ${h.targetDays} 天【${h.title}】打卡`,
+      content: 完成了 `${h.targetDays} 天【${h.title}】打卡`,
       date: today,
       tags: ["习惯", h.title],
       isMilestone: true,
@@ -219,7 +220,7 @@ function checkHabit(id) {
     h.isCompleted = true;
     
     setTimeout(() => {
-      if (confirm(`🎉 恭喜！你完成了 ${h.targetDays} 天的【${h.title}】打卡！\n\n点击【确定】开启新一轮。\n点击【取消】永久养成该习惯（不再计入进度）。`)) {
+      if (confirm(`恭喜！你完成了 ${h.targetDays} 天的【${h.title}】打卡！\n\n点击【确定】开启新一轮。\n点击【取消】永久养成该习惯（不再计入进度）。`)) {
         h.completedDates = [];
         h.isCompleted = false;
       } else {
@@ -268,7 +269,6 @@ function calcHabitStreak(dates, todayStr) {
 }
 
 // 检查“今日全清”：一次性待办全做完，且所有习惯全打卡
-// 检查“今日全清”：一次性待办全做完，且所有习惯全打卡
 function checkAllDailyCleared() {
   const today = todayStr();
   
@@ -286,6 +286,21 @@ function checkAllDailyCleared() {
   if (allTasksDone && allHabitsDone) {
     localStorage.setItem("mini-all-cleared-date", today); 
     addStars(10);
+
+    // 【新增】累加习惯连签天数
+    if (habitStreak.lastDate !== today) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+      
+      if (habitStreak.lastDate === yStr) {
+        habitStreak.current += 1; // 昨天也全清了，连签+1
+      } else {
+        habitStreak.current = 1;  // 断签了，重新从 1 开始
+      }
+      habitStreak.lastDate = today;
+      saveHabitStreak();
+    }
     
     // 🌟 恢复拾迹的专属剧情触发！
     checkStoryTrigger("all_tasks_done");
@@ -489,6 +504,9 @@ function useReplenishCard(habitId, dateStr, justBought = false) {
   h.completedDates.push(dateStr);
   saveHabits();
   renderTasks();
+  if (document.getElementById("shopView") && !document.getElementById("shopView").hidden) {
+    if (typeof renderShop === 'function') renderShop();
+  }
   
   // 看看有没有因为补签触发了全清
   if (typeof checkAllDailyCleared === 'function') {

@@ -206,6 +206,31 @@ function renderShop() {
         }
       </div>
     </div>
+
+    <!-- 拾光兑换所（在原有外观装扮下面） -->
+    <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
+      <h3 class="section-title">
+        拾光兑换所 
+        <span style="font-size: 12px; color: var(--text-tertiary); font-weight: normal; margin-left: 8px;">
+          当前兑换券：${inventory.ticket || 0} 张
+        </span>
+      </h3>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: var(--surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+        ${MONTH_TITLES.map(month => {
+          const isUnlocked = unlockedTitles.includes(month.name);
+          return `
+            <div onclick="${isUnlocked ? '' : `exchangeTitle('${month.name}')`}" 
+                 style="position: relative; padding: 12px 0; border-radius: 8px; text-align: center; font-family: 'Kaiti', serif; font-size: 15px; font-weight: bold;
+                        background: ${isUnlocked ? month.color : 'var(--surface-muted)'};
+                        color: ${isUnlocked ? '#333' : 'var(--text-tertiary)'};
+                        cursor: ${isUnlocked ? 'default' : 'pointer'};
+                        opacity: ${isUnlocked ? '1' : '0.6'};">
+              ${month.name}
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
   `;
 }
 
@@ -464,6 +489,7 @@ function openInventoryModal() {
     // 遍历所有习惯
     if (typeof habits !== 'undefined') {
       habits.forEach(h => {
+        const isValidDate = !h.startDate || dateStr >= h.startDate;
         if (!h.isCompleted && !h.completedDates.includes(dateStr) && h.completedDates.length > 0) {
           canReplenishList.push({ habitId: h.id, title: h.title, dateStr: dateStr, dateName: daysAgo === 1 ? "昨天" : "前天" });
         }
@@ -507,4 +533,24 @@ function openInventoryModal() {
 function handleInventoryReplenish(habitId, dateStr) {
   document.getElementById("inventoryModal").hidden = true; // 先关掉弹窗
   handleReplenishHabit(habitId, dateStr); // 直接复用我们在 plan.js 里写好的丝滑连招！
+}
+
+function exchangeTitle(titleName) {
+  const tickets = inventory.ticket || 0;
+  if (tickets <= 0) {
+    showToast("兑换券不足，去连签 30 天获取吧！");
+    return;
+  }
+  if (!confirm(`确定消耗 1 张【拾光兑换券】解锁称号【${titleName}】吗？`)) return;
+
+  inventory.ticket -= 1;
+  saveInventory();
+
+  if (!unlockedTitles.includes(titleName)) {
+    unlockedTitles.push(titleName);
+    saveUnlockedTitles();
+  }
+
+  renderShop(); // 刷新商店
+  showToast(`成功解锁称号【${titleName}】！`);
 }

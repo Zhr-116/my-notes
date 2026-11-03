@@ -349,14 +349,21 @@ document.addEventListener('focusout', (e) => {
 let tempAvatarId = null;
 let tempFrameId = "none"; // 新增：临时记录正在试穿的头像框
 
+// === 在文件顶部变量区，加上 ===
+let tempTitle = "";
+
+// === 修改 openProfileModal 函数 ===
 async function openProfileModal() {
   document.getElementById("profileModal").hidden = false;
   document.getElementById("profileNameInput").value = userProfile.nickname;
   document.getElementById("profileSignInput").value = userProfile.signature;
   
+  // 初始化 tempTitle 和预览
+  tempTitle = userProfile.title || "拾光萌新";
+  updateProfileTitlePreview();
+  
   const preview = document.getElementById("profileAvatarPreview");
   tempAvatarId = userProfile.avatarId || null;
-  tempFrameId = userProfile.frameId || "none"; // 初始化试穿框
   
   if (tempAvatarId) {
     if (!imageDB.db) await imageDB.init();
@@ -366,7 +373,80 @@ async function openProfileModal() {
     preview.src = "./assets/girl-color.png";
   }
   
-  updateProfileFramePreview(); // 渲染弹窗里的框
+  updateProfileFramePreview();
+}
+
+// === 新增：更新资料弹窗里的称号预览 ===
+function updateProfileTitlePreview() {
+  const titlePreview = document.getElementById("profileTitlePreview");
+  if (!titlePreview) return;
+  // 【核心修复】合并两个池子去找颜色
+  const allTitles = [...TITLE_POOL, ...MONTH_TITLES];
+  const titleData = allTitles.find(t => t.name === tempTitle) || TITLE_POOL[0];
+  titlePreview.innerText = tempTitle;
+  titlePreview.style.setProperty('--title-color', titleData.color);
+  // 为了确保预览效果，也可以直接加背景色
+  titlePreview.style.background = titleData.color; 
+}
+
+// === 新增：打开称号衣橱并渲染 ===
+function openTitleModal() {
+  document.getElementById("titleModal").hidden = false;
+  const grid = document.getElementById("titleGrid");
+  
+  // 【核心修复】把两个称号池合并起来
+  const allTitles = [...TITLE_POOL, ...MONTH_TITLES];
+  
+  grid.innerHTML = allTitles.map(title => {
+    const isUnlocked = unlockedTitles.includes(title.name);
+    const isSelected = tempTitle === title.name;
+    
+    // 如果没解锁，用极简的灰色虚线和底纹
+    const bgColor = isUnlocked ? title.color : "transparent";
+    const textColor = isUnlocked ? "#333" : "var(--text-tertiary)";
+    const borderStyle = isUnlocked ? "none" : "1px dashed var(--border)";
+    
+    return `
+      <div onclick="${isUnlocked ? `selectTitle('${title.name}')` : ''}" 
+           style="position: relative; padding: 6px 12px; border-radius: 6px; font-size: 13px; font-family: 'Kaiti', serif; font-weight: 800; 
+                  background: ${bgColor}; color: ${textColor}; 
+                  border: ${isSelected ? '2px solid var(--text-primary)' : borderStyle};
+                  cursor: ${isUnlocked ? 'pointer' : 'not-allowed'};
+                  opacity: ${isUnlocked ? '1' : '0.4'};
+                  transition: all 0.2s;">
+        ${title.name}
+      </div>
+    `;
+  }).join("");
+}
+
+// === 新增：在衣橱里选中称号 ===
+function selectTitle(titleName) {
+  tempTitle = titleName;
+  document.getElementById("titleModal").hidden = true;
+  updateProfileTitlePreview(); // 同步回资料弹窗预览
+}
+
+// === 修改 saveProfileData 函数 ===
+function saveProfileData() {
+  const nickname = document.getElementById("profileNameInput").value.trim() || "拾迹";
+  const signature = document.getElementById("profileSignInput").value.trim() || "收集时间的痕迹";
+  
+  userProfile.nickname = nickname;
+  userProfile.signature = signature;
+  userProfile.frameId = tempFrameId;
+  userProfile.title = tempTitle; // 【核心保存】把选中的称号真正写进去
+  
+  if (tempAvatarId) userProfile.avatarId = tempAvatarId;
+  
+  saveProfile();
+  closeProfileModal();
+  
+  document.getElementById("myNickname").innerText = userProfile.nickname;
+  document.getElementById("mySignature").innerText = userProfile.signature;
+  
+  renderMineView(); // 此时主页的荧光笔称号会瞬间变化！
+  showToast("资料已更新");
 }
 
 // 新增辅助函数：专门更新资料弹窗里的头像框
@@ -413,27 +493,6 @@ document.getElementById("profileAvatarInput")?.addEventListener("change", async 
   e.target.value = ""; 
 });
 
-function saveProfileData() {
-  const nickname = document.getElementById("profileNameInput").value.trim() || "拾迹";
-  const signature = document.getElementById("profileSignInput").value.trim() || "收集时间的痕迹";
-  
-  userProfile.nickname = nickname;
-  userProfile.signature = signature;
-  userProfile.frameId = tempFrameId; // 【核心】在这里才真正保存
-  
-  if (tempAvatarId) {
-    userProfile.avatarId = tempAvatarId;
-  }
-  
-  saveProfile();
-  closeProfileModal();
-  
-  document.getElementById("myNickname").innerText = userProfile.nickname;
-  document.getElementById("mySignature").innerText = userProfile.signature;
-  
-  renderMineView(); // 现在外面的头像和框会一起更新
-  showToast("资料已更新");
-}
 
 // ================= 完整数据 ZIP 打包备份 =================
 
@@ -778,4 +837,195 @@ function openThemeModal() {
 
 function closeThemeModal() {
   document.getElementById("themeModal").hidden = true;
+}
+
+let currentLadderTab = 'checkin';
+
+function switchLadderTab(tab) {
+  currentLadderTab = tab;
+  // 切换按钮样式
+  const btnC = document.getElementById("tabCheckin");
+  const btnH = document.getElementById("tabHabit");
+  if (tab === 'checkin') {
+    btnC.style.background = "var(--surface)"; btnC.style.color = "var(--text-primary)"; btnC.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+    btnH.style.background = "transparent"; btnH.style.color = "var(--text-tertiary)"; btnH.style.boxShadow = "none";
+  } else {
+    btnH.style.background = "var(--surface)"; btnH.style.color = "var(--text-primary)"; btnH.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
+    btnC.style.background = "transparent"; btnC.style.color = "var(--text-tertiary)"; btnC.style.boxShadow = "none";
+  }
+  renderLadderView();
+}
+
+function renderLadderView() {
+  const checkins = getCheckins();
+  const totalCheckinDays = new Set(checkins.map(c => c.date)).size;
+  
+  let currentStreak = 0;
+  let targetDays = 30;
+  let labelText = "本轮连签 (天)";
+
+  // 1. 根据不同的 Tab，读取正确的数据
+  if (currentLadderTab === 'checkin') {
+    currentStreak = calcCurrentCheckinStreak();
+    document.getElementById("totalCheckinDays").innerText = totalCheckinDays;
+    targetDays = 30;
+    labelText = "本轮连签 (天)";
+  } else {
+    currentStreak = habitStreak.current;
+    // 如果是习惯打卡，累计天数暂时用当前连击来展示，或者你可以替换为特定的累计数据
+    document.getElementById("totalCheckinDays").innerText = currentStreak; 
+    targetDays = 50;
+    labelText = "全清连击 (天)";
+  }
+
+  // 2. 【防漏领机制】基于基准点计算本轮进度
+  const baseStart = ladderRoundStart[currentLadderTab] || 0;
+  let currentRoundProgress = currentStreak - baseStart;
+  
+  // 如果进度超过目标，直接封顶显示
+  if (currentRoundProgress > targetDays) {
+    currentRoundProgress = targetDays;
+  }
+  // 防止出现负数（比如手动清空过数据）
+  if (currentRoundProgress < 0) {
+    currentRoundProgress = 0;
+  }
+  
+  document.getElementById("currentCheckinStreak").innerText = currentRoundProgress;
+  document.getElementById("streakTarget").innerText = `/ ${targetDays}`;
+  document.getElementById("streakLabel").innerText = labelText;
+
+  const container = document.getElementById("ladderContent");
+  
+  // 3. 获取对应的数据源
+  const rewards = currentLadderTab === 'checkin' ? CHECKIN_REWARDS : HABIT_REWARDS;
+  const claimedList = claimedRewards[currentLadderTab] || [];
+
+  // 4. 图标定义
+  const giftIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14"/><path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8"/><path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5"/><rect x="3" y="7" width="18" height="4" rx="1"/></svg>`;
+  const checkIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const lockIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/></svg>`;
+
+  let html = "";
+  
+  rewards.forEach((reward, index) => {
+    const isClaimed = claimedList.includes(reward.day);
+    // 使用本轮进度来判断是否解锁
+    const isReached = currentRoundProgress >= reward.day; 
+    
+    // 状态样式初始化
+    let iconHtml = lockIcon;
+    let iconColor = "var(--text-tertiary)";
+    let titleColor = "var(--text-tertiary)"; 
+    let descColor = "var(--text-tertiary)";
+    let cursorStyle = "default";
+    let nodeBorder = "2px solid var(--border)";
+    let nodeBg = "var(--surface)";
+    
+    if (isClaimed) {
+      // 已领取状态
+      iconHtml = checkIcon;
+      nodeBorder = "2px solid var(--border)";
+      titleColor = "var(--text-secondary)";
+      descColor = "var(--text-tertiary)";
+    } else if (isReached) {
+      // 可领取状态
+      iconHtml = giftIcon;
+      iconColor = "var(--accent)";
+      titleColor = "var(--text-primary)";
+      descColor = "var(--text-secondary)";
+      cursorStyle = "pointer";
+      nodeBorder = "2px solid var(--accent)";
+      nodeBg = "var(--accent-soft)";
+    }
+
+    // 线条逻辑（如果节点达成，线条变色；最后一个节点不画线）
+    const lineColor = isReached ? "var(--accent)" : "var(--border)";
+    const lineHtml = index < rewards.length - 1 
+      ? `<div style="position: absolute; left: 22px; top: 46px; bottom: -30px; width: 1px; background: ${lineColor}; z-index: 0;"></div>` 
+      : "";
+
+    html += `
+      <div onclick="${isReached && !isClaimed ? `claimLadderReward('${currentLadderTab}', ${reward.day})` : ''}" 
+           style="display: flex; align-items: center; gap: 16px; margin-bottom: 30px; position: relative; z-index: 1; cursor: ${cursorStyle};">
+        
+        ${lineHtml}
+
+        <!-- 左侧：图标节点 -->
+        <div style="width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: ${nodeBorder}; background: ${nodeBg}; color: ${iconColor}; transition: all 0.2s; z-index: 2;">
+          ${iconHtml}
+        </div>
+
+        <!-- 右侧：文字信息 -->
+        <div style="display: flex; flex-direction: column; justify-content: center;">
+          <div style="font-size: 15px; font-weight: 600; color: ${titleColor}; margin-bottom: 2px;">
+            ${currentLadderTab === 'checkin' ? '连签' : '累计'} ${reward.day} 天
+          </div>
+          <div style="font-size: 12px; color: ${descColor};">
+            ${reward.desc} ${isClaimed ? '(已领取)' : (reward.title && unlockedTitles.includes(reward.title) ? '(称号已拥有)' : '')}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+function claimLadderReward(type, day) {
+  const rewards = type === 'checkin' ? CHECKIN_REWARDS : HABIT_REWARDS;
+  const reward = rewards.find(r => r.day === day);
+  if (!reward) return;
+
+  // 判断称号是否已拥有
+  let hasTitleAlready = false;
+  if (reward.title && unlockedTitles.includes(reward.title)) {
+    hasTitleAlready = true;
+  }
+
+  // 弹窗确认（如果已拥有称号，提示语稍微变一下）
+  const confirmMsg = hasTitleAlready 
+    ? `确定领取【${type === 'checkin' ? '连签' : '打卡'} ${day} 天】的奖励吗？`
+    : `确定领取【${type === 'checkin' ? '连签' : '打卡'} ${day} 天】的奖励吗？`;
+
+  if (!confirm(confirmMsg)) return;
+  
+  // 1. 发基础奖（静默加星迹，发卡、发券）
+  if (reward.stars) addStars(reward.stars, true, true); 
+  if (reward.card) { inventory.replenishCard = (inventory.replenishCard || 0) + reward.card; saveInventory(); }
+  if (reward.ticket) { inventory.ticket = (inventory.ticket || 0) + reward.ticket; saveInventory(); }
+  
+  // 2. 发主题
+  if (reward.theme && !ownedThemes.includes(reward.theme)) {
+    ownedThemes.push(reward.theme);
+    localStorage.setItem("mini-owned-themes", JSON.stringify(ownedThemes));
+  }
+
+  // 3. 发称号
+  if (reward.title && !hasTitleAlready) {
+    unlockedTitles.push(reward.title);
+    saveUnlockedTitles();
+  }
+
+  // 4. 记录已领取
+  if (!claimedRewards[type]) claimedRewards[type] = [];
+  claimedRewards[type].push(day);
+  saveClaimedRewards();
+  
+  // 5. 【轮回归零】如果领取的是最高档位奖励，清空已领取记录，开启新一轮！
+  const maxDay = rewards[rewards.length - 1].day; 
+  if (day === maxDay) {
+    claimedRewards[type] = []; 
+    saveClaimedRewards();
+    
+    // 【终极修复】基准点增加一个周期的长度，多出来的天数完美结转！
+    ladderRoundStart[type] = (ladderRoundStart[type] || 0) + maxDay;
+    saveLadderRoundStart();
+    
+    showToast("领取成功，下一轮阶梯已开启！");
+  } else {
+    showToast("领取成功");
+  }
+  
+  renderLadderView(); 
 }

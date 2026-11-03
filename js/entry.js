@@ -32,6 +32,10 @@ function addEntry() {
   if (typeof checkStoryTrigger === 'function') {
     setTimeout(checkStoryTrigger, 500); // 延迟半秒，等列表刷新完再弹剧情
   }
+
+  if (typeof checkAndUnlockTitles === 'function') {
+    checkAndUnlockTitles();
+  }
 }
 
 function deleteEntry(id) {

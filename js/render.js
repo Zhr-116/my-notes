@@ -16,7 +16,7 @@ function render() {
   }
 
   // 字典：需要显示顶部返回按钮和标题的子页面
-  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡', 'quotes': '拾光摘录'};
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡', 'quotes': '拾光摘录', 'ladder': '进阶礼包' };
   const isSubPage = Object.keys(pageTitles).includes(currentView);
   
   const subPageTitle = document.getElementById("subPageTitle");
@@ -93,6 +93,8 @@ function render() {
         switchView("record", true); 
       } else if (currentView === "settings") {
         switchView("mine", true);   
+      } else if (currentView === "ladder") { // 【新增】拾光阶梯回“我的”
+        switchView("mine", true);
       } else if (currentView === "quotes") { // 【新增这行】明确指出摘录回更多
         switchView("more", true);
       } else {
@@ -118,6 +120,7 @@ function render() {
   document.getElementById("settingsView").hidden = currentView !== "settings"; 
   document.getElementById("gameView").hidden = currentView !== "game"; 
   document.getElementById("quotesView").hidden = currentView !== "quotes";
+  document.getElementById("ladderView").hidden = currentView !== "ladder";
 
   // ================= 模块定制：动态底部导航 =================
   const navContainer = document.querySelector(".bottom-nav");
@@ -228,6 +231,7 @@ function render() {
   else if (currentView === "more") {
     renderMoreView();
   } else if (currentView === "quotes") { renderQuotesView(); }
+  else if (currentView === "ladder") { renderLadderView(); }
   // 同步设置页的勾选状态
   if (document.getElementById("featStory")) document.getElementById("featStory").checked = appFeatures.story;
   if (document.getElementById("featTimeline")) document.getElementById("featTimeline").checked = appFeatures.timeline;
@@ -674,13 +678,13 @@ function toggleTagMonth(month) {
 
 // 渲染“我的”页面
 async function renderMineView() {
-  // 渲染称号
-  updateTitle(); 
+  if (typeof updateTitle === 'function') updateTitle(); 
   const titleEl = document.getElementById("myTitle");
   if (titleEl && userProfile.title) {
     titleEl.innerText = userProfile.title;
-    const titleData = TITLE_POOL.find(t => t.name === userProfile.title) || TITLE_POOL[0];
-    // 【核心修改】把颜色赋给伪元素
+    // 【核心修复】合并两个池子去找颜色
+    const allTitles = [...TITLE_POOL, ...MONTH_TITLES];
+    const titleData = allTitles.find(t => t.name === userProfile.title) || TITLE_POOL[0];
     titleEl.style.setProperty('--title-color', titleData.color);
   }
   document.getElementById("myNickname").innerText = userProfile.nickname;

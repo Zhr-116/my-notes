@@ -34,7 +34,7 @@ function getIcon(name) {
 
 function handleThemeSelect(themeName) {
   if (!ownedThemes.includes(themeName)) {
-    showToast("未解锁该主题，去商店看看吧！");
+    showToast("未解锁该主题，去拾光阶梯解锁吧！");
     return;
   }
   setTheme(themeName);
@@ -65,6 +65,8 @@ function updateThemeUI() {
     else if (currentTheme === 'night') textEl.innerText = "星夜";
     else if (currentTheme === 'ocean') textEl.innerText = "海盐蓝";
     else if (currentTheme === 'sunset') textEl.innerText = "落日橘";
+    else if (currentTheme === 'sakura') textEl.innerText = "樱花粉";
+    else if (currentTheme === 'matcha') textEl.innerText = "抹茶绿";
   }
 
   // 更新弹窗里的高亮
