@@ -46,7 +46,8 @@ function renderTasks() {
       yesterday.setDate(yesterday.getDate() - 1);
       const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
       
-      const isBroken = !h.completedDates.includes(yStr) && !isCheckedToday && h.completedDates.length > 0;
+      // 【核心修复】如果今天已经拒绝过补签了，就再也不显示红字和补签按钮了
+      const isBroken = !h.completedDates.includes(yStr) && !isCheckedToday && h.completedDates.length > 0 && h.rejectedDate !== today;
       
       // 【新增】计算累计打卡天数（去重）
       const totalDays = [...new Set(h.completedDates)].length;
@@ -58,7 +59,7 @@ function renderTasks() {
         statusHtml = `
           <span style="color: var(--text-tertiary);">累计 ${totalDays} 天 | 连续 0 / ${h.targetDays} 天</span> 
           <span style="color: var(--border); margin: 0 6px;">|</span>
-          <span onclick="handleReplenishHabit('${h.id}', '${yStr}')" style="color: #ef4444; cursor: pointer; font-weight: bold; text-decoration: underline;">[ 是否补签 ]</span>
+          <span onclick="handleReplenishHabit('${h.id}', '${yStr}')" style="color: #ef4444; cursor: pointer; font-weight: bold; text-decoration: underline;">[是否补签]</span>
         `;
         validStreak = 0; // 连续归零
       }
@@ -437,43 +438,40 @@ function handleReplenishHabit(habitId, dateStr) {
   const h = habits.find(x => x.id === habitId);
   if (!h) return;
 
-  // 定义一个放弃补签的本地刷新函数
-  const cancelReplenish = () => {
-    const statusEl = document.querySelector(`#habit-card-${habitId} div[style*="font-size: 12px"]`);
-    if (statusEl) {
-      statusEl.innerHTML = `连续 0 / ${h.targetDays} 天`;
-      statusEl.style.color = "var(--text-tertiary)";
-    }
-    const progressBar = document.querySelector(`#habit-card-${habitId} .task-text + div > div`);
-    if (progressBar) progressBar.style.background = "var(--accent)";
+  // 【核心修复】定义一个“拒绝补签”的内部函数，把今天的日期存进习惯数据里
+  const rejectReplenish = () => {
+    h.rejectedDate = todayStr(); // 记录今天已经拒绝过了
+    saveHabits();
+    renderTasks(); // 重新渲染页面，彻底恢复默认样式
   };
 
-  // 1. 有库存：问是否用卡
+  // 1. 如果背包里有卡，直接问是否使用
   if (inventory.replenishCard > 0) {
     if (confirm(`是否消耗 1 张【拾光回溯卡】补签 ${dateStr}？`)) {
       useReplenishCard(habitId, dateStr);
     } else {
-      cancelReplenish(); // 用户点“否”，直接原地恢复默认样式
+      rejectReplenish(); // 用户点取消，记录拒绝状态
     }
     return;
   }
 
-  // 2. 无库存：问是否花钱买
+  // 2. 如果没卡，问是否花钱买
   const price = getReplenishPrice();
   if (userStars < price) {
-    if (confirm(`补签需要 ${price} 星迹，你目前星迹不足。\n是否直接恢复默认状态？`)) {
-      cancelReplenish();
+    if (confirm(`补签需要 ${price} 星迹，但你的星迹不足。\n是否直接恢复默认状态？`)) {
+      rejectReplenish(); // 星迹不够，记录拒绝状态
     }
     return;
   }
 
-  if (confirm(`你没有补签卡。\n是否花费 ${price} 星迹购买一张并立即补签？`)) {
+  // 3. 星迹够，问是否购买
+  if (confirm(`你目前没有补签卡。\n是否花费 ${price} 星迹购买一张，并立即补签？`)) {
     userStars -= price;
     localStorage.setItem("mini-stars", userStars.toString());
-    localStorage.setItem("mini-last-replenish-date", Date.now().toString()); 
+    localStorage.setItem("mini-last-replenish-date", Date.now().toString());
     useReplenishCard(habitId, dateStr, true);
   } else {
-    cancelReplenish(); // 用户点“否”，直接原地恢复默认样式
+    rejectReplenish(); // 用户点取消，记录拒绝状态
   }
 }
 

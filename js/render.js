@@ -106,6 +106,10 @@ function render() {
   document.getElementById("timelineView").hidden = currentView !== "timeline";
   document.getElementById("reviewView").hidden = currentView !== "review";
   document.getElementById("bookView").hidden = currentView !== "book";
+  const addBookBtn = document.getElementById("addBookBtn");
+  if (addBookBtn) {
+    addBookBtn.style.display = currentView === "book" ? "flex" : "none";
+  }
   document.getElementById("planView").hidden = currentView !== "plan";
   document.getElementById("moreView").hidden = currentView !== "more";
   document.getElementById("mineView").hidden = currentView !== "mine";
