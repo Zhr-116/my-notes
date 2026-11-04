@@ -63,11 +63,15 @@ async function renderChatList() {
     return;
   }
 
-  // 获取用户头像
+  // 安全获取头像，防止 IndexedDB 报错导致渲染全毁
   let avatarSrc = "./assets/girl-color.png";
-  if (userProfile.avatarId && imageDB.db) {
-    const base64 = await imageDB.get(userProfile.avatarId);
-    if (base64) avatarSrc = base64;
+  try {
+    if (typeof userProfile !== 'undefined' && userProfile.avatarId && imageDB.db) {
+      const base64 = await imageDB.get(userProfile.avatarId);
+      if (base64) avatarSrc = base64;
+    }
+  } catch (e) {
+    console.warn("头像加载失败，使用默认头像");
   }
 
   let html = "";
@@ -75,7 +79,7 @@ async function renderChatList() {
 
   chatMessages.forEach((msg, index) => {
     const msgTime = new Date(msg.time).getTime();
-    // 如果上条消息和这条消息间隔超过 5 分钟，显示时间
+    // 时间分割线
     if (msgTime - lastTime > 5 * 60 * 1000 || index === 0) {
       const d = new Date(msg.time);
       const timeStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
@@ -83,23 +87,27 @@ async function renderChatList() {
     }
     lastTime = msgTime;
 
-    // 把原来的 <div class="chat-bubble"> 替换为：
+    // 核心修复：加入当前气泡样式类，并恢复长按绑定
     html += `
-      <div class="chat-msg-row" ...>
-        <div class="chat-bubble style-${currentBubble}">${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>
+      <div class="chat-msg-row" 
+           onpointerdown="startChatPress(event, '${msg.id}')" 
+           onpointerup="cancelChatPress()" 
+           onpointerleave="cancelChatPress()" 
+           onpointercancel="cancelChatPress()"
+           oncontextmenu="event.preventDefault()">
+        <div class="chat-bubble style-${typeof currentBubble !== 'undefined' ? currentBubble : 'default'}">${escapeHtml(msg.content).replace(/\n/g, '<br>')}</div>
         <img src="${avatarSrc}" class="chat-avatar">
       </div>
     `;
   });
 
   list.innerHTML = html;
-  
-  // 渲染完成后直接滚到底部
   list.scrollTop = list.scrollHeight;
 }
 
 // 长按逻辑
 function startChatPress(e, id) {
+  e.preventDefault();
   chatLongPressTriggered = false;
   chatPressTimer = setTimeout(() => {
     chatLongPressTriggered = true;

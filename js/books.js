@@ -199,10 +199,15 @@ async function openBookDetail(id) {
 
   const readView = document.getElementById("bookReadView");
   const pageContent = document.getElementById("bookPageContent");
+  
   readView.hidden = false;
   document.body.style.overflow = "hidden";
-  pageContent.style.animation = "none"; pageContent.offsetHeight; 
-  pageContent.style.animation = "slideInPage 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards";
+  
+  // 确保打开前没有残留的退出动画类
+  pageContent.classList.remove("slide-out-right");
+  
+  // 触发一次重绘，让 CSS 动画能够重新播放
+  void pageContent.offsetWidth;
 }
 
 function renderBookStatus(book) {
@@ -230,7 +235,7 @@ async function updateBookStatus(bookId, newStatus) {
 function createReadEntry(book) {
   const newEntry = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-    content: `📚 读完了《${book.title}》`,
+    content: `读完了《${book.title}》`,
     date: todayStr(),
     tags: ["读书"],
     isMilestone: false, isPinned: false,
@@ -242,8 +247,23 @@ function createReadEntry(book) {
 }
 
 function closeBookRead() {
-  document.getElementById("bookReadView").hidden = true;
-  currentBookId = null; document.body.style.overflow = ""; renderBookView(); 
+  const view = document.getElementById("bookReadView");
+  const bookView = document.getElementById("bookView");
+  
+  // 1. 瞬间隐藏书页（就像 switchView 里隐藏旧页面一样）
+  view.hidden = true;
+  currentBookId = null; 
+  document.body.style.overflow = ""; 
+  
+  // 2. 渲染底下的书架
+  renderBookView();
+  
+  // 3. 给书架加一个从左滑入的动画（完美复刻页面返回的动画手感）
+  if (bookView) {
+    bookView.classList.remove("anim-slide-left", "anim-fade-soft");
+    void bookView.offsetWidth; // 强制重绘
+    bookView.classList.add("anim-slide-left"); // 使用系统全局的返回动画
+  }
 }
 
 function startEditBookDetail() {

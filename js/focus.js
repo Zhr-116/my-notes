@@ -89,7 +89,7 @@ function finishFocus(minutes, isEarlyQuit) {
 
   const newEntry = {
     id: Date.now().toString(36),
-    content: `🌱 专注了 ${minutes} 分钟`,
+    content: `专注了 ${minutes} 分钟`,
     date: todayStr(),
     tags: ["专注"],
     isMilestone: false, isPinned: false, detail: "", createdAt: new Date().toISOString()

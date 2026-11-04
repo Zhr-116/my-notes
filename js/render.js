@@ -55,13 +55,11 @@ function render() {
       headerCheckinBtn.hidden = true;
       if (headerSettingsBtn) headerSettingsBtn.hidden = false;
       if (headerFocusBtn) headerFocusBtn.hidden = true;
-      // （因为上面已经默认隐藏了，这里不用再写 headerTreeHoleBtn 和 headerChatBtn）
     } else if (currentView === "plan") {
       // 计划页显示签到和专注闹钟
       headerCheckinBtn.hidden = false;
       if (headerSettingsBtn) headerSettingsBtn.hidden = true;
       if (headerFocusBtn) headerFocusBtn.hidden = false;
-      // （这里也不写，继承默认隐藏）
     } else {
       // 其他主页面（记录、时间轴、更多）
       headerCheckinBtn.hidden = false;
@@ -102,9 +100,9 @@ function render() {
         switchView("record", true); 
       } else if (currentView === "settings") {
         switchView("mine", true);   
-      } else if (currentView === "ladder") { // 【新增】拾光阶梯回“我的”
+      } else if (currentView === "ladder") { 
         switchView("mine", true);
-      } else if (currentView === "quotes") { // 【新增这行】明确指出摘录回更多
+      } else if (currentView === "quotes") { 
         switchView("more", true);
       } else {
         switchView("more", true);   
@@ -211,7 +209,6 @@ function render() {
   else if (currentView === "settings") {
     const select = document.getElementById("defaultViewSelect");
     if (select) {
-      // 收集当前开启的可作为启动页的模块
       let optionsHtml = `<option value="record">记录</option>`;
       if (appFeatures.timeline) optionsHtml += `<option value="timeline">时间轴</option>`;
       if (appFeatures.plan) optionsHtml += `<option value="plan">计划倒计时</option>`;
@@ -224,7 +221,6 @@ function render() {
       
       select.innerHTML = optionsHtml;
       
-      // 获取当前保存的默认页，如果它被关闭了，强制回退到 record
       let savedDefault = localStorage.getItem("mini-default-view") || "record";
       let availableValues = Array.from(select.options).map(o => o.value);
       
@@ -237,11 +233,10 @@ function render() {
     }
   }
   else if (currentView === "mine") { renderMineView(); } 
-  // 【新增】动态渲染更多页
-  else if (currentView === "more") {
-    renderMoreView();
-  } else if (currentView === "quotes") { renderQuotesView(); }
+  else if (currentView === "more") { renderMoreView(); } 
+  else if (currentView === "quotes") { renderQuotesView(); }
   else if (currentView === "ladder") { renderLadderView(); }
+
   // 同步设置页的勾选状态
   if (document.getElementById("featStory")) document.getElementById("featStory").checked = appFeatures.story;
   if (document.getElementById("featTimeline")) document.getElementById("featTimeline").checked = appFeatures.timeline;
@@ -261,7 +256,6 @@ function renderMoreView() {
 
   let html = "";
 
-  // 回顾看板
   if (appFeatures.review) {
     html += `
       <div class="more-card" onclick="switchView('review')">
@@ -272,7 +266,6 @@ function renderMoreView() {
       </div>`;
   }
 
-  // 私人书架
   if (appFeatures.book) {
     html += `
       <div class="more-card" onclick="switchView('book')">
@@ -283,7 +276,6 @@ function renderMoreView() {
       </div>`;
   }
 
-  // 拾光商店
   if (appFeatures.shop) {
     html += `
       <div class="more-card" onclick="switchView('shop')">
@@ -294,7 +286,6 @@ function renderMoreView() {
       </div>`;
   }
 
-  // 拾光趣问
   if (appFeatures.game) {
     html += `
       <div class="more-card" onclick="switchView('game')">
@@ -305,7 +296,6 @@ function renderMoreView() {
       </div>`;
   }
 
-  // 拾光摘录
   if (appFeatures.quotes) {
     html += `
       <div class="more-card" onclick="switchView('quotes')">
@@ -316,7 +306,6 @@ function renderMoreView() {
       </div>`;
   }
 
-  // 时间胶囊
   if (appFeatures.capsule) {
     html += `
       <div class="more-card" onclick="openCapsuleModal()">
@@ -327,13 +316,11 @@ function renderMoreView() {
       </div>`;
   }
 
-  // 如果全关了，给个提示
   if (html === "") {
     html = `<div class="empty" style="grid-column: 1/-1;">没有开启任何模块哦，去“我的-设置”里开启吧。</div>`;
   }
 
   grid.innerHTML = html;
-  // 渲染“我的”页面时，同步主题按钮的高亮
   if (typeof updateThemeUI === 'function') {
     updateThemeUI();
   }
@@ -397,21 +384,27 @@ function renderTimeline() {
     return;
   }
 
-  // 定义两个排序图标
   const iconDesc = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 4v16"/><path d="M15 4h5l-5 6h5"/><path d="M15 20v-3.5a2.5 2.5 0 0 1 5 0V20"/><path d="M20 18h-5"/></svg>`;
   const iconAsc = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M20 8h-5"/><path d="M15 10V6.5a2.5 2.5 0 0 1 5 0V10"/><path d="M15 14h5l-5 6h5"/></svg>`;
   
-  // 根据当前排序状态选择图标
   const currentIcon = timelineSortOrder === "desc" ? iconDesc : iconAsc;
 
+  // 处理跨度时间轴的虚拟拆分
+  const timelineNodes = [];
+  milestones.forEach(e => {
+    timelineNodes.push({ ...e, virtualDate: e.date, label: e.endDate ? "（开始）" : "" });
+    if (e.endDate && e.endDate !== e.date) {
+      timelineNodes.push({ ...e, virtualDate: e.endDate, label: "（结束）" });
+    }
+  });
+
   const groups = {};
-  milestones.forEach((e) => {
-    const year = e.date.slice(0, 4);
+  timelineNodes.forEach((e) => {
+    const year = e.virtualDate.slice(0, 4);
     if (!groups[year]) groups[year] = [];
     groups[year].push(e);
   });
   
-  // 年份永远固定倒序
   const years = Object.keys(groups).sort().reverse();
 
   let html = "";
@@ -419,11 +412,10 @@ function renderTimeline() {
   years.forEach((year) => {
     const items = groups[year];
     
-    // 年份内部事件排序
     items.sort((a, b) => {
       return timelineSortOrder === "desc" 
-        ? b.date.localeCompare(a.date) 
-        : a.date.localeCompare(b.date);
+        ? b.virtualDate.localeCompare(a.virtualDate) 
+        : a.virtualDate.localeCompare(b.virtualDate);
     });
 
     const isExpanded = expandedYears.has(year);
@@ -432,7 +424,6 @@ function renderTimeline() {
       <div class="year-header" onclick="toggleYear('${year}')">
         <div style="display: flex; align-items: center; gap: 8px;">
           <span>${year} 年</span>
-          <!-- 排序图标：阻止冒泡，防止触发折叠 -->
           <span onclick="event.stopPropagation(); toggleTimelineSort()" style="color: var(--text-tertiary); cursor: pointer; display: flex; align-items: center; transition: color 0.2s;" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-tertiary)'">
             ${currentIcon}
           </span>
@@ -447,11 +438,14 @@ function renderTimeline() {
         const tagsHtml = e.tags && e.tags.length
             ? `<div class="tags">${e.tags.map((t) => `<span class="tag">#${escapeHtml(t)}</span>`).join("")}</div>`
             : "";
+        
+        const dotStyle = e.label ? 'background: var(--border); border: 1px solid var(--text-tertiary);' : '';
+
         html += `
           <div class="timeline-item ${isLast ? "timeline-item-last" : ""}">
-            <div class="dot"></div>
+            <div class="dot" style="${dotStyle}"></div>
             <div>
-              <div class="date">${escapeHtml(e.date)}</div>
+              <div class="date">${escapeHtml(e.virtualDate)} <span style="color:var(--accent); font-size:11px;">${e.label || ''}</span></div>
               <div class="content">${escapeHtml(e.content)}</div>
               ${tagsHtml}
             </div>
@@ -464,7 +458,6 @@ function renderTimeline() {
   timelineEl.innerHTML = html;
 }
 
-// 切换排序逻辑保持不变
 function toggleTimelineSort() {
   timelineSortOrder = timelineSortOrder === "desc" ? "asc" : "desc";
   renderTimeline();
@@ -484,6 +477,13 @@ function renderItem(e) {
 
   const detailBadge = hasDetail ? `<span class="badge-detail" style="display:inline-flex;align-items:center; gap:4px;">${getIcon('pencil')} 详情</span>` : '';
 
+  // 【核心修复】把日期跨度判断正确地放在 return 之前
+  let dateHtml = escapeHtml(e.date);
+  if (e.endDate && e.endDate !== e.date) {
+    const endStr = e.endDate.slice(5); 
+    dateHtml = `${escapeHtml(e.date)} <span style="color:var(--text-tertiary)">~ ${endStr}</span>`;
+  }
+
   return `
     <div class="list-item ${e.isMilestone ? 'is-milestone-item' : ''}" data-id="${e.id}">
       <div class="swipe-actions">
@@ -495,7 +495,7 @@ function renderItem(e) {
       
       <div class="swipe-content" onclick="openModal('${e.id}')">
         <div class="item-header">
-          <div class="item-date">${escapeHtml(e.date)}</div>
+          <div class="item-date">${dateHtml}</div>
           <div class="item-badges">
             ${milestoneBadge}
             ${detailBadge}
@@ -560,7 +560,7 @@ function renderList() {
   let html = `<div class="list-container">`;
 
   if (pinned.length) {
-    html += `<div class="pin-header">📌 置顶</div>`;
+    html += `<div class="pin-header">置顶</div>`;
     html += pinned.map(renderItem).join("");
   }
 
@@ -680,13 +680,11 @@ function toggleTagMonth(month) {
   renderTagDetailView();
 }
 
-// 渲染“我的”页面
 async function renderMineView() {
   if (typeof updateTitle === 'function') updateTitle(); 
   const titleEl = document.getElementById("myTitle");
   if (titleEl && userProfile.title) {
     titleEl.innerText = userProfile.title;
-    // 【核心修复】合并两个池子去找颜色
     const allTitles = [...TITLE_POOL, ...MONTH_TITLES];
     const titleData = allTitles.find(t => t.name === userProfile.title) || TITLE_POOL[0];
     titleEl.style.setProperty('--title-color', titleData.color);
@@ -697,12 +695,10 @@ async function renderMineView() {
   const avatarEl = document.getElementById("myAvatar");
   const frameEl = document.getElementById("myAvatarFrame");
 
-  // 1. 强制等待数据库就绪
   if (!imageDB.db) {
     await imageDB.init();
   }
 
-  // 2. 严格加载头像
   if (avatarEl) {
     if (userProfile.avatarId) {
       try {
@@ -710,7 +706,6 @@ async function renderMineView() {
         if (base64) {
           avatarEl.src = base64;
         } else {
-          // 如果数据库里找不到，才用默认
           avatarEl.src = "./assets/girl-color.png"; 
         }
       } catch (err) {
@@ -722,11 +717,9 @@ async function renderMineView() {
     }
   }
 
-  // 【修复】渲染头像框（支持单独缩放）
   if (frameEl) {
     const currentFrame = FRAME_POOL.find(f => f.id === userProfile.frameId);
     if (currentFrame) {
-      // 如果没有写 scale，默认就是 1
       const scaleVal = currentFrame.scale || 1;
       
       if (currentFrame.svg) {
@@ -745,7 +738,6 @@ async function renderMineView() {
     }
   }
 
-  // 动态控制抽屉显隐
   const mineCapsule = document.getElementById("mineCapsule");
   const mineQuotes = document.getElementById("mineQuotes");
   if (mineCapsule) mineCapsule.style.display = appFeatures.capsule ? "flex" : "none";

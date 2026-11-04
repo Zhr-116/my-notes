@@ -143,6 +143,7 @@ const saveDraft = debounce(() => {
     content: contentInput.value,
     date: dateInput.value,
     tags: tagsInput.value,
+    endDate: document.getElementById("endDateInput")?.value || ""
   };
   if (data.content.trim() || data.tags.trim()) {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
@@ -164,6 +165,13 @@ try {
     if (data.content) contentInput.value = data.content;
     if (data.tags) tagsInput.value = data.tags;
     if (data.date) draftDate = data.date;
+
+    if (data.endDate) {
+      document.getElementById("endDateInput").value = data.endDate;
+      document.getElementById("endDateInput").style.display = "block";
+      document.getElementById("toggleEndDateBtn").style.color = "var(--accent)";
+      document.getElementById("toggleEndDateBtn").style.borderColor = "var(--accent)";
+    }
   }
 } catch (e) {}
 

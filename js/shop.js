@@ -251,8 +251,9 @@ function renderShop() {
                         background: ${isUnlocked ? month.color : 'var(--surface-muted)'};
                         color: ${isUnlocked ? '#333' : 'var(--text-tertiary)'};
                         cursor: ${isUnlocked ? 'default' : 'pointer'};
-                        opacity: ${isUnlocked ? '1' : '0.6'};">
-              ${month.name}
+                        opacity: ${isUnlocked ? '1' : '0.6'};
+                        letter-spacing: ${isUnlocked ? 'normal' : '4px'};">
+              ${isUnlocked ? month.name : '？'}
             </div>
           `;
         }).join("")}
@@ -593,7 +594,7 @@ function exchangeTitle(titleName) {
     showToast("兑换券不足，去连签 30 天获取吧！");
     return;
   }
-  if (!confirm(`确定消耗 1 张【拾光兑换券】解锁称号【${titleName}】吗？`)) return;
+  if (!confirm(`确定消耗 1 张【拾光兑换券】，揭晓并解锁这个神秘的月份专属称号吗？`)) return;
 
   inventory.ticket -= 1;
   saveInventory();
@@ -603,6 +604,6 @@ function exchangeTitle(titleName) {
     saveUnlockedTitles();
   }
 
-  renderShop(); // 刷新商店
-  showToast(`成功解锁称号【${titleName}】！`);
+  renderShop(); // 刷新商店，此时那个方块会亮起并显示出真实的名字
+  showToast(`恭喜揭晓：解锁称号【${titleName}】！`); // 延长展示时间，无 Emoji
 }

@@ -343,66 +343,145 @@ button.primary:active { transform: translateY(1px); }
 .book-card.selected .book-checkbox { background: var(--text-primary); border-color: var(--text-primary); }
 .book-card.selected .book-checkbox::after { content: "✓"; color: white; font-size: 10px; font-weight: bold; }
 .book-card.selected { transform: scale(0.95); box-shadow: 0 0 0 2px var(--text-primary); opacity: 0.9; }
-.selection-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); padding: 16px 20px; box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1); display: flex; align-items: center; justify-content: space-between; z-index: 1000; animation: slideUpBar 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-@keyframes slideUpBar { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.selection-bar[hidden] { display: none !important; }
-.selection-bar span { font-size: 14px; font-weight: 600; color: var(--text-primary); }
-.selection-bar button { border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; font-weight: 600; }
-.selection-bar .danger-btn { background: #ef4444; color: white; margin-left: auto; margin-right: 12px; }
-.selection-bar .cancel-btn { background: var(--surface-muted); color: var(--text-primary); }
+/* 底部操作栏（无遮罩，不阻挡列表滑动） */
+.book-bottom-bar {
+  position: fixed;
+  bottom: max(24px, env(safe-area-inset-bottom)); /* 适配全面屏安全区 */
+  left: 16px;
+  right: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  z-index: 9999; /* 保证在最上层 */
+  /* 开启独立渲染层，死死钉在屏幕上，绝不跟随列表滚动 */
+  transform: translateZ(0); 
+  animation: slideUpBar 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
 
-/* ================= 沉浸式书页视图 ================= */
-.book-read-page { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #2a2a2a; z-index: 1500; display: flex; align-items: center; justify-content: center; }
+/* 夜间模式适配 */
+html[data-theme="night"] .book-bottom-bar {
+  background: rgba(30, 30, 30, 0.95);
+}
+
+.book-bottom-bar[hidden] { display: none !important; }
+
+@keyframes slideUpBar { 
+  from { transform: translateY(100px) translateZ(0); opacity: 0; } 
+  to { transform: translateY(0) translateZ(0); opacity: 1; } 
+}
+
+/* ================= 沉浸式书页视图（全屏滑入滑出） ================= */
+.book-read-page { 
+  position: fixed; 
+  inset: 0; 
+  background: #fcf9f2; /* 全屏信纸底色，无黑边 */
+  z-index: 1500; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+}
 .book-read-page[hidden] { display: none !important; }
-.book-page-content { background: #fcf9f2; width: 100%; max-width: 600px; height: 95vh; padding: 30px; overflow-y: auto; scrollbar-width: none; box-shadow: 0 10px 40px rgba(0,0,0,0.5), inset 4px 0 10px rgba(0,0,0,0.05); border-radius: 4px; animation: slideInPage 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+/* 替换掉之前的 animation 动画 */
+.book-page-content { 
+  background: #fcf9f2; 
+  width: 100%; 
+  max-width: 800px; 
+  height: 100vh; 
+  padding: 30px; 
+  overflow-y: auto; 
+  scrollbar-width: none; 
+  box-shadow: none; 
+  border-radius: 0; 
+  /* 👈 核心：用过渡代替动画，时长缩短到 0.2s，极致干脆 */
+  transition: transform 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transform: translateX(0);
+}
 .book-page-content::-webkit-scrollbar { display: none; }
-@keyframes slideInPage { from { transform: translateX(60px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-.book-read-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; height: 36px; }
-.back-btn { background: transparent; border: none; font-size: 14px; color: #8c8273; cursor: pointer; font-weight: 600; }
+
+@keyframes slideInPage { 
+  from { transform: translateX(100%); opacity: 0.8; } 
+  to { transform: translateX(0); opacity: 1; } 
+}
+
+/* ================= 书页头部 ================= */
+.book-read-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 20px; 
+  height: 36px; 
+}
+.back-btn { 
+  background: transparent; 
+  border: none; 
+  font-size: 14px; 
+  color: #8c8273; 
+  cursor: pointer; 
+  font-weight: 600; 
+  outline: none; 
+  transition: color 0.2s;
+}
 .back-btn:hover { color: #333; }
 #brHeaderActions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
-.page-btn-edit { background: transparent; border: 1px solid #d1c7b8; color: #8c8273; padding: 4px 16px; border-radius: 16px; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+
+.page-btn-edit { 
+  background: transparent; 
+  border: 1px solid #d1c7b8; 
+  color: #8c8273; 
+  padding: 4px 16px; 
+  border-radius: 16px; 
+  font-size: 13px; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+  outline: none; 
+}
 .page-btn-edit:hover { background: #f0e9d8; color: #4b453c; border-color: #8c8273; }
-.page-btn-save { background: #a0522d; color: #fcf9f2; border: none; padding: 4px 16px; border-radius: 16px; font-size: 13px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 6px rgba(160, 82, 45, 0.3); }
-.page-btn-cancel { background: transparent; color: #8c8273; border: 1px solid transparent; padding: 4px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; }
+.page-btn-save { background: #a0522d; color: #fcf9f2; border: none; padding: 4px 16px; border-radius: 16px; font-size: 13px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 6px rgba(160, 82, 45, 0.3); outline: none; }
+.page-btn-cancel { background: transparent; color: #8c8273; border: 1px solid transparent; padding: 4px 12px; border-radius: 16px; font-size: 13px; cursor: pointer; outline: none; }
 .page-btn-cancel:hover { border-color: #d1c7b8; }
+
+/* ================= 书籍信息区 ================= */
 .book-read-info { display: flex; gap: 20px; margin-bottom: 20px; }
-.br-cover { width: 90px; height: 126px; border-radius: 4px; background: #e5e0d8; overflow: hidden; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
+.br-cover { width: 90px; height: 126px; border-radius: 4px; background: #e5e0d8; overflow: hidden; box-shadow: 2px 2px 8px rgba(0,0,0,0.1); flex-shrink: 0; position: relative; }
 .br-cover img { width: 100%; height: 100%; object-fit: cover; }
 .br-meta { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .br-meta h1 { font-family: "Songti SC", "SimSun", serif; font-size: 24px; color: #333; margin: 0 0 6px 0; line-height: 1.3; }
 .br-meta p { font-size: 13px; color: #8c8273; margin: 0 0 12px 0; }
 .br-quote { font-family: "Kaiti", "STKaiti", serif; font-size: 14px; color: #6b6457; font-style: italic; line-height: 1.5; }
 .book-divider { text-align: center; color: #d1c7b8; font-size: 12px; margin: 20px 0; letter-spacing: 4px; }
-/* 沉浸式书页的正文与输入区 */
+
+/* ================= 正文与输入区（无装订线） ================= */
 .paper-read-area, .paper-textarea {
   width: 100%;
   font-family: "Kaiti", "STKaiti", "Georgia", serif;
   font-size: 16px;
   color: #333;
   line-height: 2; 
-  padding: 10px 0 10px 20px; 
+  padding: 10px 0; 
   text-indent: 2em; 
   white-space: pre-wrap;
   margin: 0;
-  border: none;
+  border: none; 
   box-sizing: border-box;
   background: transparent; 
   outline: none;
   resize: none;
-  border-left: 1px dashed #d1c7b8; /* 左侧装订线 */
 }
-
-.paper-read-area {
-  min-height: 300px;
-}
-
-.paper-textarea {
-  height: 45vh;
-  min-height: 200px;
-  overflow-y: auto;
-}
+.paper-read-area { min-height: 300px; }
+.paper-textarea { height: 45vh; min-height: 200px; overflow-y: auto; }
 .paper-textarea::placeholder { color: #b0a696; }
+
+/* ================= 夜间模式专属适配 ================= */
+html[data-theme="night"] .book-read-page { background: #121212; }
+html[data-theme="night"] .book-page-content { background: #1E1E1E; color: #E5E7EB; }
+html[data-theme="night"] .br-meta h1, 
+html[data-theme="night"] .paper-read-area { color: #E5E7EB !important; }
+html[data-theme="night"] .paper-read-area { background-image: linear-gradient(transparent 95%, #374151 95%); }
 
 /* ================= 生成分享卡片 ================= */
 .card-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -974,7 +1053,7 @@ html[data-theme="night"] .quote-card-source {
   opacity: 1; 
   transform: translateX(0); /* 滑入屏幕 */
 }
-.chat-header { display: flex; justify-content: space-between; align-items: center; padding: max(20px, env(safe-area-inset-top)) 16px 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+.chat-header { display: flex; justify-content: space-between; align-items: center; padding: max(10px, env(safe-area-inset-top)) 16px 6px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
 .chat-list { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
 .chat-time-divider { text-align: center; font-size: 11px; color: var(--text-tertiary); margin: 10px 0; font-family: monospace; }
 
@@ -1007,6 +1086,7 @@ html[data-theme="night"] .quote-card-source {
   word-break: break-all; 
   user-select: none; 
   -webkit-user-select: none; 
+  -webkit-touch-callout: none;
   margin-top: 2px; 
 }
 .chat-bubble:active { opacity: 0.8; }
@@ -1153,8 +1233,8 @@ html[data-theme="night"] .chat-bubble.style-paper::after {
 .chat-bubble.style-highlighter::before {
   content: "";
   position: absolute;
-  top: 12%;
-  bottom: 12%;
+  top: 6px;    /* 👈 仅修改这里：从 12% 改为固定像素，包住首尾 */
+  bottom: 6px; /* 👈 仅修改这里：从 12% 改为固定像素 */
   left: -2px;
   right: -2px;
   z-index: -1;
@@ -1174,8 +1254,8 @@ html[data-theme="night"] .chat-bubble.style-paper::after {
 .chat-bubble.style-highlighter::after {
   content: "";
   position: absolute;
-  top: 18%;
-  bottom: 18%;
+  top: 9px;    /* 👈 仅修改这里：从 18% 改为固定像素 */
+  bottom: 9px; /* 👈 仅修改这里：从 18% 改为固定像素 */
   left: 2px;
   right: -4px;
   z-index: -1;
@@ -1191,6 +1271,15 @@ html[data-theme="night"] .chat-bubble.style-paper::after {
   filter: blur(0.5px); /* 边缘轻微羽化，更像墨水渗入纸张 */
 }
 
+/* 夜间模式适配 */
+html[data-theme="night"] .chat-bubble.style-highlighter::before {
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 10%, var(--accent) 90%, transparent 100%);
+  mix-blend-mode: screen;
+}
+html[data-theme="night"] .chat-bubble.style-highlighter::after {
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 15%, var(--accent) 85%, transparent 100%);
+  mix-blend-mode: screen;
+}
 /* 3. 极简票根（纯虚线，带缺口） */
 .chat-bubble.style-ticket {
   background: var(--surface);
@@ -1214,3 +1303,56 @@ html[data-theme="night"] .chat-bubble.style-paper::after {
 .chat-bubble.style-ticket::before { left: -6px; border-right: 1px solid var(--text-tertiary); }
 .chat-bubble.style-ticket::after { right: -6px; border-left: 1px solid var(--text-tertiary); }
 html[data-theme="night"] .chat-bubble.style-ticket { background: var(--surface-muted); }
+
+/* 无遮罩的底部抽屉 */
+.book-bottom-drawer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-radius: 16px 16px 0 0; /* 圆角稍微收敛 */
+  padding: 12px 16px; /* 👈 压扁高度 */
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transform: translateZ(0);
+  animation: slideUpDrawer 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.book-bottom-drawer[hidden] { display: none !important; }
+
+@keyframes slideUpDrawer {
+  from { transform: translateY(100%) translateZ(0); }
+  to { transform: translateY(0) translateZ(0); }
+}
+
+/* ================= 星夜模式专属对比度修复 ================= */
+
+/* 1. 修复打卡对勾：白底白勾 -> 浅底深勾 */
+html[data-theme="night"] .task-checkbox {
+  color: #121212 !important; /* 让对勾变成深色 */
+}
+
+/* 2. 提亮习惯的统计文字 (如：累计 X 天 | 连续 X / X 天) */
+html[data-theme="night"] .task-item div[style*="color: var(--text-tertiary)"] {
+  color: #9CA3AF !important; /* 比默认的 #6B7280 亮一档 */
+}
+
+/* 3. 提亮“是否补签”附近的分隔符 */
+html[data-theme="night"] .task-item span[style*="color: var(--border)"] {
+  color: #4B5563 !important;
+}
+
+/* 4. 提亮无任务时的空状态提示 */
+html[data-theme="night"] .empty-task {
+  color: #9CA3AF !important;
+}
+
+/* 5. 提亮记录列表的日期和标签计数 */
+html[data-theme="night"] .item-date,
+html[data-theme="night"] .month-count {
+  color: #9CA3AF !important;
+}
+
+/* 6. 习惯进度条的暗色底槽稍微提亮，防止和卡片融为一体 */
+html[data-theme="night"] .task-item div[style*="background: var(--surface-muted)"] {
+  background: #374151 !important;
+}
