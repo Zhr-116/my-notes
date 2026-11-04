@@ -27,35 +27,6 @@ function selectMode(el, mode) {
   currentMode = mode;
 }
 
-// 开始游戏
-async function startGame() {
-  document.getElementById("gameStartPanel").hidden = true;
-  document.getElementById("gamePlayPanel").hidden = false;
-  document.getElementById("gameEndPanel").hidden = true;
-  document.getElementById("feedbackPanel").hidden = true;
-  
-  currentQuestionIndex = 0;
-  currentScore = 0;
-  timeLeft = 60;
-  timeElapsed = 0;
-
-  try {
-    // 动态读取题库
-    const res = await fetch(`./js/data/${currentSubject}.json?v=` + new Date().getTime());
-    let allQuestions = await res.json();
-
-    // 随机打乱题库
-    gameQuestions = allQuestions.sort(() => 0.5 - Math.random());
-    
-    // 启动计时器
-    startGameTimer();
-    loadQuestion();
-  } catch (error) {
-    console.error("题库加载失败", error);
-    alert(`题库加载失败，请检查本地是否存有：${currentSubject}.json`);
-    switchView('more');
-  }
-}
 
 // 计时器逻辑
 function startGameTimer() {

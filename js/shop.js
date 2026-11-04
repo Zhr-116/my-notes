@@ -184,26 +184,53 @@ function renderShop() {
     <div class="shop-section" style="margin-top: 40px; margin-bottom: 40px;">
       <h3 class="section-title">外观装扮</h3>
       
-      <!-- 手账风 -->
-      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">手账涂鸦包</h4>
+      <!-- 使用 flex 容器和 gap 统一控制间距，不用给每个卡片写 margin-bottom 了 -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        
+        <!-- 手账风 -->
+        <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">手账涂鸦包</h4>
+          </div>
+          ${ownedThemes.includes('doodle')
+            ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
+            : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 14px; font-size: 13px;">500 解锁</button>`
+          }
         </div>
-        ${ownedThemes.includes('doodle')
-          ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
-          : `<button onclick="buyTheme('doodle', 500)" class="primary" style="padding: 6px 14px; font-size: 13px;">500 解锁</button>`
-        }
-      </div>
 
-      <!-- 落日橘 -->
-      <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">落日橘</h4>
+        <!-- 落日橘 -->
+        <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">落日橘</h4>
+          </div>
+          ${ownedThemes.includes('sunset')
+            ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
+            : `<button onclick="buyTheme('sunset', 300)" class="primary" style="padding: 6px 14px; font-size: 13px;">300 解锁</button>`
+          }
         </div>
-        ${ownedThemes.includes('sunset')
-          ? `<span style="font-size: 13px; color: var(--text-tertiary);">已在“我的”页面解锁</span>`
-          : `<button onclick="buyTheme('sunset', 300)" class="primary" style="padding: 6px 14px; font-size: 13px;">300 解锁</button>`
-        }
+
+        <!-- 纯正圆角气泡 -->
+        <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">纯正圆角 气泡</h4>
+          </div>
+          ${ownedBubbles.includes('round')
+            ? `<span style="font-size: 13px; color: var(--text-tertiary);">已拥有，去碎碎念切换</span>`
+            : `<button onclick="buyBubble('round', 150)" class="primary" style="padding: 6px 14px; font-size: 13px;">150 解锁</button>`
+          }
+        </div>
+
+        <!-- 荧光叠色气泡 -->
+        <div class="theme-card" style="background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <h4 style="margin: 0; font-size: 15px; color: var(--text-primary); font-weight: 500;">荧光叠色 气泡</h4>
+          </div>
+          ${ownedBubbles.includes('highlighter')
+            ? `<span style="font-size: 13px; color: var(--text-tertiary);">已拥有，去碎碎念切换</span>`
+            : `<button onclick="buyBubble('highlighter', 300)" class="primary" style="padding: 6px 14px; font-size: 13px;">300 解锁</button>`
+          }
+        </div>
+
       </div>
     </div>
 
@@ -260,6 +287,28 @@ function buyTheme(themeName, price) {
   }
 }
 
+// 购买气泡
+function buyBubble(bubbleId, price) {
+  if (ownedBubbles.includes(bubbleId)) {
+    showToast("你已拥有该气泡");
+    return;
+  }
+  if (userStars < price) {
+    showToast("星迹不足，快去记录吧！");
+    return;
+  }
+  if (confirm(`确定花费 ${price} 星迹解锁该气泡吗？\n（解锁后可在碎碎念顶部的标题里切换）`)) {
+    userStars -= price;
+    localStorage.setItem("mini-stars", userStars.toString());
+    
+    ownedBubbles.push(bubbleId);
+    saveBubbles(); // 调用 state.js 里存数据的函数
+    
+    renderShop(); // 刷新商店视图
+    showToast("✨ 气泡解锁成功！");
+  }
+}
+
 function openMysteryBox(poolKey) {
   const pool = BOX_POOLS[poolKey];
   if (userStars < pool.price) {
@@ -302,7 +351,7 @@ function openMysteryBox(poolKey) {
       resultEl.innerHTML = `
         <div class="luxury-badge" style="filter: grayscale(100%); opacity: 0.5; --c1: #ccc; --c2: #999; width: 80px; height: 80px;">${drawnItem.icon}</div>
         <div class="result-title" style="color: #666; margin-top: 16px;">重复的【${drawnItem.title}】</div>
-        <div class="result-desc" ...>已退还 ${STAR_ICON} ${refund} 星迹</div>
+        <div class="result-desc" style="color: var(--text-secondary); font-size: 14px;">已退还 ${STAR_ICON} ${refund} 星迹</div>
         <button class="primary" style="margin-top: 24px; width: 100%;" onclick="document.getElementById('boxOverlay').style.display='none'; document.getElementById('boxOverlay').innerHTML = ''; renderShop();">我知道了</button>
       `;
     } else {
@@ -489,8 +538,11 @@ function openInventoryModal() {
     // 遍历所有习惯
     if (typeof habits !== 'undefined') {
       habits.forEach(h => {
+        // 1. 判断这一天是否在习惯的开启日之后
         const isValidDate = !h.startDate || dateStr >= h.startDate;
-        if (!h.isCompleted && !h.completedDates.includes(dateStr) && h.completedDates.length > 0) {
+        
+        // 2. 真正把 isValidDate 加上，同时去掉 length > 0（允许 0 次打卡的新习惯出现在待补签列表中）
+        if (isValidDate && !h.isCompleted && !h.completedDates.includes(dateStr)) {
           canReplenishList.push({ habitId: h.id, title: h.title, dateStr: dateStr, dateName: daysAgo === 1 ? "昨天" : "前天" });
         }
       });

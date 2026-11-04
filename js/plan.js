@@ -46,8 +46,9 @@ function renderTasks() {
       yesterday.setDate(yesterday.getDate() - 1);
       const yStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
       
-      // 【核心修复】如果今天已经拒绝过补签了，就再也不显示红字和补签按钮了
-      const isBroken = !h.completedDates.includes(yStr) && !isCheckedToday && h.completedDates.length > 0 && h.rejectedDate !== today;
+      // 【核心修复】用 startDate 判断，去掉 length > 0 的限制，让昨天刚建但没打卡的新习惯也能补签
+      const isYesterdayValid = !h.startDate || yStr >= h.startDate;
+      const isBroken = isYesterdayValid && !h.completedDates.includes(yStr) && !isCheckedToday && h.rejectedDate !== today;
       
       // 【新增】计算累计打卡天数（去重）
       const totalDays = [...new Set(h.completedDates)].length;
@@ -205,7 +206,7 @@ function checkHabit(id) {
     // 达成目标
     const newEntry = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
-      content: 完成了 `${h.targetDays} 天【${h.title}】打卡`,
+      content: `完成了 ${h.targetDays} 天【${h.title}】打卡`,
       date: today,
       tags: ["习惯", h.title],
       isMilestone: true,

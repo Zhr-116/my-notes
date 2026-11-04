@@ -335,6 +335,13 @@ document.addEventListener('focusin', (e) => {
     window.isKeyboardOpen = true;
     const nav = document.querySelector('.bottom-nav');
     if (nav) nav.classList.add('keyboard-open');
+
+    // 【新增】如果是书页编辑框，延迟一小会儿后滚动到可视区域
+    if (e.target.id === 'brDetailInput') {
+      setTimeout(() => {
+        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
   }
 });
 document.addEventListener('focusout', (e) => {
@@ -1005,6 +1012,12 @@ function claimLadderReward(type, day) {
   if (reward.title && !hasTitleAlready) {
     unlockedTitles.push(reward.title);
     saveUnlockedTitles();
+  }
+
+  // 【新增】4. 发气泡
+  if (reward.bubble && !ownedBubbles.includes(reward.bubble)) {
+    ownedBubbles.push(reward.bubble);
+    saveBubbles();
   }
 
   // 4. 记录已领取

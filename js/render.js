@@ -16,7 +16,7 @@ function render() {
   }
 
   // 字典：需要显示顶部返回按钮和标题的子页面
-  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡', 'quotes': '拾光摘录', 'ladder': '进阶礼包' };
+  const pageTitles = { 'review': '回顾', 'book': '书架', 'shop': '拾光商店', 'tagDetail': '标签档案', 'settings': '应用设置', 'game': '拾光关卡', 'quotes': '拾光摘录', 'ladder': '连签馈赠' };
   const isSubPage = Object.keys(pageTitles).includes(currentView);
   
   const subPageTitle = document.getElementById("subPageTitle");
@@ -26,6 +26,7 @@ function render() {
   const headerSettingsBtn = document.getElementById("headerSettingsBtn");
   const headerFocusBtn = document.getElementById("headerFocusBtn");
   const headerTreeHoleBtn = document.getElementById("headerTreeHoleBtn");
+  const headerChatBtn = document.getElementById("headerChatBtn");
 
   // 处理顶部栏状态
   if (isSubPage) {
@@ -38,33 +39,41 @@ function render() {
     headerCheckinBtn.hidden = true; 
     if (headerSettingsBtn) headerSettingsBtn.hidden = true; 
     if (headerFocusBtn) headerFocusBtn.hidden = true;
-    if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; // 【新增】子页面隐藏树洞
-  } else {
+    if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; 
+    if (headerChatBtn) headerChatBtn.hidden = true;
+   } else {
     subPageTitle.hidden = true;
     appTitle.hidden = false;
     subBackBtn.hidden = true;
-    
+         
+    // 【新增】初始化时，默认隐藏树洞和聊天气泡，防止状态串台
+    if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true;
+    if (headerChatBtn) headerChatBtn.hidden = true;
+
     // 主页面动态显示逻辑
     if (currentView === "mine") {
       headerCheckinBtn.hidden = true;
       if (headerSettingsBtn) headerSettingsBtn.hidden = false;
       if (headerFocusBtn) headerFocusBtn.hidden = true;
-      if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; // 【新增】我的页面隐藏树洞
+      // （因为上面已经默认隐藏了，这里不用再写 headerTreeHoleBtn 和 headerChatBtn）
     } else if (currentView === "plan") {
       // 计划页显示签到和专注闹钟
       headerCheckinBtn.hidden = false;
       if (headerSettingsBtn) headerSettingsBtn.hidden = true;
       if (headerFocusBtn) headerFocusBtn.hidden = false;
-      if (headerTreeHoleBtn) headerTreeHoleBtn.hidden = true; // 【新增】计划页隐藏树洞
+      // （这里也不写，继承默认隐藏）
     } else {
       // 其他主页面（记录、时间轴、更多）
       headerCheckinBtn.hidden = false;
       if (headerSettingsBtn) headerSettingsBtn.hidden = true;
       if (headerFocusBtn) headerFocusBtn.hidden = true;
       
-      // 【核心修复】树洞只在“记录”页显示，时间轴和更多页都隐藏
+      // 【核心修复】树洞和气泡只在“记录”页显示，其他页隐藏
       if (headerTreeHoleBtn) {
         headerTreeHoleBtn.hidden = (currentView !== "record");
+      }
+      if (headerChatBtn) {
+        headerChatBtn.hidden = !appFeatures.chat || currentView !== "record";
       }
     }
   }
@@ -121,6 +130,7 @@ function render() {
   document.getElementById("gameView").hidden = currentView !== "game"; 
   document.getElementById("quotesView").hidden = currentView !== "quotes";
   document.getElementById("ladderView").hidden = currentView !== "ladder";
+  if (document.getElementById("featChat")) document.getElementById("featChat").checked = appFeatures.chat;
 
   // ================= 模块定制：动态底部导航 =================
   const navContainer = document.querySelector(".bottom-nav");
@@ -455,12 +465,6 @@ function renderTimeline() {
 }
 
 // 切换排序逻辑保持不变
-function toggleTimelineSort() {
-  timelineSortOrder = timelineSortOrder === "desc" ? "asc" : "desc";
-  renderTimeline();
-}
-
-// 新增：切换排序逻辑
 function toggleTimelineSort() {
   timelineSortOrder = timelineSortOrder === "desc" ? "asc" : "desc";
   renderTimeline();

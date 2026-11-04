@@ -27,6 +27,10 @@
 
       <!-- 右侧：主页显示导航，子页面显示标题 -->
       <div id="headerRight">
+        <!-- 碎碎念聊天入口 -->
+        <button id="headerChatBtn" class="header-checkin-btn" onclick="openChatOverlay()" title="碎碎念" hidden>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-circle-more"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
+        </button>
         <!-- 新增：树洞入口（羽毛图标） -->
         <button id="headerTreeHoleBtn" class="header-checkin-btn" onclick="openTreeHole()" title="拾迹树洞">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-feather"><path d="M12.67 19a2 2 0 0 0 1.416-.588l6.154-6.172a6 6 0 0 0-8.49-8.49L5.586 9.914A2 2 0 0 0 5 11.328V18a1 1 0 0 0 1 1z"/><path d="M16 8 2 22"/><path d="M17.5 15H9"/></svg>
@@ -113,7 +117,7 @@
             <p id="brAuthor">作者</p>
             <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
               <span id="brStatusBadge" class="status-badge"></span>
-              <button id="brMarkReadBtn" class="page-btn-edit" style="font-size: 11px; padding: 2px 8px; border-color: #d1c7b8; color: #8c8273;" onclick="markBookAsRead()">标记为已读完</button>
+              <button id="brMarkReadBtn" class="page-btn-edit" style="font-size: 11px; padding: 2px 8px; border-color: #d1c7b8; color: #8c8273;" >标记为已读完</button>
             </div>
             <div id="brQuote" class="br-quote">金句</div>
           </div>
@@ -353,7 +357,7 @@
         <div class="more-card" onclick="switchView('ladder')" style="flex-direction: row; justify-content: space-between; padding: 16px 20px; border-radius: 12px;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-primary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 9-4-4-4 4"/><path d="M18 5v14"/><path d="m2 15 4 4 4-4"/><path d="M6 19V5"/></svg>
-            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">进阶礼包</span>
+            <span style="font-size: 15px; color: var(--text-primary); font-weight: 500;">连签馈赠</span>
           </div>
           <span style="font-size: 13px; color: var(--text-tertiary);">▸</span>
         </div>
@@ -471,7 +475,12 @@
             <span style="font-size: 15px; color: var(--text-primary);">拾迹的剧情陪伴 (小女孩弹窗)</span>
             <input type="checkbox" id="featStory" onchange="toggleFeature('story', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
           </label>
+          <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+            <span style="font-size: 15px; color: var(--text-primary);">碎碎念对话框</span>
+            <input type="checkbox" id="featChat" onchange="toggleFeature('chat', this.checked)" style="width: 18px; height: 18px; accent-color: var(--accent);">
+          </label>
           <div style="border-top: 1px dashed var(--border); margin: 4px 0;"></div>
+
 
           <label style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
             <span style="font-size: 15px; color: var(--text-primary);">时间轴导航</span>
@@ -585,7 +594,7 @@
         </div>
         <div style="text-align: center; padding: 10px 0;">
           <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 10px;"><path d="M4 10a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8Z"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M8 21v-5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v5"/></svg>
-          <h3 style="font-size: 18px; margin-bottom: 8px;">拾光回溯卡：${inventory.replenishCard || 0} 张</h3>
+          <h3 id="inventoryCardCount" style="font-size: 18px; margin-bottom: 8px;">拾光回溯卡：0 张</h3>
           <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">
             此道具无需在商店使用。<br>
             当你的<b>心情签到</b>或<b>周期习惯</b>断签时，<br>
@@ -889,6 +898,44 @@
     </button>
   </div>
 
+  <!-- 碎碎念对话框 -->
+  <div id="chatOverlay" class="chat-overlay" style="display: none;">
+    <!-- 顶部条 -->
+    <div class="chat-header">
+      <button class="back-btn-icon" onclick="closeChatOverlay()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      
+      <!-- 核心修复：直接把 onclick 写在 div 上，点旁边也能触发 -->
+      <div onclick="openBubbleModal()" style="flex: 1; text-align: center; cursor: pointer; padding: 10px 0;">
+        <span style="font-weight: 600; font-size: 16px; pointer-events: none;">碎碎念</span>
+      </div>
+      
+      <div style="width: 24px;"></div> <!-- 占位平衡 -->
+    </div>
+
+    <!-- 消息列表 -->
+    <div id="chatList" class="chat-list"></div>
+
+    <!-- 底部输入框 -->
+    <div class="chat-input-area">
+      <textarea id="chatInput" rows="1" placeholder="和自己说点什么..." oninput="autoResizeChatInput(this)" onkeydown="handleChatKeydown(event)"></textarea>
+      <button class="chat-send-btn" onclick="sendChatMessage()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- 聊天气泡长按菜单 -->
+  <div id="chatActionMenu" class="chat-action-mask" style="display: none;" onclick="closeChatActionMenu()">
+    <div class="chat-action-content" onclick="event.stopPropagation()">
+      <button onclick="convertChatToEntry()">转为正式记录</button>
+      <button onclick="copyChatText()">复制文本</button>
+      <button style="color: #ef4444;" onclick="deleteChatMessage()">删除</button>
+      <button style="border-top: 1px solid var(--border); color: var(--text-tertiary);" onclick="closeChatActionMenu()">取消</button>
+    </div>
+  </div>
+
   <!-- 年度报告全屏遮罩 -->
   <div id="annualReportOverlay" class="report-overlay" style="display: none;">
     <div class="report-slides-container" id="reportSlidesContainer">
@@ -1157,6 +1204,19 @@
     </div>
   </div>
 
+  <!-- 气泡样式选择弹窗 -->
+  <div id="bubbleModal" class="modal-mask" hidden style="z-index: 8500;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-date">选择气泡样式</span>
+        <button class="close-btn" onclick="document.getElementById('bubbleModal').hidden = true">×</button>
+      </div>
+      <div id="bubbleGrid" style="display: flex; flex-direction: column; gap: 16px; padding: 10px 0;">
+        <!-- JS 动态注入 -->
+      </div>
+    </div>
+  </div>
+
   <!-- 底部导航栏 -->
   <nav class="bottom-nav">
     <div class="nav-item" data-view="record" onclick="switchView('record')">
@@ -1197,6 +1257,7 @@
   <script src="js/focus.js"></script>
   <script src="js/checkin.js"></script>
   <script src="js/game.js"></script>
+  <script src="js/chat.js"></script>
   <script src="js/render.js"></script>
   <script src="js/export.js"></script>
   <script src="js/app.js"></script>

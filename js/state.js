@@ -112,7 +112,8 @@ let defaultFeatures = {
   capsule: true,   // 时间胶囊（在更多里）
   checkin: true,   // 首页右上角签到
   story: true,      // 剧情小女孩
-  quotes: true
+  quotes: true,
+  chat: true
 };
 
 let savedFeatures = JSON.parse(localStorage.getItem("mini-features") || "{}");
@@ -263,7 +264,7 @@ const HABIT_REWARDS = [
   { day: 3, stars: 60, desc: "60 星迹" },
   { day: 7, stars: 140, card: 1, desc: "140 星迹 + 1 补签卡" },
   { day: 21, stars: 200, title: "星轨漫步者", desc: "200 星迹 + 专属称号" },
-  { day: 50, stars: 300, theme: "matcha", desc: "300 星迹 + 抹茶绿主题" }
+  { day: 50, stars: 300, theme: "matcha", bubble: "paper", desc: "300 星迹 + 抹茶绿主题 + 拾光便笺气泡" }
 ];
 
 // 【新增】检查并自动解锁常规称号（在渲染主页时调用）
@@ -309,4 +310,20 @@ const MONTH_TITLES = [
 let ladderRoundStart = JSON.parse(localStorage.getItem("mini-ladder-start") || '{"checkin": 0, "habit": 0}');
 function saveLadderRoundStart() {
   localStorage.setItem("mini-ladder-start", JSON.stringify(ladderRoundStart));
+}
+
+// ================= 碎碎念聊天数据 =================
+let chatMessages = JSON.parse(localStorage.getItem("mini-chats") || "[]");
+function saveChatMessages() {
+  localStorage.setItem("mini-chats", JSON.stringify(chatMessages));
+}
+
+// ================= 聊天气泡资产系统 =================
+// 默认拥有 "default" (素白) 气泡
+let ownedBubbles = JSON.parse(localStorage.getItem("mini-owned-bubbles") || '["default"]');
+let currentBubble = localStorage.getItem("mini-current-bubble") || "default";
+
+function saveBubbles() {
+  localStorage.setItem("mini-owned-bubbles", JSON.stringify(ownedBubbles));
+  localStorage.setItem("mini-current-bubble", currentBubble);
 }

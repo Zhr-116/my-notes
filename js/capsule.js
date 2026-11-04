@@ -160,6 +160,15 @@ function flyPaperAway() {
           const cap = capsules.find(c => c.id === currentCapsuleId);
           if(cap) cap.isOpened = true;
           localStorage.setItem("mini-capsules", JSON.stringify(capsules));
+
+          // 【新增】拆开胶囊赠送：极简票根气泡
+          if (!ownedBubbles.includes('ticket')) {
+            ownedBubbles.push('ticket');
+            saveBubbles(); // 存入本地
+            setTimeout(() => {
+              showToast("岁月附赠：解锁了「极简票根」气泡", 3000);
+            }, 1000); // 延迟1秒弹提示，避免和封存动画冲突
+          }
         }, 400);
 
       }, 600); // 盖子盖上的等待时间

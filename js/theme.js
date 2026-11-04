@@ -31,28 +31,17 @@ function getIcon(name) {
 }
 
 // ================= 主题切换逻辑 =================
-
 function handleThemeSelect(themeName) {
   if (!ownedThemes.includes(themeName)) {
-    showToast("未解锁该主题，去拾光阶梯解锁吧！");
+    const shopThemes = ['doodle', 'sunset']; // 商店买的
+    if (shopThemes.includes(themeName)) {
+      showToast("未解锁该主题，去拾光商店购买吧！");
+    } else {
+      showToast("未解锁该主题，去连签馈赠解锁吧！");
+    }
     return;
   }
   setTheme(themeName);
-}
-
-function setTheme(themeName) {
-  currentTheme = themeName;
-  localStorage.setItem("mini-theme", themeName);
-  
-  if (themeName === "default") {
-    document.documentElement.removeAttribute("data-theme");
-  } else {
-    document.documentElement.setAttribute("data-theme", themeName);
-  }
-  
-  updateThemeUI();
-  render(); 
-  showToast("外观已切换！");
 }
 
 // 独立的高亮刷新函数
